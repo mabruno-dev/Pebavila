@@ -2,7 +2,8 @@ import yfinance as yf
 import time
 import datetime
 
-def obter_dados_acoes_bovespa(intervalo_horas_coleta=0.03, simbolos_acoes= [ "ABEV3.SA",  # Ambev S.A.
+def obter_dados_acoes_bovespa(intervalo_horas_coleta=0.03, simbolos_acoes= ["PETR4.SA", 'SANB11.SA']):
+    '''[ "ABEV3.SA",  # Ambev S.A.
     "AZUL4.SA",  # Azul S.A.
     "B3SA3.SA",  # B3 S.A. - Brasil, Bolsa, Balcão
     "BBAS3.SA",  # Banco do Brasil S.A.
@@ -54,7 +55,8 @@ def obter_dados_acoes_bovespa(intervalo_horas_coleta=0.03, simbolos_acoes= [ "AB
     "MGLU3.SA",  # Magazine Luiza S.A.
     "MRFG3.SA",  # Marfrig Global Foods S.A.
     "MRVE3.SA",  # MRV Engenharia e Participações S
-    ]):  #Adicionar o resto das acoes como parametro base depois
+    ]):'''  #Adicionar o resto das acoes como parametro base depois
+    
     """
     Função para obter dados em tempo real das ações da Bovespa.
     Devolve dados das acoes e recomeca contagem depois que e excutada logica do programa.
@@ -68,8 +70,25 @@ def obter_dados_acoes_bovespa(intervalo_horas_coleta=0.03, simbolos_acoes= [ "AB
 
     for simbolo in simbolos_acoes:
         acao = yf.Ticker(simbolo)
-        dados_acoes[simbolo] = acao.history()
+        dados_acoes[simbolo+'_0'] = acao.history(period="2h", interval="1m")
+        dados_acoes[simbolo+'_1'] = acao.actions
+        dados_acoes[simbolo+'_3'] = acao.balance_sheet
+        dados_acoes[simbolo+'_4'] = acao.basic_info
+        dados_acoes[simbolo+'_5'] = acao.calendar
+        dados_acoes[simbolo+'_6'] = acao.capital_gains
+        dados_acoes[simbolo+'_7'] = acao.cash_flow
+        dados_acoes[simbolo+'_8'] = acao.dividends
+        dados_acoes[simbolo+'_10'] = acao.earnings_dates
+        dados_acoes[simbolo+'_13'] = acao.fast_info
+        dados_acoes[simbolo+'_14'] = acao.financials
 
+        # Linhas de baixo ainda nao implementada na biblioteca
+        ''' 
+        dados_acoes[simbolo+'_2'] = acao.analyst_price_target
+        #dados_acoes[simbolo+'_9'] = acao.earnings
+        #dados_acoes[simbolo+'_11'] = acao.earnings_forecasts
+        #dados_acoes[simbolo+'_12'] = acao.earnings_trend
+        '''
 
     print(f"{dados_acoes}--> Consulta e coleta realizadas com sucesso")
 
@@ -79,11 +98,6 @@ def main(intervalo_horas_coleta = 0, dados_acoes={}):
     
 # falta salvar esses dados em algum arquivo por enquanto so esta criando um dicionario q eh resetado a cada excecucao,
 # logica pode ser essa mas add no bd
-
-
-
-
-
     """
     Timer para acompanhar o tempo de execucao do codigo.
     """
