@@ -2,7 +2,59 @@ import yfinance as yf
 import time
 import datetime
 
-def obter_dados_acoes_bovespa(intervalo_horas_coleta=0.03, simbolos_acoes=["PETR4.SA"]):  #Adicionar o resto das acoes como parametro base depois
+def obter_dados_acoes_bovespa(intervalo_horas_coleta=0.03, simbolos_acoes= [ "ABEV3.SA",  # Ambev S.A.
+    "AZUL4.SA",  # Azul S.A.
+    "B3SA3.SA",  # B3 S.A. - Brasil, Bolsa, Balcão
+    "BBAS3.SA",  # Banco do Brasil S.A.
+    "BBDC3.SA",  # Banco Bradesco S.A.
+    "BBDC4.SA",  # Banco Bradesco S.A.
+    "BBSE3.SA",  # BB Seguridade Participações S.A.
+    "BEEF3.SA",  # Minerva S.A.
+    "BPAC11.SA", # Banco BTG Pactual S.A.
+    "BRAP4.SA",  # Bradespar S.A.
+    "BRDT3.SA",  # Petrobras Distribuidora S.A.
+    "BRFS3.SA",  # BRF S.A.
+    "BRKM5.SA",  # Braskem S.A.
+    "BRML3.SA",  # BR Malls Participações S.A.
+    "BTOW3.SA",  # B2W - Companhia Digital
+    "CCRO3.SA",  # CCR S.A.
+    "CIEL3.SA",  # Cielo S.A.
+    "CMIG4.SA",  # CEMIG
+    "COGN3.SA",  # Cogna Educação S.A.
+    "CPFE3.SA",  # CPFL Energia S.A.
+    "CRFB3.SA",  # Carrefour Brasil
+    "CSAN3.SA",  # Cosan S.A.
+    "CSNA3.SA",  # Companhia Siderúrgica Nacional
+    "CVCB3.SA",  # CVC Brasil Operadora e Agência de Viagens S.A.
+    "CYRE3.SA",  # Cyrela Brazil Realty S.A. Empreendimentos e Participações
+    "ECOR3.SA",  # EcoRodovias Infraestrutura e Logística S.A.
+    "EGIE3.SA",  # Engie Brasil Energia S.A.
+    "ELET3.SA",  # Centrais Elétricas Brasileiras S.A. - Eletrobrás
+    "ELET6.SA",  # Centrais Elétricas Brasileiras S.A. - Eletrobrás
+    "EMBR3.SA",  # Embraer S.A.
+    "ENBR3.SA",  # EDP Energias do Brasil S.A.
+    "ENGI11.SA", # Energisa S.A.
+    "EQTL3.SA",  # Equatorial Energia S.A.
+    "FLRY3.SA",  # Fleury S.A.
+    "GGBR4.SA",  # Gerdau S.A.
+    "GNDI3.SA",  # Grupo Notre Dame Intermédica
+    "GOAU4.SA",  # Metalúrgica Gerdau S.A.
+    "GOLL4.SA",  # Gol Linhas Aéreas Inteligentes S.A.
+    "HAPV3.SA",  # Hapvida Participações e Investimentos S.A.
+    "HGTX3.SA",  # Cia. Hering
+    "HYPE3.SA",  # Hypera Pharma
+    "IGTA3.SA",  # Iguatemi Empresa de Shopping Centers S.A.
+    "IRBR3.SA",  # IRB-Brasil Resseguros S.A.
+    "ITSA4.SA",  # Itaúsa - Investimentos Itaú S.A.
+    "ITUB4.SA",  # Itaú Unibanco Holding S.A.
+    "JBSS3.SA",  # JBS S.A.
+    "KLBN11.SA", # Klabin S.A.
+    "LAME4.SA",  # Lojas Americanas S.A.
+    "LREN3.SA",  # Lojas Renner S.A.
+    "MGLU3.SA",  # Magazine Luiza S.A.
+    "MRFG3.SA",  # Marfrig Global Foods S.A.
+    "MRVE3.SA",  # MRV Engenharia e Participações S
+    ]):  #Adicionar o resto das acoes como parametro base depois
     """
     Função para obter dados em tempo real das ações da Bovespa.
     Devolve dados das acoes e recomeca contagem depois que e excutada logica do programa.
@@ -21,7 +73,7 @@ def obter_dados_acoes_bovespa(intervalo_horas_coleta=0.03, simbolos_acoes=["PETR
 
     print(f"{dados_acoes}--> Consulta e coleta realizadas com sucesso")
 
-    return dados_acoes, main(intervalo_horas_coleta, dados_acoes)
+    return dados_acoes
 
 def main(intervalo_horas_coleta = 0, dados_acoes={}):
     
@@ -39,7 +91,7 @@ def main(intervalo_horas_coleta = 0, dados_acoes={}):
     end_time = datetime.datetime.now() + datetime.timedelta(hours=intervalo_horas_coleta)
 
     # Ajuste de tempo de execucao para coleta de dados
-    intervalo_horas_coleta = 0.03
+    intervalo_horas_coleta = 0.01
 
     while True:
 
