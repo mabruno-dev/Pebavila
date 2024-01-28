@@ -8,21 +8,41 @@ Diferencial: Mercado muito dependente de mão de obra e falta de tecnologia, tan
 
 Modelo de negócios: No que tange as empresas o recurso viria de venda de licenças para uso do sistema assim como assinatura, mensal ou anual para suporte personalizado. No que tange a pessoa física, arrecadação a partir de anúncios e cobrança pelo serviço de avaliação detalhada: “De forma gratuita acesso a poucas informações, como valor estimado de venda (valor do imóvel) e com um custo (ainda a decidir) disponibilização de informações mais detalhadas (com input de novas informações para avaliação mais fidedigna), como valor de aluguel, tempo estimado de locação (dependendo do valor), tempo estimado de venda (dependendo do valor), expectativa de valorização e desvalorização, auxilio com valoração do ativo considerando valor a ser recebido, tempo de venda, e outros parâmetros”.
 
-Interface de controle de investimentos
+•	COLETA DE DADOS
+	•	 Webscraping + inteligencia artificial
 
-Interface mais fácil
+•	BANCO DE DADOS
 
-Recomendação de website quanto dinheiro a pessoa quer ter, poder de compra daqui a 30 anos (- inflação ) quanto a pessoa precisa para se aposentar.
+•	DESENVOLVIMENTO DA IA
+Etapa dependente da finalização da FASE 2.
 
-Perfil de investidor (opção de pular)
+•	LAYOUT (SITE)
 
-Inteligencia artificial de recomendacao (pegar dados dos próprios, recomendação personalizada) 
+•	INTEGRAÇAO IA-LAYOUT
+Conexão propriamente dita do layout desenvolvido com o uso das funcionalidades criadas a partir da IA.
 
-+ de uma carteira de investimento
+•	ROBUSTEZ DO BANCO DE DADOS
+Ampliação das tecnologias já desenvolvidas e estruturação intensiva do servidor.
 
-Opção de simular uma carteira sem logar no site
+•	APIS
 
-1- Webscraping + inteligencia artificial
+•	LAYOUT-APIS
+
+•	Validação de IA com Especialistas
+
+•	Implementação de Segurança
+
+•	Interface de controle de investimentos
+
+•	Interface mais fácil
+
+•	Recomendação de website valor.
+
+•	+ de uma carteira de investimento(em relacao ao mercado imobiliario)
+
+
+
+
 
 #Primeiros-passos 
 
