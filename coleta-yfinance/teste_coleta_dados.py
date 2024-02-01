@@ -11,17 +11,14 @@ service = Service(ChromeDriverManager().install())
 driver = webdriver.Chrome(service=service)
 
     # Abre o site
-driver.get("https://www.zapimoveis.com.br/venda/imoveis/rj+niteroi/?__ab=seo-texts:control,exp-aa-test:B,preco-metro-quadrado:deslog&transacao=venda&onde=,Rio%20de%20Janeiro,Niter%C3%B3i,,,,,city,BR%3ERio%20de%20Janeiro%3ENULL%3ENiteroi,-22.880707,-43.101353,&pagina=1")
-
+driver.get("https://www.zapimoveis.com.br/lancamento/venda-apartamento-1-quarto-inga-niteroi-rj-101m2-id-2659690255/")
 # Aguarda o carregamento da página
-time.sleep(5)  # Ajuste este tempo conforme necessário
-
+time.sleep(5)
 # Localiza o elemento pelo título e clica nele
 # Localiza o botão "Mensagem" pelo atributo `data-cy` e clica nele
 
-message_button = driver.find_elements(By.TAG_NAME, 'a')
+message_button = driver.find_elements(By.TAG_NAME, 'strong')
 print(message_button)
-#message_button.click()
-time.sleep(20)
+message_button.click()
 
 
