@@ -16,9 +16,12 @@ driver.get("https://www.zapimoveis.com.br/lancamento/venda-apartamento-1-quarto-
 time.sleep(5)
 # Localiza o elemento pelo título e clica nele
 # Localiza o botão "Mensagem" pelo atributo `data-cy` e clica nele
+elements = driver.find_elements(By.XPATH, "//*[contains(@class, 'price__business--main')]")
 
-message_button = driver.find_elements(By.TAG_NAME, 'strong')
-print(message_button)
-message_button.click()
+for element in elements:
+    print(element.text)
+
+# Não esqueça de fechar o navegador depois de terminar
+driver.quit()
 
 
