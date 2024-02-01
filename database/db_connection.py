@@ -4,14 +4,14 @@ from psycopg2.extras import DictCursor
 
 class Database():
 
-    def _init_(self) -> None:
+    def __init__(self) -> None:
         try:
             self.connection = postgre.connect("""
-                dbname=pebavila
-                host = '192.168.1.188'
+                dbname=postgres
+                host = '25.73.143.27'
                 port = 5432
                 user = 'postgres'
-                password = 'root' 
+                password = '$Pebav1la+' 
             """)
             self.cursor = self.connection.cursor(cursor_factory=DictCursor)
         except Exception as E:
@@ -32,7 +32,7 @@ class Database():
         self.connection.close()
 
     def execute(self, sql, params=None):
-        self.connection.execute(sql, params or ())
+        self.cursor.execute(sql, params or ())
 
     def fetchone(self):
         return self.cursor.fetchone()
