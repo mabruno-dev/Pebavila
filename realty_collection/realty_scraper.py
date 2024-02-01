@@ -8,7 +8,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import time
 
-def web_scrap(link_fornecido , state = 'RJ'):
+def scrap_realty(link_fornecido , state = 'RJ'):
     # Configure Selenium to use the proxy
   try:
     driver = webdriver.Chrome()
