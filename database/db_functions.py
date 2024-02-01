@@ -1,5 +1,6 @@
 from db_connection import Database
 from datetime import datetime
+from models.states import Set_state
 
 
 def generic_delete(schema_name, table_name, id_record):
@@ -29,4 +30,51 @@ def generic_update():
         print(E)
 
 
-generic_delete('public', 'states', 1)
+def add_states(jsonStates: Set_state):
+    try:
+        with Database() as banco:
+            for state in jsonStates.states:
+                result = banco.queryone(
+                    "SELECT state_id FROM public.states WHERE state_name = %s AND state_acronym = %s", (state.state_name, state.state_acronym))
+                if result:
+                    pass
+                else:
+                    banco.execute("INSERT INTO public.states (state_name, state_acronym) VALUES(%s,%s)", (
+                        state.state_name, state.state_acronym))
+                    banco.commit()
+        return print("Success")
+    except Exception as E:
+        print(E)
+
+
+states = Set_state(states=[
+    {"state_name": "Acre", "state_acronym": "AC"},
+    {"state_name": "Alagoas", "state_acronym": "AL"},
+    {"state_name": "Amapá", "state_acronym": "AP"},
+    {"state_name": "Amazonas", "state_acronym": "AM"},
+    {"state_name": "Bahia", "state_acronym": "BA"},
+    {"state_name": "Ceará", "state_acronym": "CE"},
+    {"state_name": "Distrito Federal", "state_acronym": "DF"},
+    {"state_name": "Espírito Santo", "state_acronym": "ES"},
+    {"state_name": "Goiás", "state_acronym": "GO"},
+    {"state_name": "Maranhão", "state_acronym": "MA"},
+    {"state_name": "Mato Grosso", "state_acronym": "MT"},
+    {"state_name": "Mato Grosso do Sul", "state_acronym": "MS"},
+    {"state_name": "Minas Gerais", "state_acronym": "MG"},
+    {"state_name": "Pará", "state_acronym": "PA"},
+    {"state_name": "Paraíba", "state_acronym": "PB"},
+    {"state_name": "Paraná", "state_acronym": "PR"},
+    {"state_name": "Pernambuco", "state_acronym": "PE"},
+    {"state_name": "Piauí", "state_acronym": "PI"},
+    {"state_name": "Rio de Janeiro", "state_acronym": "RJ"},
+    {"state_name": "Rio Grande do Norte", "state_acronym": "RN"},
+    {"state_name": "Rio Grande do Sul", "state_acronym": "RS"},
+    {"state_name": "Rondônia", "state_acronym": "RO"},
+    {"state_name": "Roraima", "state_acronym": "RR"},
+    {"state_name": "Santa Catarina", "state_acronym": "SC"},
+    {"state_name": "São Paulo", "state_acronym": "SP"},
+    {"state_name": "Sergipe", "state_acronym": "SE"},
+    {"state_name": "Tocantins", "state_acronym": "TO"}
+])
+
+add_states(states)
