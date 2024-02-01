@@ -2,13 +2,9 @@ from typing import List, Optional, Union
 from pydantic import BaseModel, Field
 
 
-class SetProdutosGrupos(BaseModel):
-    class Grupo(BaseModel):
-        id_produto_grupo: Optional[int] = Field(default=-1)
-        id_empresa_filial: int = Field(default=-1)
-        codigo: str = Field(default='', max_length=50)
-        descricao: str = Field(default='', max_length=100)
-        ativo: int = Field(default=1)
-        motivo: Union[str, None] = Field(default=None)
+class Set_state(BaseModel):
+    class State(BaseModel):
+        state_name: str = Field(default='', max_length=50)
+        state_acronym:  str = Field(default='', max_length=2)
 
-    grupos: Union[List[Grupo], None] = Field(default=[Grupo()])
+    states: Union[List[State], None] = Field(default=[State()])
