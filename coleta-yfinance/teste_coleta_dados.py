@@ -11,7 +11,6 @@ import time
 service = Service(ChromeDriverManager().install())
 driver = webdriver.Chrome(service=service)
 
-<<<<<<< Updated upstream
     # Abre o site
 driver.get("https://www.zapimoveis.com.br/venda/imoveis/rj+niteroi/?__ab=seo-texts:control,exp-aa-test:B,preco-metro-quadrado:deslog&transacao=venda&onde=,Rio%20de%20Janeiro,Niter%C3%B3i,,,,,city,BR%3ERio%20de%20Janeiro%3ENULL%3ENiteroi,-22.880707,-43.101353,&pagina=1")
 
@@ -27,7 +26,6 @@ print(message_button)
 time.sleep(20)
 
 
-=======
 # Acessa o site de um imóvel específico na Zap Imóveis.
 driver.get("https://www.zapimoveis.com.br/imovel/venda-casa-3-quartos-com-churrasqueira-serra-grande-niteroi-rj-168m2-id-2684897903/?")
 
@@ -133,4 +131,3 @@ print(price_dict)
 
 # Fecha o navegador, liberando os recursos.
 driver.quit()
->>>>>>> Stashed changes
