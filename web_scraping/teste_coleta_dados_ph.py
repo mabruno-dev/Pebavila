@@ -51,16 +51,16 @@ driver = webdriver.Chrome(service=service)
 data_imoveis = []
 
 # Abre o site
-driver.get('https://www.quintoandar.com.br/comprar/imovel/niteroi-rj-brasil?flexible=true&referrer=profilingv2')
+driver.get('https://www.quintoandar.com.br/comprar/imovel/niteroi-rj-brasil?referrer=home&profiling=true')
 # Aguarda o carregamento da página
 time.sleep(5)
 elements = driver.find_elements(By.TAG_NAME, 'h3')
-'''
+
 i = 0
 for element in elements:
     print(f'{element.text}-{i}')
     i += 1
-''' 
+
 # Loop para clicar em até 11 elementos e extrair dados de imóveis
 for i in range(0, 1):
     elements[i].click()
