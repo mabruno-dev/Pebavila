@@ -55,14 +55,14 @@ driver.get('https://www.quintoandar.com.br/comprar/imovel/niteroi-rj-brasil?flex
 # Aguarda o carregamento da página
 time.sleep(5)
 elements = driver.find_elements(By.TAG_NAME, 'h3')
-
+'''
 i = 0
 for element in elements:
     print(f'{element.text}-{i}')
     i += 1
-
+''' 
 # Loop para clicar em até 11 elementos e extrair dados de imóveis
-for i in range(0, 11):
+for i in range(0, 1):
     elements[i].click()
     data_imoveis.append(pegar_dados)
     driver.back
