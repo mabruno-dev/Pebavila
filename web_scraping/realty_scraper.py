@@ -6,26 +6,17 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+import time
 
-
-async def web_scrap(link_fornecido, state):
+def web_scrap(link_fornecido , state = 'RJ'):
     # Configure Selenium to use the proxy
-
-
-    gecko_driver_path = 'geckodriver'  # Update this path
-    options = Options()
-    # Set up the service object with the path to GeckoDriver
-    service = Service(executable_path=gecko_driver_path)
-
-    # Pass the service object to the driver
-    driver = webdriver.Firefox(service=service)
+  try:
+    driver = webdriver.Chrome()
 
     driver.get(link_fornecido)
 
 
-    element = WebDriverWait(driver, 10).until(
-    EC.visibility_of_element_located((By.TAG_NAME, "span"))
-    )
+    WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.TAG_NAME, 'body')))
 
     # Here you can specify custom headers via the proxy
 
@@ -61,11 +52,18 @@ async def web_scrap(link_fornecido, state):
 
     # Coleta Nome imobiliaria
         if "denunciar" in element.text and y != 1:
-            index = element.text.index("denunciar")
-            index2 = element.text.index("Vendas")
+            try:
+                index = element.text.index("denunciar")
+                index2 = element.text.index("Código")
 
-            imobiliaria = element.text[index+18:index2] ## ver se vai precisar ajustar tamanho para outras imobiliarias##
-            y += 1
+                imobiliaria = element.text[index+17:index2] ## ver se vai precisar ajustar tamanho para outras imobiliarias##
+                y += 1
+            except:
+                index = element.text.index("denunciar")
+                index2 = element.text.index("Vendas")
+
+                imobiliaria = element.text[index+18:index2] ## ver se vai precisar ajustar tamanho para outras imobiliarias##
+                y += 1
 
     # Coleta descricao do imovel
         if "Características" in element.text:
@@ -89,6 +87,7 @@ async def web_scrap(link_fornecido, state):
                 index = element.text.index("R$")
                 price = ''.join([caractere for caractere in element.text[index:index+30] if caractere.isdigit()])
                 price = float(price)
+                print = element.text
                 price_list.append(price)
         except:
             price_list.append('None')
@@ -123,12 +122,16 @@ async def web_scrap(link_fornecido, state):
                 neighborhood = elements[index].text[:-3].split('-')[1].split(',')[0]
                 public_place = loc[0]
                 street = ''
+                realty_number = ""
                 #bumero = 0
                 for n in loc:
                     #if bumero != 0:
-                    street += n
-                    street += ' '
+                    if n.isdigit() == False:
+                        street += n
+                        street += ' '
                     #bumero = 1
+                    else:
+                        realty_number += n
                 city = street.split(',')[1].split("-")[0]
                 street = street.split("-")[0]
             except:
@@ -189,33 +192,64 @@ async def web_scrap(link_fornecido, state):
 
 
     # Compila as informações extraídas em um dicionário.
-    property_dict = {
+    try:
+        property_dict = {
 
-        "realty_type": realty_type,
-        "realty_square_footage": meters, 
-        "realty_property_tax": price_list[0], 
-        "realty_price": price_list[1],
-        "realty_rent_price": 'not implemented', ##ainda nao implementado##
-        "realty_description": descricao,
-        "realty_parking_spaces": parking_spot, 
-        "realty_bathroom": bathroom, 
-        "realty_bedroom": bedroom, 
-        "realty_real_state_office": imobiliaria,
-        "realty_advertiser_number": number,
-        "realty_done": lancamento,
-        "location": {
-            "city_name": city, 
-            "neighborhood_name": neighborhood,
-            "street_name": street,
-            "state_name": state
+            "realty_type": realty_type,
+            "realty_square_footage": meters,
+            "realty_condo_price":price_list[0],
+            "realty_property_tax": price_list[1], 
+            "realty_price": price_list[2],
+            "realty_rent_price": 'not implemented', ##ainda nao implementado##
+            "realty_description": descricao,
+            "realty_parking_spaces": parking_spot, 
+            "realty_bathroom": bathroom, 
+            "realty_bedroom": bedroom, 
+            "realty_real_state_office": imobiliaria,
+            "realty_advertiser_number": number,
+            "realty_done": lancamento,
+            "location": {
+                "city_name": city, 
+                "neighborhood_name": neighborhood,
+                "street_name": street,
+                "state_name": state,
+                "realty_number": realty_number
+                        }
+
+
+            #"public_place": public_place,          
+                    }
+    except:
+        property_dict = {
+
+            "realty_type": realty_type,
+            "realty_square_footage": meters,
+            "realty_condo_price":"condo price not informed",
+            "realty_property_tax": price_list[0], 
+            "realty_price": price_list[1],
+            "realty_rent_price": 'not implemented', ##ainda nao implementado##
+            "realty_description": descricao,
+            "realty_parking_spaces": parking_spot, 
+            "realty_bathroom": bathroom, 
+            "realty_bedroom": bedroom, 
+            "realty_real_state_office": imobiliaria,
+            "realty_advertiser_number": number,
+            "realty_done": lancamento,
+            "location": {
+                "city_name": city, 
+                "neighborhood_name": neighborhood,
+                "street_name": street,
+                "state_name": state
+                        }
+
+
+            #"public_place": public_place,          
                     }
 
-
-        #"public_place": public_place,          
-                }
 
     # Fecha o navegador, liberando os recursos.
     driver.quit()
 
     return property_dict
-
+  except Exception as e:
+       return e, "Em contrucao"
