@@ -7,6 +7,7 @@ from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.support.ui import WebDriverWait
 import time
 from selenium.webdriver.support import expected_conditions as EC
+from webdriver_manager.firefox import GeckoDriverManager
 
 # Define uma função para extrair dados de um imóvel
 def pegar_dados():
@@ -46,8 +47,11 @@ def pegar_dados():
     return imovel_dict
 
 # Configuração do WebDriver
-service = Service(ChromeDriverManager().install())
-driver = webdriver.Chrome(service=service)
+#service = Service(ChromeDriverManager().install())
+#driver=webdriver.Chrome(service=Service(ChromeDriverManager().install()))
+service = Service(GeckoDriverManager().install())
+driver=webdriver.Firefox(service=Service(GeckoDriverManager().install()))
+
 data_imoveis = []
 
 # Abre o site
@@ -55,17 +59,23 @@ driver.get('https://www.quintoandar.com.br/comprar/imovel/niteroi-rj-brasil?refe
 # Aguarda o carregamento da página
 time.sleep(5)
 elements = driver.find_elements(By.TAG_NAME, 'h3')
-
+'''
 i = 0
 for element in elements:
     print(f'{element.text}-{i}')
     i += 1
+'''
 
 # Loop para clicar em até 11 elementos e extrair dados de imóveis
 for i in range(0, 1):
     elements[i].click()
-    data_imoveis.append(pegar_dados)
-    driver.back
+    driver.switch_to.window(driver.window_handles[-1])
+    #data_imoveis.append(pegar_dados())
+    elements1 = driver.find_elements(By.CSS_SELECTOR, 'li')
+    for element in elements1:
+        print(element.text)
+    driver.close()
+    driver.switch_to.window(driver.window_handles[0])
 
 print(data_imoveis)
 # Não esqueça de fechar o navegador depois de terminar
