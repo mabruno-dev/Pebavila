@@ -9,18 +9,20 @@ import time
 from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.firefox import GeckoDriverManager
 
-service = Service(GeckoDriverManager().install())
-driver=webdriver.Firefox(service=Service(GeckoDriverManager().install()))
+gecko_driver_path = '/usr/local/bin/geckodriver'  # Update this path
+# Set up the service object with the path to GeckoDriver
+service = Service(executable_path=gecko_driver_path)
 
-data_imoveis = []
+# Pass the service object to the driver
+driver = webdriver.Firefox(service=service)
 
 # Abre o site
 driver.get('https://www.quintoandar.com.br/imovel/894374892/comprar/kitnet-1-quarto-centro-niteroi?from_route="profiling"&house_tags=visualized&search_id="84538d46-1c56-485c-92ac-c490c804f6f4"&search_rank=%7B"sortMode"%3A"relevance"%2C"searchMode"%3A"list"%2C"resultsOrigin"%3A"search"%2C"rank"%3A0%2C"personalization"%3Afalse%7D')
 # Aguarda o carregamento da página
 time.sleep(5)
 
-elements1 = driver.find_elements(By.CLASS_NAME, 'p')
-elements2 = driver.find_elements(By.CLASS_NAME, 'li')
+elements1 = driver.find_elements(By.TAG_NAME, 'p')
+elements2 = driver.find_elements(By.TAG_NAME, 'li')
 '''
 # Realiza tratamento de dados para extrair informações relevantes
 price = float(''.join([caractere for caractere in elements1[3].text if caractere.isdigit()]))

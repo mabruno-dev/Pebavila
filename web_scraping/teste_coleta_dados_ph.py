@@ -12,10 +12,12 @@ from webdriver_manager.firefox import GeckoDriverManager
 # Define uma função para extrair dados de um imóvel
 def pegar_dados():
     # Encontra elementos de texto e listas na página
-    elements1 = driver.find_elements(By.CSS_SELECTOR, 'p')
-    elements2 = driver.find_elements(By.CSS_SELECTOR, 'li')
+    elements1 = driver.find_elements(By.TAG_NAME, 'p')
+    elements2 = driver.find_elements(By.TAG_NAME, 'li')
     
+    print(elements1[3].text)
     # Realiza tratamento de dados para extrair informações relevantes
+
     price = float(''.join([caractere for caractere in elements1[3].text if caractere.isdigit()]))
     bedroom = int(''.join([caractere for caractere in elements1[5].text if caractere.isdigit()]))
     meters = ''.join([caractere for caractere in elements1[6].text if caractere.isdigit()])
@@ -49,8 +51,12 @@ def pegar_dados():
 # Configuração do WebDriver
 #service = Service(ChromeDriverManager().install())
 #driver=webdriver.Chrome(service=Service(ChromeDriverManager().install()))
-service = Service(GeckoDriverManager().install())
-driver=webdriver.Firefox(service=Service(GeckoDriverManager().install()))
+gecko_driver_path = '/usr/local/bin/geckodriver'  # Update this path
+# Set up the service object with the path to GeckoDriver
+service = Service(executable_path=gecko_driver_path)
+
+# Pass the service object to the driver
+driver = webdriver.Firefox(service=service)
 
 data_imoveis = []
 
@@ -70,10 +76,7 @@ for element in elements:
 for i in range(0, 1):
     elements[i].click()
     driver.switch_to.window(driver.window_handles[-1])
-    #data_imoveis.append(pegar_dados())
-    elements1 = driver.find_elements(By.CSS_SELECTOR, 'li')
-    for element in elements1:
-        print(element.text)
+    data_imoveis.append(pegar_dados())
     driver.close()
     driver.switch_to.window(driver.window_handles[0])
 
