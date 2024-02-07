@@ -1,6 +1,7 @@
 from selenium import webdriver
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.common.by import By
+from selenium.common.exceptions import NoSuchElementException
 from time import sleep
 import threading
 from realty_scraper import scrap_realty
@@ -24,7 +25,7 @@ def load_realties(driver: webdriver.Chrome, realty_list_div: WebElement):
 
         driver.execute_script(f"window.scrollBy(0, {STEP});")
 
-        max_y = loaded_realties * 300
+        max_y = loaded_realties * REALTY_DIV_SIZE
         current_scroll_y = driver.execute_script("return window.scrollY;")
         if current_scroll_y >= max_y:
             driver.execute_script(f"window.scrollTo(0, {max_y * 0.2});")
@@ -64,7 +65,7 @@ def scrape_website():
                     print(f"Scraping realty number {data_position}")
                     realty_a = realty_div.find_element(By.TAG_NAME, "a")
                     url = realty_a.get_attribute("href")
-                except Exception as e:
+                except NoSuchElementException as e: # Entra quando a div não possui uma tag a
                     pause_loading = True
                     show_all_button = realty_div.find_element(By.XPATH, ".//*[contains(text(), 'Exibir Anúncios')]")
                     show_all_button.click()
