@@ -1,255 +1,166 @@
-# Importações necessárias para automação web e manipulação de tempo.
+import json
+from re import findall
+from unidecode import unidecode
+
 from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-import time
 
-def scrap_realty(link_fornecido , state = 'RJ'):
-    # Configure Selenium to use the proxy
-  try:
+from utils.constants import RealtyConstants as RC
+
+def find_numbers(s: str):
+    result = findall(r"\d+\.*\d*", s)
+    # O padrão de expressão regular r'\d+\.*\d*' corresponde a um ou mais dígitos \d+,
+    # seguido de um ponto opcional \.* e zero ou mais dígitos \d*.
+    # Este padrão permite corresponder a números inteiros e decimais.
+    return result if len(result) > 0 else [None]
+    
+def is_number(s: str):
+    return s.isdigit()
+
+def scrape_realty(url):
+
     driver = webdriver.Chrome()
+    driver.get(url)
 
-    driver.get(link_fornecido)
-
-
-    WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.TAG_NAME, 'body')))
-
-    # Here you can specify custom headers via the proxy
-
-    # Espera 5 segundos para garantir que a página tenha carregado completamente.
-    # Busca por todos os elementos 'span' na página, que podem conter informações relevantes.
-    elements = driver.find_elements(By.TAG_NAME, 'span')
-
-    elements_2 = driver.find_elements(By.TAG_NAME, 'div')
-
-
-
-    # Declaracao de variaveis e contadores necessarios
-    i = 0
-    j = 0
-    k = 0
-    y = 0
-    property_dict = {}
-    price_list = []
-
-
-    # Abre as diferentes paginas do website.
-    for element in elements_2:
-
-    #print(f"{element.text}-->{i}")
-
-    # Coleta do No do anunciante
-        if "No anunciante" in element.text and k != 1:
-            index = element.text.index("No anunciante")
-            number = ''.join([caractere for caractere in element.text[index:index+30] if caractere.isdigit()])
-            number = element.text[index+15] + number
-            k += 1
-
-
-    # Coleta Nome imobiliaria
-        if "denunciar" in element.text and y != 1:
-            try:
-                index = element.text.index("denunciar")
-                index2 = element.text.index("Código")
-
-                imobiliaria = element.text[index+17:index2] ## ver se vai precisar ajustar tamanho para outras imobiliarias##
-                y += 1
-            except:
-                index = element.text.index("denunciar")
-                index2 = element.text.index("Vendas")
-
-                imobiliaria = element.text[index+18:index2] ## ver se vai precisar ajustar tamanho para outras imobiliarias##
-                y += 1
-
-    # Coleta descricao do imovel
-        if "Características" in element.text:
-            index = element.text.index("Características")
-            index2 = element.text.index("Mostrar mais")
-            descricao = element.text[index:index2]
-        
-
-        i += 1
-    i = 0
-
-
-    # Itera pelos elementos 'span' para extrair informações específicas.
-    for element in elements:
-
-        #print(f"{element.text}-->{i}")
-
-    # Verifica se o elemento contém informações de preço.
-        try:
-            if "R$" in element.text:
-                index = element.text.index("R$")
-                price = ''.join([caractere for caractere in element.text[index:index+30] if caractere.isdigit()])
-                price = float(price)
-                print = element.text
-                price_list.append(price)
-        except:
-            price_list.append('None')
-        
-
-    # Verifica se o elemento contém informações de metragem quadrada.
-        try:
-            if "m²" in element.text:
-                if j == 0:
-                    meters = ''.join([caractere for caractere in element.text if caractere.isdigit()])
-                    meters = float(meters[0:-1])
-                j += 1
-        except:
-            meters = None
-            print("No information about square_footage")
-
-
-    # Determina o tipo de imóvel com base no texto do elemento.
-        if "Casa" in element.text:
-            realty_type = "house"
-        elif "Apartamento" in element.text:
-            realty_type = "apartament"
-        else:
-            realty_type = "building"
-
-
-    # Extrai informações de localização se o elemento contém um "pin".
-        if "pin" in element.text:
-            try:
-                index = i+1
-                loc = elements[index].text[:-3].split()
-                neighborhood = elements[index].text[:-3].split('-')[1].split(',')[0]
-                public_place = loc[0]
-                street = ''
-                realty_number = ""
-                #bumero = 0
-                for n in loc:
-                    #if bumero != 0:
-                    if n.isdigit() == False:
-                        street += n
-                        street += ' '
-                    #bumero = 1
-                    else:
-                        realty_number += n
-                city = street.split(',')[1].split("-")[0]
-                street = street.split("-")[0]
-            except:
-                i+=1
-                continue
-
-
-    # Extrai o número de quartos, vagas de estacionamento e banheiros com base no texto do elemento.
-        try:
-            if "bedroom" in element.text:
-                try:
-                    index = i+1
-                    loc = elements[index].text.split()
-                    bedroom = int(loc[0])
-                except:
-                    i+=1
-                    continue
-        except:
-            bedroom = None
-            print("No information about bedroom")
-        try:
-            if "parking" in element.text:
-                try:
-                    index = i+1
-                    loc = elements[index].text.split()
-                    parking_spot = int(loc[0])
-                except:
-                    i+=1
-                    continue
-        except:
-            parking_spot = None
-            print("No information about parking_spot")
-
-
-        try:
-            if "bathroom" in element.text:
-                try:
-                    index = i+1
-                    loc = elements[index].text.split()
-                    bathroom = int(loc[0])
-                except:
-                    i+=1
-                    continue
-        except:
-            bathroom = None
-            print("No information about bathroom")
-
-
-        if "Na planta" in element.text:
-            lancamento = 0
-        elif "Em construcao" in element.text:
-            lancamento = 1
-        else:
-            lancamento = 2
-        
-
-        i+=1
-
-
-    # Compila as informações extraídas em um dicionário.
+    # Sugerir troca de realty_done para realty_status
     try:
-        property_dict = {
-
-            "realty_type": realty_type,
-            "realty_square_footage": meters,
-            "realty_condo_price":price_list[0],
-            "realty_property_tax": price_list[1], 
-            "realty_price": price_list[2],
-            "realty_rent_price": 'not implemented', ##ainda nao implementado##
-            "realty_description": descricao,
-            "realty_parking_spaces": parking_spot, 
-            "realty_bathroom": bathroom, 
-            "realty_bedroom": bedroom, 
-            "realty_real_state_office": imobiliaria,
-            "realty_advertiser_number": number,
-            "realty_done": lancamento,
-            "location": {
-                "city_name": city, 
-                "neighborhood_name": neighborhood,
-                "street_name": street,
-                "state_name": state,
-                "realty_number": realty_number
-                        }
-
-
-            #"public_place": public_place,          
-                    }
+        status_span = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.CLASS_NAME, "main__labels"))
+        )
     except:
-        property_dict = {
+        print("Connection error")
+        driver.quit()
+        return scrape_realty(url)
 
-            "realty_type": realty_type,
-            "realty_square_footage": meters,
-            "realty_condo_price":"condo price not informed",
-            "realty_property_tax": price_list[0], 
-            "realty_price": price_list[1],
-            "realty_rent_price": 'not implemented', ##ainda nao implementado##
-            "realty_description": descricao,
-            "realty_parking_spaces": parking_spot, 
-            "realty_bathroom": bathroom, 
-            "realty_bedroom": bedroom, 
-            "realty_real_state_office": imobiliaria,
-            "realty_advertiser_number": number,
-            "realty_done": lancamento,
-            "location": {
-                "city_name": city, 
-                "neighborhood_name": neighborhood,
-                "street_name": street,
-                "state_name": state
-                        }
+    if "Em construção" in status_span.text:
+        status = RC.UNDER_CONSTRUCTION
+    elif "Na planta" in status_span.text:
+        status = RC.FLOOR_PLAN
+    else:
+        status = RC.DONE
 
+    # type é uma palavra reservada
+    type = unidecode(driver.find_element(By.CLASS_NAME,  "info__business-type").text.split("para")[0].strip().upper())
 
-            #"public_place": public_place,          
-                    }
+    location_button = driver.find_element(By.CLASS_NAME, "info__map-link")
+    location_list = location_button.text.replace("pin", "").split(",")
+    aux = list()
+    for item in location_list:
+        aux2 = item.split("-")
+        for item2 in aux2:
+            aux.append(unidecode(item2.strip().upper()))
+    location_list = aux
+    street = location_list[0]
+    if is_number(location_list[1]):
+        number = location_list[1]
+        neighborhood = location_list[2]
+        city = location_list[3]
+        state = location_list[4]
+    else:
+        number = None
+        neighborhood = location_list[1]
+        city = location_list[2]
+        state = location_list[3]
 
+    # DEFINIR TRATAMENTO DO CASO "Sob consulta"
+    price_div = driver.find_element(By.CLASS_NAME, "prices__container")
+    try:
+        price = find_numbers(price_div.text.replace(".", ""))[0]
 
-    # Fecha o navegador, liberando os recursos.
-    driver.quit()
+    except:
+        print("Price not informed") # Normalmente sob consulta
+        price = None
+    try:
+        price_ul = price_div.find_element(By.TAG_NAME, "ul")
+        price_li_list = price_ul.find_elements(By.TAG_NAME, "li")
+        for price_li in price_li_list:
 
-    return property_dict
-  except Exception as e:
-       return e, "Em contrucao"
+            if "condomínio" in price_li.text:
+                condo_price = find_numbers(price_li.text)[0]
+            else:
+                print("Condo price not informed")
+                condo_price = None
+
+            if "IPTU" in price_li.text:
+                property_tax = find_numbers(price_li.text)[0]
+            else:
+                print("Taxes not informed")
+                property_tax = None
+    except:
+        print("Condo price and taxes not informed")
+        condo_price = None
+        property_tax = None
+
+    # Coleta os valores mais baixos
+    features_ul = driver.find_element(By.CLASS_NAME, "info__base-amenities")
+    try:
+        square_footage = find_numbers(features_ul.find_element(By.CSS_SELECTOR, 'span[itemprop="floorSize"]').text)[0]
+    except:
+        print("Square footage not informed")
+        square_footage = None
+    try:
+        bedrooms = find_numbers(features_ul.find_element(By.CSS_SELECTOR, 'span[itemprop="numberOfRooms"]').text)[0]
+    except:
+        print("Number of not informed")
+        bedrooms = None
+    try:
+        parking_spaces = find_numbers(features_ul.find_element(By.CLASS_NAME, "js-parking-spaces").text)[0]
+    except:
+        print("Number of parking spaces not informed")
+        parking_spaces = None
+    try:
+        bathrooms = find_numbers(features_ul.find_element(By.CSS_SELECTOR, 'span[itemprop="numberOfBathroomsTotal"]').text)[0]
+    except:
+        print("Number of bathrooms not informed")
+        bathrooms = None
+    try:
+        floor = find_numbers(features_ul.find_element(By.CSS_SELECTOR, 'span[itemprop="floorLevel"]').text)[0]
+    except:
+        print("Floor not informed")
+        floor = None
+
+    # Sugerir mudança de real_state_office para advertiser 
+    # e criação de nova tabela advertiser contendo nome e número do anunciante ou utilizacao do creci 
+    # (acho que com o creci nao precisa de outra tabela e facilita pois deve ser padrao em todos os sites)
+    advertiser_div = driver.find_element(By.CLASS_NAME, "advertser-info--wrapper")
+    advertiser_name = unidecode(advertiser_div.find_element(By.CLASS_NAME, "advertiser-info__name").text.strip().upper())
+    advertiser_number = advertiser_div.find_element(By.CLASS_NAME, "advertiser-info__offer-codes--advertiser").text.replace("No anunciante:", "").strip() 
+    # Não deve ser "unidecodado" e nem capitalizado pois alguns se diferenciam por letras maiusculas e minusculas
+
+    # Descrição deve ser conservada para exibição ao usuário caso necessária
+    description = driver.find_element(By.CLASS_NAME, "amenities__description").text.strip()
+
+    if "mobiliado" in url:
+        furnished = RC.FURNISHED
+    else:
+        furnished = RC.NOT_FURNISHED
+
+    realty_dict = {
+        "realty_location": {
+            "state": state,
+            "city": city,
+            "neighborhood": neighborhood,
+            "street": street
+        },
+        "realty_number": number,
+        "realty_square_footage": square_footage,
+        "realty_price": price,
+        "realty_description": description,
+        "realty_parking_spaces": parking_spaces,
+        "realty_bathrooms": bathrooms,
+        "realty_bedrooms": bedrooms,
+        "realty_real_state_office": advertiser_name,
+        "realty_advertiser_number": advertiser_number,
+        "realty_done": status,
+        "realty_property_tax": property_tax,
+        "realty_furnished": furnished,
+        "realty_condo_price": condo_price,
+        "realty_floor": floor,
+        "realty_type": type
+    }
+
+    print(f"{json.dumps(realty_dict, indent=4, ensure_ascii=False)}\n")
+
+    return realty_dict
