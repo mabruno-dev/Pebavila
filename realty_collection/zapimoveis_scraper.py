@@ -49,14 +49,16 @@ def scrape_website():
     current_page = 1
     scraped_realties = 0
     total_realties = 1
-    while scraped_realties < total_realties:
+    while scraped_realties <= total_realties:
 
-        print(f"\nPAGE {current_page}")
+        print(console.BLUE + f"PAGE {current_page}" + console.RESET)
 
         driver = webdriver.Chrome()
         driver.get(BASE_URL + f"{current_page}")
+        wait = WebDriverWait(driver, 10)
+
         try:
-            total_realties_h1 = WebDriverWait(driver, 10).until(
+            total_realties_h1 = wait.until(
                 EC.presence_of_element_located((By.CSS_SELECTOR, "h1.l-text.l-u-color-neutral-12.l-text--variant-heading-small.l-text--weight-semibold.undefined"))
             )
         except:
@@ -69,7 +71,7 @@ def scrape_website():
         loader = threading.Thread(target=load_realties, args=(driver, realty_list_div))
         loader.start()
 
-        data_position = 1
+        data_position = 90
         while data_position <= REALTIES_PER_PAGE:
 
             try:
@@ -78,12 +80,14 @@ def scrape_website():
                     # Extract the URL of the realty
                     realty_a = realty_div.find_element(By.TAG_NAME, "a")
                     url = realty_a.get_attribute("href")
-                except NoSuchElementException as e:
+                except NoSuchElementException:
                     # Handle special case when link is not directly available
                     pause_loading = True
                     show_all_button = realty_div.find_element(By.XPATH, ".//*[contains(text(), 'Exibir Anúncios')]")
                     show_all_button.click()
-                    duplicate_list_div = driver.find_element(By.CLASS_NAME, "deduplication-listings__listings")
+                    duplicate_list_div = wait.until(
+                        EC.presence_of_element_located((By.CLASS_NAME, "deduplication-listings__listings"))
+                    )
                     duplicate_a_tags = duplicate_list_div.find_elements(By.TAG_NAME, "a")
                     url = duplicate_a_tags[0].get_attribute("href")
                     close_span = driver.find_element(By.CSS_SELECTOR, f'span[aria-label="Fechar modal lateral"]')
@@ -106,37 +110,33 @@ def scrape_website():
                         all_realties.append(realty_info)
                     data_position += 1
                     scraped_realties += 1
-                    print()
-            except Exception as e:
+            except NoSuchElementException:
                 print("Loading...", end="\r")
+            except Exception as e:
+                print(f"Error: {e}")
 
         loader.join()
         driver.quit()
         current_page += 1
-        break
 
     return all_realties
 
 
 def __main__():
-    answer = str(input("IS YOUR SLEEP TIMER DISABLED? (Y/N): "))
-    if "Y" == answer.upper().strip():
-        start_time = time()
+    start_time = time()
 
-        all_realties = scrape_website()
+    all_realties = scrape_website()
 
-        # Write scraped realties to a JSON file
-        json_object = {"realties": all_realties}
-        OUTPUT_PATH = r"realty_collection/output"
-        os.makedirs(OUTPUT_PATH)
-        with open(OUTPUT_PATH + f"/realties.json", "w") as json_file:
-            json.dump(json_object, json_file, indent=4, ensure_ascii=False)
+    # Write scraped realties to a JSON file
+    json_object = {"realties": all_realties}
+    OUTPUT_PATH = r"realty_collection/output"
+    os.makedirs(OUTPUT_PATH)
+    with open(OUTPUT_PATH + f"/realties.json", "w") as json_file:
+        json.dump(json_object, json_file, indent=4, ensure_ascii=False)
 
-        execution_time = time() - start_time
-        print(f"Total execution done in {format_time(execution_time)}")
-        print("Remeber to turn your sleep timer back on")
-    else:
-        print("Go disable it")
+    execution_time = time() - start_time
+    print(f"Total execution done in {format_time(execution_time)}")
+    print("Remeber to turn your sleep timer back on")
 
 
 if __name__ == "__main__":
