@@ -4,6 +4,7 @@ from unidecode import unidecode
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
@@ -21,7 +22,9 @@ def is_number(s: str):
 
 def scrape_realty(url):
 
-    driver = webdriver.Chrome()
+    chrome_options = Options()
+    chrome_options.add_argument('--headless')
+    driver = webdriver.Chrome(options=chrome_options)
     driver.get(url)
 
     # Sugerir troca de realty_done para realty_status
@@ -103,7 +106,7 @@ def scrape_realty(url):
     try:
         bedrooms = find_numbers(features_ul.find_element(By.CSS_SELECTOR, 'span[itemprop="numberOfRooms"]').text)[0]
     except:
-        print("Number of not informed")
+        print("Number of bedrooms not informed")
         bedrooms = None
     try:
         parking_spaces = find_numbers(features_ul.find_element(By.CLASS_NAME, "js-parking-spaces").text)[0]
@@ -161,6 +164,6 @@ def scrape_realty(url):
         "realty_type": type
     }
 
-    print(f"{json.dumps(realty_dict, indent=4, ensure_ascii=False)}\n")
+    print(f"{json.dumps(realty_dict, indent=4, ensure_ascii=False)}")
 
     return realty_dict
