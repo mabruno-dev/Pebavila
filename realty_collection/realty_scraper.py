@@ -23,7 +23,9 @@ def is_number(s: str):
 def scrape_realty(url):
 
     chrome_options = Options()
-    chrome_options.add_argument('--headless')
+    chrome_options.add_argument('--disable-popup-blocking')
+    chrome_options.add_argument('--disable-notifications')
+    chrome_options.add_argument('--disable-infobars')
     driver = webdriver.Chrome(options=chrome_options)
     driver.get(url)
 
