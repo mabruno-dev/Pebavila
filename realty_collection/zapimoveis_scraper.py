@@ -85,9 +85,8 @@ def scrape_website():
                     pause_loading = True
                     show_all_button = realty_div.find_element(By.XPATH, ".//*[contains(text(), 'Exibir Anúncios')]")
                     show_all_button.click()
-                    duplicate_list_div = wait.until(
-                        EC.presence_of_element_located((By.CLASS_NAME, "deduplication-listings__listings"))
-                    )
+                    sleep(1.5)
+                    duplicate_list_div = driver.find_element(By.CLASS_NAME, "deduplication-listings__listings")
                     duplicate_a_tags = duplicate_list_div.find_elements(By.TAG_NAME, "a")
                     url = duplicate_a_tags[0].get_attribute("href")
                     close_span = driver.find_element(By.CSS_SELECTOR, f'span[aria-label="Fechar modal lateral"]')

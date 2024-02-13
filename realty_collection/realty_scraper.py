@@ -4,7 +4,6 @@ from unidecode import unidecode
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
@@ -22,11 +21,7 @@ def is_number(s: str):
 
 def scrape_realty(url):
 
-    chrome_options = Options()
-    chrome_options.add_argument('--disable-popup-blocking')
-    chrome_options.add_argument('--disable-notifications')
-    chrome_options.add_argument('--disable-infobars')
-    driver = webdriver.Chrome(options=chrome_options)
+    driver = webdriver.Chrome()
     driver.get(url)
 
     # Sugerir troca de realty_done para realty_status
