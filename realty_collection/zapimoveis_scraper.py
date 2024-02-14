@@ -7,6 +7,7 @@ import traceback
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
@@ -17,17 +18,22 @@ from utils.functions import format_time
 
 REALTY_DIV_SIZE = 300
 REALTIES_PER_PAGE = 100
-BASE_URL = "https://www.zapimoveis.com.br/venda/imoveis/rj+niteroi/?__ab=seo-texts:control,exp-aa-test:B&transacao=venda&onde=,Rio%20de%20Janeiro,Niterói,,,,,city,BR%3ERio%20de%20Janeiro%3ENULL%3ENiteroi,-22.823378,-43.04625,&pagina="
+BASE_URL = "https://www.zapimoveis.com.br/venda/?__ab=seo-texts:control,exp-aa-test:B&transacao=venda&pagina="
 
 pause_loading = False  # Global variable to control loading pause
-
+scraped_realties = 0
+total_realties = 1
 
 def load_realties(driver: webdriver.Chrome, realty_list_div: WebElement):
     global pause_loading
+    global total_realties
+    global scraped_realties
     STEP = 100
     while True:
         loaded_realties = len(realty_list_div.find_elements(By.CLASS_NAME, "l-card__wrapper"))
         if loaded_realties == REALTIES_PER_PAGE:
+            break  
+        elif loaded_realties >= (total_realties - scraped_realties):
             break
 
         driver.execute_script(f"window.scrollBy(0, {STEP});")
@@ -44,11 +50,11 @@ def load_realties(driver: webdriver.Chrome, realty_list_div: WebElement):
 
 
 def scrape_website():
+    global scraped_realties
+    global total_realties
     global pause_loading
     all_realties = list()
     current_page = 1
-    scraped_realties = 0
-    total_realties = 1
     while scraped_realties <= total_realties:
 
         print(console.BLUE + f"PAGE {current_page}" + console.RESET)
@@ -117,6 +123,8 @@ def scrape_website():
         loader.join()
         driver.quit()
         current_page += 1
+        if current_page > 100:
+            break
 
     return all_realties
 
