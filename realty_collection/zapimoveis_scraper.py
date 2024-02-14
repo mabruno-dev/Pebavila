@@ -33,7 +33,7 @@ def load_realties(driver: webdriver.Chrome, realty_list_div: WebElement):
         loaded_realties = len(realty_list_div.find_elements(By.CLASS_NAME, "l-card__wrapper"))
         if loaded_realties == REALTIES_PER_PAGE:
             break  
-        elif loaded_realties >= (total_realties - scraped_realties):
+        elif loaded_realties >= (total_realties - scraped_realties): # In case it's the last page
             break
 
         driver.execute_script(f"window.scrollBy(0, {STEP});")
