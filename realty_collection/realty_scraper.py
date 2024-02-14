@@ -6,6 +6,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium_stealth import stealth
 
 from utils.constants import RealtyConstants as RC
 
@@ -22,6 +23,16 @@ def is_number(s: str):
 def scrape_realty(url):
 
     driver = webdriver.Chrome()
+
+    stealth(driver,
+        languages=["en-US", "en"],
+        vendor="Google Inc.",
+        platform="Win32",
+        webgl_vendor="Intel Inc.",
+        renderer="Intel Iris OpenGL Engine",
+        fix_hairline=True,
+    )
+    
     driver.get(url)
 
     # Sugerir troca de realty_done para realty_status

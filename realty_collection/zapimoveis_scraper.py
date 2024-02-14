@@ -11,6 +11,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
+from selenium_stealth import stealth
 
 from realty_scraper import scrape_realty
 from utils.constants import ConsoleColors as console
@@ -60,6 +61,16 @@ def scrape_website():
         print(console.BLUE + f"PAGE {current_page}" + console.RESET)
 
         driver = webdriver.Chrome()
+
+        stealth(driver,
+            languages=["en-US", "en"],
+            vendor="Google Inc.",
+            platform="Win32",
+            webgl_vendor="Intel Inc.",
+            renderer="Intel Iris OpenGL Engine",
+            fix_hairline=True,
+        )
+        
         driver.get(BASE_URL + f"{current_page}")
         wait = WebDriverWait(driver, 10)
 
