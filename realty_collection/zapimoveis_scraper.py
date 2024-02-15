@@ -105,7 +105,7 @@ def scrape_website():
             loader = threading.Thread(target=load_realties, args=(driver, realty_list_div))
             loader.start()
 
-            data_position = 1
+            data_position = 97
             while data_position <= REALTIES_PER_PAGE and scraped_realties < total_realties:
 
                 try:
