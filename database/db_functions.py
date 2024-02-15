@@ -217,6 +217,12 @@ def insert_realties(realties_dict):
             del realty["realty_location"]
             realty["realty_street"] = street
 
+            aux = realty.copy()
+            for key, value in aux.items():
+                if value == None:
+                    del realty[f"{key}"]
+            print(realty)
+
             if not database.queryone('''
                 SELECT realty_id 
                 FROM public.realties 
@@ -291,6 +297,30 @@ insert_realties({
         "realty_floor": 2,
         "realty_type": "APARTMENT",
         "realty_url": "www.sexosexosexosexo.com"
+    },
+    {
+        "realty_location": {
+            "state": "SP",
+            "city": "SAO JOSE DO RIO PRETO",
+            "neighborhood": "PARQUE INDUSTRIAL",
+            "street": "RUA PEDRO AMARAL"
+        },
+        "realty_number": 2496,
+        "realty_square_footage": 137,
+        "realty_price": 320000.0,
+        "realty_description": "kjasdkjhasd",
+        "realty_parking_spaces": None,
+        "realty_bathrooms": 3,
+        "realty_bedrooms": 3,
+        "realty_advertiser": "ROMA PRIME NEGOCIOS IMOBILIARIOS",
+        "realty_advertiser_number": "375908",
+        "realty_done": 2,
+        "realty_property_tax": None,
+        "realty_furnished": "0",
+        "realty_condo_price": None,
+        "realty_floor": 4,
+        "realty_type": "APARTAMENTO",
+        "realty_url": "https://www.zapimoveis.com.br/imovel/venda-apartamento-3-quartos-com-zelador-parque-industrial-sao-jose-do-rio-preto-sp-137m2-id-2580372921/"
     }]
 })
 

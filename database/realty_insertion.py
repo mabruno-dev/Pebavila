@@ -8,7 +8,7 @@ def __main__():
         with open(REALTIES_JSON_PATH) as json_file:
             realties = json.load(json_file)
         print(realties)
-        # insert_realties(realties)
+        insert_realties(realties)
     except Exception as e:
         print(f"Error: {e}")
 

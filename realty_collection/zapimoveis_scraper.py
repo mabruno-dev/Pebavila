@@ -20,7 +20,7 @@ from utils.functions import format_time
 
 REALTY_DIV_SIZE = 300
 REALTIES_PER_PAGE = 100
-BASE_URL = "https://www.zapimoveis.com.br/venda/?__ab=seo-texts:control,exp-aa-test:B&transacao=venda&pagina="
+BASE_URL = "https://www.zapimoveis.com.br/venda/imoveis/rj+niteroi/?__ab=seo-texts:control,exp-aa-test:B&transacao=venda&onde=,Rio%20de%20Janeiro,Niterói,,,,,city,BR%3ERio%20de%20Janeiro%3ENULL%3ENiteroi,-22.916099,-42.819192,&pagina="
 OUTPUT_FOLDER_PATH = r"output/realty_data"
 OUTPUT_FILE_PATH = OUTPUT_FOLDER_PATH + r"/realties.json"
 STORED_URLS_JSON_PATH = OUTPUT_FOLDER_PATH + r"/stored_urls.json"
@@ -36,7 +36,7 @@ def load_realties(driver: webdriver.Chrome, realty_list_div: WebElement):
     STEP = 100
     while True:
         loaded_realties = len(realty_list_div.find_elements(By.CLASS_NAME, "l-card__wrapper"))
-        if loaded_realties == REALTIES_PER_PAGE:
+        if loaded_realties >= REALTIES_PER_PAGE:
             break  
         elif loaded_realties >= (total_realties - scraped_realties): # In case it's the last page
             break
@@ -105,7 +105,7 @@ def scrape_website():
             loader = threading.Thread(target=load_realties, args=(driver, realty_list_div))
             loader.start()
 
-            data_position = 97
+            data_position = 1
             while data_position <= REALTIES_PER_PAGE and scraped_realties < total_realties:
 
                 try:
@@ -153,7 +153,6 @@ def scrape_website():
             loader.join()
             driver.quit()
             current_page += 1
-            break
             if current_page > 100:
                 break
         except Exception as e:
