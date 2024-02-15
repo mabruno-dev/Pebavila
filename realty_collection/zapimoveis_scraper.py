@@ -1,4 +1,5 @@
 import os
+import sys
 import json
 import threading
 from time import time, sleep
@@ -20,7 +21,9 @@ from utils.functions import format_time
 REALTY_DIV_SIZE = 300
 REALTIES_PER_PAGE = 100
 BASE_URL = "https://www.zapimoveis.com.br/venda/?__ab=seo-texts:control,exp-aa-test:B&transacao=venda&pagina="
-OUTPUT_PATH = r"realty_collection/output"
+OUTPUT_FOLDER_PATH = r"output/realty_data"
+OUTPUT_FILE_PATH = OUTPUT_FOLDER_PATH + r"/realties.json"
+STORED_URLS_JSON_PATH = OUTPUT_FOLDER_PATH + r"/stored_urls.json"
 
 pause_loading = False  # Global variable to control loading pause
 scraped_realties = 0
@@ -51,13 +54,23 @@ def load_realties(driver: webdriver.Chrome, realty_list_div: WebElement):
             sleep(0.3)
 
 def append_list_to_json(obj_name, list):
-    with open(OUTPUT_PATH + f"/realties.json", "w") as json_file:
+    with open(OUTPUT_FILE_PATH, "w") as json_file:
         json.dump({f"{obj_name}": list}, json_file, indent=4, ensure_ascii=False)
+
+def get_stored_urls():
+    try:
+        with open(STORED_URLS_JSON_PATH) as json_file:
+            url_dict = json.load(json_file)
+        return url_dict["urls"]
+    except:
+        print(f"File not found: {STORED_URLS_JSON_PATH}")
+        return []
 
 def scrape_website():
     global scraped_realties
     global total_realties
     global pause_loading
+    stored_urls = get_stored_urls()
     all_realties = list()
     current_page = 1
     while scraped_realties < total_realties:
@@ -114,20 +127,22 @@ def scrape_website():
                         close_span.click()
                         pause_loading = False
                     finally:
-                        print(f"Scraping realty number {data_position}")
-                        try:
-                            # Scrape realty info
-                            start_time = time()
-                            realty_info = scrape_realty(url)
-                            execution_time = time() - start_time
-                            print(f"Realty scraped in {format_time(execution_time)}")
-                        except Exception as e:
-                            # Handle scraping errors
-                            realty_info = None
-                            print(console.RED + f"Error at webpage: {url}" + console.RESET)
-                            traceback.print_exc()
-                        if realty_info != None:
-                            all_realties.append(realty_info)
+                        if url not in stored_urls:
+                            print(f"Scraping realty number {data_position}")
+                            try:
+                                # Scrape realty info
+                                start_time = time()
+                                realty_info = scrape_realty(url)
+                                execution_time = time() - start_time
+                                print(f"Realty scraped in {format_time(execution_time)}")
+                            except Exception as e:
+                                # Handle scraping errors
+                                realty_info = None
+                                print(console.RED + f"Error at webpage: {url}" + console.RESET)
+                                traceback.print_exc()
+                                append_list_to_json("realties", all_realties)
+                            if realty_info != None:
+                                all_realties.append(realty_info)
                         data_position += 1
                         scraped_realties += 1
                 except NoSuchElementException:
@@ -138,6 +153,7 @@ def scrape_website():
             loader.join()
             driver.quit()
             current_page += 1
+            break
             if current_page > 100:
                 break
         except Exception as e:
@@ -151,7 +167,7 @@ def scrape_website():
 def __main__():
     start_time = time()
 
-    os.makedirs(OUTPUT_PATH, exist_ok=True)
+    os.makedirs(OUTPUT_FOLDER_PATH, exist_ok=True)
     all_realties = scrape_website()
     append_list_to_json("realties", all_realties)
 

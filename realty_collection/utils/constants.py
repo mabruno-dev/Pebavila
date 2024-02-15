@@ -2,8 +2,8 @@ class RealtyConstants:
     DONE = 2
     FLOOR_PLAN = 0
     UNDER_CONSTRUCTION = 1
-    FURNISHED = 1
-    NOT_FURNISHED = 0
+    FURNISHED = "1"
+    NOT_FURNISHED = "0"
 
 class ConsoleColors:
     RESET = "\033[0m"

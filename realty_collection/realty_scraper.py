@@ -65,7 +65,7 @@ def scrape_realty(url):
     location_list = aux
     street = location_list[0]
     if is_number(location_list[1]):
-        number = location_list[1]
+        number = int(location_list[1])
         neighborhood = location_list[2]
         city = location_list[3]
         state = location_list[4]
@@ -78,7 +78,7 @@ def scrape_realty(url):
     # DEFINIR TRATAMENTO DO CASO "Sob consulta"
     price_div = driver.find_element(By.CLASS_NAME, "prices__container")
     try:
-        price = find_numbers(price_div.text.replace(".", ""))[0]
+        price = float(find_numbers(price_div.text.replace(".", ""))[0])
 
     except:
         print("Price not informed") # Normalmente sob consulta
@@ -89,13 +89,13 @@ def scrape_realty(url):
         for price_li in price_li_list:
 
             if "condomínio" in price_li.text:
-                condo_price = find_numbers(price_li.text)[0]
+                condo_price = float(find_numbers(price_li.text)[0])
             else:
                 print("Condo price not informed")
                 condo_price = None
 
             if "IPTU" in price_li.text:
-                property_tax = find_numbers(price_li.text)[0]
+                property_tax = float(find_numbers(price_li.text)[0])
             else:
                 print("Taxes not informed")
                 property_tax = None
@@ -107,33 +107,33 @@ def scrape_realty(url):
     # Coleta os valores mais baixos
     features_ul = driver.find_element(By.CLASS_NAME, "info__base-amenities")
     try:
-        square_footage = find_numbers(features_ul.find_element(By.CSS_SELECTOR, 'span[itemprop="floorSize"]').text)[0]
+        square_footage = int(find_numbers(features_ul.find_element(By.CSS_SELECTOR, 'span[itemprop="floorSize"]').text)[0])
     except:
         print("Square footage not informed")
         square_footage = None
     try:
-        bedrooms = find_numbers(features_ul.find_element(By.CSS_SELECTOR, 'span[itemprop="numberOfRooms"]').text)[0]
+        bedrooms = int(find_numbers(features_ul.find_element(By.CSS_SELECTOR, 'span[itemprop="numberOfRooms"]').text)[0])
     except:
         print("Number of bedrooms not informed")
         bedrooms = None
     try:
-        parking_spaces = find_numbers(features_ul.find_element(By.CLASS_NAME, "js-parking-spaces").text)[0]
+        parking_spaces = int(find_numbers(features_ul.find_element(By.CLASS_NAME, "js-parking-spaces").text)[0])
     except:
         print("Number of parking spaces not informed")
         parking_spaces = None
     try:
-        bathrooms = find_numbers(features_ul.find_element(By.CSS_SELECTOR, 'span[itemprop="numberOfBathroomsTotal"]').text)[0]
+        bathrooms = int(find_numbers(features_ul.find_element(By.CSS_SELECTOR, 'span[itemprop="numberOfBathroomsTotal"]').text)[0])
     except:
         print("Number of bathrooms not informed")
         bathrooms = None
     try:
-        floor = find_numbers(features_ul.find_element(By.CSS_SELECTOR, 'span[itemprop="floorLevel"]').text)[0]
+        floor = int(find_numbers(features_ul.find_element(By.CSS_SELECTOR, 'span[itemprop="floorLevel"]').text)[0])
     except:
         print("Floor not informed")
         floor = None
 
-    # Sugerir mudança de real_state_office para advertiser 
-    # e criação de nova tabela advertiser contendo nome e número do anunciante ou utilizacao do creci 
+
+    # Sugerir criação de nova tabela advertiser contendo nome e número do anunciante ou utilizacao do creci 
     # (acho que com o creci nao precisa de outra tabela e facilita pois deve ser padrao em todos os sites)
     advertiser_div = driver.find_element(By.CLASS_NAME, "advertser-info--wrapper")
     advertiser_name = unidecode(advertiser_div.find_element(By.CLASS_NAME, "advertiser-info__name").text.strip().upper())
@@ -162,14 +162,15 @@ def scrape_realty(url):
         "realty_parking_spaces": parking_spaces,
         "realty_bathrooms": bathrooms,
         "realty_bedrooms": bedrooms,
-        "realty_real_state_office": advertiser_name,
+        "realty_advertiser": advertiser_name,
         "realty_advertiser_number": advertiser_number,
         "realty_done": status,
         "realty_property_tax": property_tax,
         "realty_furnished": furnished,
         "realty_condo_price": condo_price,
         "realty_floor": floor,
-        "realty_type": type
+        "realty_type": type,
+        "realty_url": url
     }
 
     print(f"{json.dumps(realty_dict, indent=4, ensure_ascii=False)}")
