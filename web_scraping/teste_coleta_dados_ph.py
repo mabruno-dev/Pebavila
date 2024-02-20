@@ -15,7 +15,7 @@ def pegar_dados():
     elements1 = driver.find_elements(By.TAG_NAME, 'p')
     elements2 = driver.find_elements(By.TAG_NAME, 'li')
     
-    print(elements1[3].text)
+    
     # Realiza tratamento de dados para extrair informações relevantes
 
     price = float(''.join([caractere for caractere in elements1[3].text if caractere.isdigit()]))
@@ -64,23 +64,14 @@ data_imoveis = []
 driver.get('https://www.quintoandar.com.br/comprar/imovel/niteroi-rj-brasil?referrer=home&profiling=true')
 # Aguarda o carregamento da página
 time.sleep(5)
-elements = driver.find_elements(By.TAG_NAME, 'h3')
-'''
+elements_link = driver.find_elements(By.TAG_NAME, 'a')
 i = 0
-for element in elements:
-    print(f'{element.text}-{i}')
+for c in elements_link:
+    url_do_link = c.get_attribute("href")
+    print(f'({url_do_link}-->{i} )')
     i += 1
-'''
 
-# Loop para clicar em até 11 elementos e extrair dados de imóveis
-for i in range(0, 1):
-    elements[i].click()
-    driver.switch_to.window(driver.window_handles[-1])
-    data_imoveis.append(pegar_dados())
-    driver.close()
-    driver.switch_to.window(driver.window_handles[0])
-
-print(data_imoveis)
-# Não esqueça de fechar o navegador depois de terminar
+#22-33
+    
 driver.quit()
 

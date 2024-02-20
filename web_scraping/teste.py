@@ -88,52 +88,39 @@ driver = webdriver.Chrome(service=service)
 data_imoveis = []
 
 # Abre o site
-driver.get('https://www.quintoandar.com.br/comprar/imovel/r.-dr.-genserico-ribeiro-sao-lourenco-niteroi-rj-brasil')
+driver.get('https://www.quintoandar.com.br/comprar/imovel/niteroi-rj-brasil?referrer=home&profiling=true')
 # Aguarda o carregamento da página
 time.sleep(5)
+elements_button = driver.find_elements(By.CLASS_NAME, 'sc-boq37v-0')
 
 
 def verify_element():
-    try:
-        # element = driver.find_elements(By.TAG_NAME, 'button')
-        element = driver.find_elements(By.TAG_NAME, "button")
-        button_found = False
-
-        for each in element:
-            if each.text == "Ver mais":
-                each.click()
-                button_found = True
-            elif each.text != "ver mais":
-                pass
-
-        if button_found:
-            return 1
-        else:
-            return 0
-    except Exception as E:
-        print(E)
+    #element = driver.find_elements(By.TAG_NAME, 'button')
+    element = driver.find_elements(By.CSS_SELECTOR, 'Ver mais')
+    if not element:
+        return 0
+    else:
+        element.click()
 
 
 control = 1
 while control != 0:
     control = verify_element()
 
-elements_button = driver.find_elements(By.CLASS_NAME, 'sc-boq37v-0')
 
-h3_click = []
-for element in elements_button:
-    h3_click.extend(element.find_elements(By.TAG_NAME, 'h3'))
-
-
-for element in h3_click:
-    try:
+for i ,element in enumerate(elements_button):
+    if 'R$' in element[i-1] == "Apartamento":
         element.click()
         driver.switch_to.window(driver.window_handles[-1])
         data_imoveis.append(pegar_dados())
         driver.close()
         driver.switch_to.window(driver.window_handles[0])
-    except Exception as E:
-        print(E)
+
+j = 0
+for element in elements_button:
+    print(f'{element.text}-{i}')
+    j += 1
+
 
 '''
 # Loop para clicar em até 11 elementos e extrair dados de imóveis
@@ -143,6 +130,8 @@ for i in range(0, 11):
     data_imoveis.append(pegar_dados())
     driver.close()
     driver.switch_to.window(driver.window_handles[0])'''
+
+
 
 
 print(data_imoveis)
