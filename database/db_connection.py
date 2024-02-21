@@ -7,9 +7,9 @@ class Database():
     def __init__(self) -> None:
         try:
             self.connection = postgre.connect("""
-                dbname=postgres
+                dbname = 'postgres'
                 host = '25.73.143.27'
-                port = 5432
+                port = '5432'
                 user = 'postgres'
                 password = '$Pebav1la+' 
             """)
