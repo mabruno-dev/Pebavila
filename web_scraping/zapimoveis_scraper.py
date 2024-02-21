@@ -39,7 +39,7 @@ total_realties = 1
 # Signal handling function for termination signals (such as SIGINT, SIGTERM)
 def signal_handler(sig, frame):
     print("Termination signal detected:", sig)
-    append_to_realties_json("realties", scrape_url())
+    append_to_realties_json(scrape_url())
     sys.exit(0)
 
 pause_loading = False
@@ -68,7 +68,7 @@ def load_realties(driver: webdriver.Chrome, realty_list_div: WebElement):
         while pause_loading:
             sleep(0.3)
 
-def append_to_realties_json(obj_name, new_list):
+def append_to_realties_json(new_list):
     print("Saving realties...", end=" ")
     create_dirs(REALTIES_JSON)
     current_list: list = list()
@@ -81,7 +81,7 @@ def append_to_realties_json(obj_name, new_list):
     except:
         pass
     with open(REALTIES_JSON, "w") as json_file:
-        json.dump({f"{obj_name}": current_list}, json_file, indent=4, ensure_ascii=False)
+        json.dump({f"realties": current_list}, json_file, indent=4, ensure_ascii=False)
     print(console.GREEN + "Done" + console.RESET)
     print_log(f"json saved with {len(current_list)} realties")
 
@@ -202,7 +202,7 @@ def scrape_url(url: str):
                                 realty_info = None
                                 print(console.RED + f"Error at webpage: {url}" + console.RESET)
                                 traceback.print_exc()
-                                append_to_realties_json("realties", all_realties)
+                                append_to_realties_json(all_realties)
                             if realty_info != None:
                                 all_realties.append(realty_info)
                         data_position += 1
@@ -215,11 +215,12 @@ def scrape_url(url: str):
             loader.join()
             driver.quit()
             current_page += 1
-            if current_page > 100:
+            if current_page > 100: # Limitation from the website
+                print("Reached page limit")
                 break
         except Exception as e:
             print(f"ERROR: {e}")
-            append_to_realties_json("realties", all_realties)
+            append_to_realties_json(all_realties)
             break
 
     return all_realties
@@ -239,17 +240,18 @@ def __main__():
 
     street_urls = get_street_urls()
     for street in street_urls:
-        print(f"Scraping realties from: {street['street']}")
+        if street["url"] != None:
+            print(f"Scraping realties from: {street['street']}")
 
-        # Reset global variables
-        pause_loading = False
-        scraped_realties = 0
-        total_realties = 1
+            # Reset global variables
+            pause_loading = False
+            scraped_realties = 0
+            total_realties = 1
 
-        all_realties = scrape_url(street["url"])
+            all_realties = scrape_url(street["url"])
 
-        append_to_scraped_streets(street["url"])
-    append_to_realties_json("realties", all_realties)
+            append_to_scraped_streets(street["url"])
+    append_to_realties_json(all_realties)
 
     execution_time = time() - start_time
     print(f"Total execution done in {format_time(execution_time)}")
