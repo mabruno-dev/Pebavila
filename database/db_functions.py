@@ -1,11 +1,6 @@
 from database.db_connection import Database
 from datetime import datetime
-# from models.states import Set_state
-import json
-# import models
-
-def teste():
-    print("MEU CUUUUUU")
+import models
 
 def generic_delete(schema_name, table_name, id_record):
     try:
@@ -23,52 +18,52 @@ def generic_update():
     except Exception as E:
         print(E)
         
-# def add_states(jsonStates: models.states.Set_state):
-#     try:
-#         with Database() as database:
-#             for state in jsonStates.states:
-#                 result = database.queryone(
-#                     "SELECT state_id FROM public.states WHERE state_name = %s AND state_acronym = %s", (state.state_name, state.state_acronym))
-#                 if result:
-#                     pass
-#                 else:
-#                     database.execute("INSERT INTO public.states (state_name, state_acronym) VALUES(%s,%s)", (
-#                         state.state_name.upper(), state.state_acronym.upper()))
-#                     database.commit()
-#         return print("Success")
-#     except Exception as E:
-#         print(E)
+def add_states(jsonStates: models.states.Set_state):
+    try:
+        with Database() as database:
+            for state in jsonStates.states:
+                result = database.queryone(
+                    "SELECT state_id FROM public.states WHERE state_name = %s AND state_acronym = %s", (state.state_name, state.state_acronym))
+                if result:
+                    pass
+                else:
+                    database.execute("INSERT INTO public.states (state_name, state_acronym) VALUES(%s,%s)", (
+                        state.state_name.upper(), state.state_acronym.upper()))
+                    database.commit()
+        return print("Success")
+    except Exception as E:
+        print(E)
 
 
-# states = models.states.Set_state(states=[
-#     {"state_name": "Acre", "state_acronym": "AC"},
-#     {"state_name": "Alagoas", "state_acronym": "AL"},
-#     {"state_name": "Amapa", "state_acronym": "AP"},
-#     {"state_name": "Amazonas", "state_acronym": "AM"},
-#     {"state_name": "Bahia", "state_acronym": "BA"},
-#     {"state_name": "Ceara", "state_acronym": "CE"},
-#     {"state_name": "Distrito Federal", "state_acronym": "DF"},
-#     {"state_name": "Espirito Santo", "state_acronym": "ES"},
-#     {"state_name": "Goias", "state_acronym": "GO"},
-#     {"state_name": "Maranhao", "state_acronym": "MA"},
-#     {"state_name": "Mato Grosso", "state_acronym": "MT"},
-#     {"state_name": "Mato Grosso do Sul", "state_acronym": "MS"},
-#     {"state_name": "Minas Gerais", "state_acronym": "MG"},
-#     {"state_name": "Para", "state_acronym": "PA"},
-#     {"state_name": "Paraiba", "state_acronym": "PB"},
-#     {"state_name": "Parana", "state_acronym": "PR"},
-#     {"state_name": "Pernambuco", "state_acronym": "PE"},
-#     {"state_name": "Piaui", "state_acronym": "PI"},
-#     {"state_name": "Rio de Janeiro", "state_acronym": "RJ"},
-#     {"state_name": "Rio Grande do Norte", "state_acronym": "RN"},
-#     {"state_name": "Rio Grande do Sul", "state_acronym": "RS"},
-#     {"state_name": "Rondonia", "state_acronym": "RO"},
-#     {"state_name": "Roraima", "state_acronym": "RR"},
-#     {"state_name": "Santa Catarina", "state_acronym": "SC"},
-#     {"state_name": "Sao Paulo", "state_acronym": "SP"},
-#     {"state_name": "Sergipe", "state_acronym": "SE"},
-#     {"state_name": "Tocantins", "state_acronym": "TO"}
-# ])
+states = models.states.Set_state(states=[
+    {"state_name": "Acre", "state_acronym": "AC"},
+    {"state_name": "Alagoas", "state_acronym": "AL"},
+    {"state_name": "Amapa", "state_acronym": "AP"},
+    {"state_name": "Amazonas", "state_acronym": "AM"},
+    {"state_name": "Bahia", "state_acronym": "BA"},
+    {"state_name": "Ceara", "state_acronym": "CE"},
+    {"state_name": "Distrito Federal", "state_acronym": "DF"},
+    {"state_name": "Espirito Santo", "state_acronym": "ES"},
+    {"state_name": "Goias", "state_acronym": "GO"},
+    {"state_name": "Maranhao", "state_acronym": "MA"},
+    {"state_name": "Mato Grosso", "state_acronym": "MT"},
+    {"state_name": "Mato Grosso do Sul", "state_acronym": "MS"},
+    {"state_name": "Minas Gerais", "state_acronym": "MG"},
+    {"state_name": "Para", "state_acronym": "PA"},
+    {"state_name": "Paraiba", "state_acronym": "PB"},
+    {"state_name": "Parana", "state_acronym": "PR"},
+    {"state_name": "Pernambuco", "state_acronym": "PE"},
+    {"state_name": "Piaui", "state_acronym": "PI"},
+    {"state_name": "Rio de Janeiro", "state_acronym": "RJ"},
+    {"state_name": "Rio Grande do Norte", "state_acronym": "RN"},
+    {"state_name": "Rio Grande do Sul", "state_acronym": "RS"},
+    {"state_name": "Rondonia", "state_acronym": "RO"},
+    {"state_name": "Roraima", "state_acronym": "RR"},
+    {"state_name": "Santa Catarina", "state_acronym": "SC"},
+    {"state_name": "Sao Paulo", "state_acronym": "SP"},
+    {"state_name": "Sergipe", "state_acronym": "SE"},
+    {"state_name": "Tocantins", "state_acronym": "TO"}
+])
 
 
 def get_state_id(database: Database, state_acronym: str):

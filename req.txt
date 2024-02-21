@@ -1,4 +1,5 @@
 altgraph==0.17.4
+annotated-types==0.6.0
 attrs==23.2.0
 auto-py-to-exe==2.42.0
 bottle==0.12.25
@@ -29,6 +30,8 @@ pandas==2.2.0
 pillow==10.2.0
 proglog==0.1.10
 psycopg2-binary==2.9.9
+pydantic==2.6.1
+pydantic_core==2.16.2
 pyinstaller==6.4.0
 pyinstaller-hooks-contrib==2024.1
 pyparsing==3.1.1
