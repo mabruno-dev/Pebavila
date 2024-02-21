@@ -1,4 +1,4 @@
-from db_functions import set_streets_neighborhoods_cities
+from database.db_functions import set_streets_neighborhoods_cities
 import json
 
 def __main__():

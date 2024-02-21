@@ -1,4 +1,4 @@
-from db_functions import get_realty_urls
+from database.db_functions import get_realty_urls
 
 def __main__():
     get_realty_urls()

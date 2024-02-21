@@ -1,8 +1,6 @@
 from selenium import webdriver
-from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium_stealth import stealth
@@ -13,7 +11,6 @@ import json
 import os
 
 from utils.constants import ConsoleColors as Console
-
 
 OUTPUT_PATH = r"output/location_data"
 OUTPUT_FILE_PATH = OUTPUT_PATH + r"/street_urls.json"
@@ -63,6 +60,16 @@ def get_street_url(driver: webdriver.Chrome, location: dict):
 def __main__():
 
     driver = webdriver.Chrome()
+
+    stealth(driver,
+        languages=["en-US", "en"],
+        vendor="Google Inc.",
+        platform="Win32",
+        webgl_vendor="Intel Inc.",
+        renderer="Intel Iris OpenGL Engine",
+        fix_hairline=True,
+    )
+
     driver.get("https://www.zapimoveis.com.br/venda/?itl_id=1000063&itl_name=zap_-_link-header_comprar_to_zap_resultado-pesquisa")
 
     with open(LOCATIONS_FILE_PATH, "r") as json_file:

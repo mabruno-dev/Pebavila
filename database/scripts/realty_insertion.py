@@ -1,5 +1,5 @@
 import json
-from db_functions import insert_realties
+from database.db_functions import insert_realties
 
 REALTIES_JSON_PATH = r"output/realty_data/realties.json"
 

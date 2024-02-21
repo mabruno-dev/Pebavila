@@ -1,4 +1,4 @@
-from db_connection import Database
+from database.db_connection import Database
 from datetime import datetime
 # from models.states import Set_state
 import json

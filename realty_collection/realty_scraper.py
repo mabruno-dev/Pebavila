@@ -9,6 +9,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium_stealth import stealth
 
 from utils.constants import RealtyConstants as RC
+from utils.functions import print_log
 
 def find_numbers(s: str):
     result = findall(r"\d+\.*\d*", s)
@@ -174,5 +175,15 @@ def scrape_realty(url):
     }
 
     print(f"{json.dumps(realty_dict, indent=4, ensure_ascii=False)}")
+    print_log(f'''
+            Coletado imóvel: \n
+            ESTADO - {realty_dict["location"]["state"]}\n
+            CIDADE - {realty_dict["location"]["city"]}\n
+            BAIRRO - {realty_dict["location"]["city"]}\n
+            RUA - {realty_dict["location"]["rua"]}\n
+            NUMERO - {realty_dict["number"]}
+            ''', 
+            showCons=False
+    )
 
     return realty_dict

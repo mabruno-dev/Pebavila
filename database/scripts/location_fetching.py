@@ -1,4 +1,4 @@
-from db_functions import get_locations_from_city
+from database.db_functions import get_locations_from_city
 
 import json
 import os

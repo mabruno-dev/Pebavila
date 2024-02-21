@@ -77,6 +77,7 @@ def append_to_realties_json(obj_name, new_list):
     with open(REALTIES_JSON, "w") as json_file:
         json.dump({f"{obj_name}": current_list}, json_file, indent=4, ensure_ascii=False)
     print(console.GREEN + "Done" + console.RESET)
+    print_log(f"json saved with {len(current_list)} realties")
 
 def get_scraped_realty_urls():
     try:
@@ -101,6 +102,7 @@ def append_to_scraped_streets(url):
     with open(SCRAPED_STREET_URLS_JSON, "w") as json_file:
         json.dump({"scraped_street_urls": url_list}, json_file, indent=4, ensure_ascii=False)
     print(console.GREEN + "Done" + console.RESET)
+    print_log(f"json saved with {len(url_list)} urls")
 
 def get_scraped_street_urls():
     try:
