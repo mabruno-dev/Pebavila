@@ -1,3 +1,5 @@
+import os
+
 def format_time(seconds):
     days = seconds // (24 * 3600)
     hours = (seconds % (24 * 3600)) // 3600
@@ -15,3 +17,6 @@ def format_time(seconds):
         time_str += f"{seconds} second{'s' if seconds != 1 else ''}"
 
     return time_str
+
+def create_dirs(file_path):
+    os.makedirs(os.path.dirname(file_path), exist_ok=True)

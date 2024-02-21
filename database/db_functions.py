@@ -4,6 +4,8 @@ from datetime import datetime
 import json
 # import models
 
+def teste():
+    print("MEU CUUUUUU")
 
 def generic_delete(schema_name, table_name, id_record):
     try:
@@ -69,7 +71,8 @@ def generic_update():
 # ])
 
 
-def get_state_id(database: Database, state_acronym):
+def get_state_id(database: Database, state_acronym: str):
+    state_acronym = state_acronym.upper()
     try:
         state_id = database.queryone(
             'SELECT state_id FROM public.states WHERE state_acronym = %s', (state_acronym,))
@@ -163,7 +166,8 @@ def set_streets_neighborhoods_cities(json_streets):
     except Exception as e:
         print(f"Error: {e}")
 
-def get_street_id(database: Database, street_name, neighborhood_id):
+def get_street_id(database: Database, street_name: str, neighborhood_id):
+    street_name = street_name.upper()
     try:
         street_id = database.queryone(
             "SELECT street_id FROM public.streets WHERE street_name = %s AND street_neighborhood = %s",
@@ -174,7 +178,8 @@ def get_street_id(database: Database, street_name, neighborhood_id):
     except Exception as e:
         print(f"Error: {e}")
 
-def get_neighborhood_id(database: Database, neighborhood_name, city_id):
+def get_neighborhood_id(database: Database, neighborhood_name: str, city_id):
+    neighborhood_name = neighborhood_name.upper()
     try:
         neighborhood_id = database.queryone(
             "SELECT neighborhood_id FROM public.neighborhoods WHERE neighborhood_name = %s AND neighborhood_city = %s",
@@ -185,7 +190,8 @@ def get_neighborhood_id(database: Database, neighborhood_name, city_id):
     except Exception as e:
         print(f"Error: {e}")
 
-def get_city_id(database: Database, city_name, state_id):
+def get_city_id(database: Database, city_name: str, state_id):
+    city_name = city_name.upper()
     try:
         city_id = database.queryone(
             "SELECT city_id FROM public.cities WHERE city_name = %s AND city_state = %s",
@@ -210,6 +216,7 @@ def insert_realties(realties_dict):
     with Database() as database:
         for realty in realties_dict["realties"]:
             realty = dict(realty)
+
             street = get_realty_street(database, realty["realty_location"])
             if not street:
                 set_streets_neighborhoods_cities({"addresses": [realty["realty_location"]]})
@@ -249,86 +256,42 @@ def insert_realties(realties_dict):
             else:
                 print("Record already exists")
 
-insert_realties({
-    "realties": [{
-        "realty_number": "137",
-        "realty_location": {
-            "state": "RJ",
-            "city": "NITEROI",
-            "neighborhood": "ICARAI",
-            "street": "RUA DOUTOR PAULO CESAR"
-        },
-        "realty_square_footage": 150,
-        "realty_price": 5435435,
-        "realty_description": "BEAUTIFUL HOUSE WITH A SPACIOUS BACKYARD AND MODERN AMENITIES.",
-        "realty_parking_spaces": 2,
-        "realty_bathrooms": 2,
-        "realty_bedrooms": 3,
-        "realty_advertiser": "SPIN",
-        "realty_advertiser_number": "555-123-4567",
-        "realty_done": 1,
-        "realty_property_tax": 2500.00,
-        "realty_furnished": "1",
-        "realty_condo_price": 3000.00,
-        "realty_floor": 2,
-        "realty_type": "APARTMENT",
-        "realty_url": "www.sexosexosexosexo.com"
-    },
-    {
-        "realty_number": "137",
-        "realty_location": {
-            "state": "RJ",
-            "city": "NITEROI",
-            "neighborhood": "SAO FRANCISCO",
-            "street": "AVENIDA QUINTINO BOCAIUVA"
-        },
-        "realty_square_footage": 150,
-        "realty_price": 5435435,
-        "realty_description": "BEAUTIFUL HOUSE WITH A SPACIOUS BACKYARD AND MODERN AMENITIES.",
-        "realty_parking_spaces": 2,
-        "realty_bathrooms": 2,
-        "realty_bedrooms": 1,
-        "realty_advertiser": "SPIN",
-        "realty_advertiser_number": "555-123-4567",
-        "realty_done": 2,
-        "realty_property_tax": 2500.00,
-        "realty_furnished": "1",
-        "realty_condo_price": 3000.00,
-        "realty_floor": 2,
-        "realty_type": "APARTMENT",
-        "realty_url": "www.sexosexosexosexo.com"
-    },
-    {
-        "realty_location": {
-            "state": "SP",
-            "city": "SAO JOSE DO RIO PRETO",
-            "neighborhood": "PARQUE INDUSTRIAL",
-            "street": "RUA PEDRO AMARAL"
-        },
-        "realty_number": 2496,
-        "realty_square_footage": 137,
-        "realty_price": 320000.0,
-        "realty_description": "kjasdkjhasd",
-        "realty_parking_spaces": None,
-        "realty_bathrooms": 3,
-        "realty_bedrooms": 3,
-        "realty_advertiser": "ROMA PRIME NEGOCIOS IMOBILIARIOS",
-        "realty_advertiser_number": "375908",
-        "realty_done": 2,
-        "realty_property_tax": None,
-        "realty_furnished": "0",
-        "realty_condo_price": None,
-        "realty_floor": 4,
-        "realty_type": "APARTAMENTO",
-        "realty_url": "https://www.zapimoveis.com.br/imovel/venda-apartamento-3-quartos-com-zelador-parque-industrial-sao-jose-do-rio-preto-sp-137m2-id-2580372921/"
-    }]
-})
+def get_neighborhood_name(database: Database, neighborhood_id):
+    try:
+        data = database.queryone(
+            "SELECT * FROM public.neighborhoods WHERE neighborhood_id = %s", 
+            (neighborhood_id,)
+        )
+        return data[1]
+    except Exception as e:
+        print(f"Error: {e}")
 
+def get_locations_from_city(city: str, state: str):
+    locations = list()
+    with Database() as database:
+        state_id = get_state_id(database, state)
+        city_id = get_city_id(database, city, state_id)
 
+        neighborhood_id_list = database.query(
+            "SELECT neighborhood_id FROM public.neighborhoods WHERE neighborhood_city = %s", 
+            (city_id,)
+        )
 
-            
-            
+        for neighborhood_id in neighborhood_id_list:
+            neighborhood_id = neighborhood_id[0]
+            street_list = database.query(
+                "SELECT street_name FROM public.streets WHERE street_neighborhood = %s", 
+                (neighborhood_id,)
+            )
 
-            
+            for street in street_list:
+                street = street[0]
+                location_dict = {
+                    "state": state.upper(),
+                    "city": city.upper(),
+                    "neighborhood": get_neighborhood_name(database, neighborhood_id),
+                    "street": street
+                }
+                locations.append(location_dict)
 
-            
+    return locations

@@ -4,11 +4,11 @@ import json
 import threading
 from time import time, sleep
 import traceback
+import signal
 
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
@@ -16,18 +16,27 @@ from selenium_stealth import stealth
 
 from realty_scraper import scrape_realty
 from utils.constants import ConsoleColors as console
-from utils.functions import format_time
+from utils.functions import *
 
 REALTY_DIV_SIZE = 300
 REALTIES_PER_PAGE = 100
-BASE_URL = "https://www.zapimoveis.com.br/venda/imoveis/rj+niteroi/?__ab=seo-texts:control,exp-aa-test:B&transacao=venda&onde=,Rio%20de%20Janeiro,Niterói,,,,,city,BR%3ERio%20de%20Janeiro%3ENULL%3ENiteroi,-22.916099,-42.819192,&pagina="
-OUTPUT_FOLDER_PATH = r"output/realty_data"
-OUTPUT_FILE_PATH = OUTPUT_FOLDER_PATH + r"/realties.json"
-STORED_URLS_JSON_PATH = OUTPUT_FOLDER_PATH + r"/stored_urls.json"
+OUTPUT_PATH = r"output/"
+REALTIES_JSON = OUTPUT_PATH + r"realty_data/realties.json"
+SCRAPED_REALTY_URLS_JSON = OUTPUT_PATH + r"scraped_urls/scraped_realty_urls.json"
+SCRAPED_STREET_URLS_JSON = OUTPUT_PATH + r"scraped_urls/scraped_street_urls.json"
+STREET_URLS_JSON = OUTPUT_PATH + r"location_data/street_urls.json"
 
-pause_loading = False  # Global variable to control loading pause
+pause_loading = False
 scraped_realties = 0
 total_realties = 1
+
+# Signal handling function for termination signals (such as SIGINT, SIGTERM)
+def signal_handler(sig, frame):
+    print("Termination signal detected:", sig)
+    append_to_realties_json("realties", scrape_url())
+    sys.exit(0)
+
+pause_loading = False
 
 def load_realties(driver: webdriver.Chrome, realty_list_div: WebElement):
     global pause_loading
@@ -53,24 +62,69 @@ def load_realties(driver: webdriver.Chrome, realty_list_div: WebElement):
         while pause_loading:
             sleep(0.3)
 
-def append_list_to_json(obj_name, list):
-    with open(OUTPUT_FILE_PATH, "w") as json_file:
-        json.dump({f"{obj_name}": list}, json_file, indent=4, ensure_ascii=False)
-
-def get_stored_urls():
+def append_to_realties_json(obj_name, new_list):
+    print("Saving realties...", end=" ")
+    create_dirs(REALTIES_JSON)
+    current_list: list = list()
     try:
-        with open(STORED_URLS_JSON_PATH) as json_file:
+        with open(REALTIES_JSON, "r") as json_file:
+            current_list = json.load(json_file)["realties"]
+        for item in new_list:
+            if item not in current_list:
+                current_list.append(item)
+    except:
+        pass
+    with open(REALTIES_JSON, "w") as json_file:
+        json.dump({f"{obj_name}": current_list}, json_file, indent=4, ensure_ascii=False)
+    print(console.GREEN + "Done" + console.RESET)
+
+def get_scraped_realty_urls():
+    try:
+        with open(SCRAPED_REALTY_URLS_JSON) as json_file:
             url_dict = json.load(json_file)
         return url_dict["urls"]
     except:
-        print(f"File not found: {STORED_URLS_JSON_PATH}")
+        print(f"File not found: {SCRAPED_REALTY_URLS_JSON}")
         return []
 
-def scrape_website():
+def append_to_scraped_streets(url):
+    print("Saving scraped street urls...", end=" ")
+    create_dirs(SCRAPED_STREET_URLS_JSON)
+    url_list: list = list()
+    try:
+        with open(SCRAPED_STREET_URLS_JSON, "r") as json_file:
+            url_list = json.load(json_file)["scraped_street_urls"]
+            if url not in url_list:
+                url_list.append(url)
+    except:
+        pass
+    with open(SCRAPED_STREET_URLS_JSON, "w") as json_file:
+        json.dump({"scraped_street_urls": url_list}, json_file, indent=4, ensure_ascii=False)
+    print(console.GREEN + "Done" + console.RESET)
+
+def get_scraped_street_urls():
+    try:
+        with open(SCRAPED_STREET_URLS_JSON, "r") as json_file:
+            return json.load(json_file)["scraped_street_urls"]
+    except:
+        print(f"File not found: {SCRAPED_STREET_URLS_JSON}")
+        return []
+
+def get_street_urls():
+    try:
+        with open(STREET_URLS_JSON, "r") as json_file:
+            return json.load(json_file)["street_urls"]
+    except:
+        print(f"File not found: {STREET_URLS_JSON}")
+        return []
+
+def scrape_url(url: str):
+    url = url[:-1] # Remove the page index
+
     global scraped_realties
     global total_realties
     global pause_loading
-    stored_urls = get_stored_urls()
+    stored_urls = get_scraped_realty_urls()
     all_realties = list()
     current_page = 1
     while scraped_realties < total_realties:
@@ -88,7 +142,7 @@ def scrape_website():
                 fix_hairline=True,
             )
             
-            driver.get(BASE_URL + f"{current_page}")
+            driver.get(url + f"{current_page}")
             wait = WebDriverWait(driver, 10)
 
             try:
@@ -140,7 +194,7 @@ def scrape_website():
                                 realty_info = None
                                 print(console.RED + f"Error at webpage: {url}" + console.RESET)
                                 traceback.print_exc()
-                                append_list_to_json("realties", all_realties)
+                                append_to_realties_json("realties", all_realties)
                             if realty_info != None:
                                 all_realties.append(realty_info)
                         data_position += 1
@@ -157,18 +211,37 @@ def scrape_website():
                 break
         except Exception as e:
             print(f"ERROR: {e}")
-            append_list_to_json("realties", all_realties)
+            append_to_realties_json("realties", all_realties)
             break
 
     return all_realties
 
-
 def __main__():
+
+    signal.signal(signal.SIGINT, signal_handler)  # Ctrl+C
+    signal.signal(signal.SIGTERM, signal_handler)  # Termination command
+
     start_time = time()
 
-    os.makedirs(OUTPUT_FOLDER_PATH, exist_ok=True)
-    all_realties = scrape_website()
-    append_list_to_json("realties", all_realties)
+    global pause_loading
+    global scraped_realties
+    global total_realties
+
+    all_realties = list()
+
+    street_urls = get_street_urls()
+    for street in street_urls:
+        print(f"Scraping realties from: {street['street']}")
+
+        # Reset global variables
+        pause_loading = False
+        scraped_realties = 0
+        total_realties = 1
+
+        all_realties = scrape_url(street["url"])
+
+        append_to_scraped_streets(street["url"])
+    append_to_realties_json("realties", all_realties)
 
     execution_time = time() - start_time
     print(f"Total execution done in {format_time(execution_time)}")
