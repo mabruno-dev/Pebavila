@@ -7,9 +7,12 @@ bottle-websocket==0.2.9
 browsermob-proxy==0.8.0
 certifi==2023.11.17
 charset-normalizer==3.3.2
+contourpy==1.2.0
+cycler==0.12.1
 decorator==4.4.2
 Eel==0.16.0
 exceptiongroup==1.2.0
+fonttools==4.49.0
 future==0.18.3
 gevent==24.2.1
 gevent-websocket==0.10.1
@@ -19,7 +22,9 @@ idna==3.6
 imageio==2.33.1
 imageio-ffmpeg==0.4.9
 joblib==1.3.2
+kiwisolver==1.4.5
 macholib==1.16.3
+matplotlib==3.8.3
 moviepy==1.0.3
 numpy==1.26.3
 opencv-python==4.9.0.80
