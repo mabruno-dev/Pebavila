@@ -1,7 +1,15 @@
+import os
+import sys
+
+current_file = os.path.abspath(__file__)
+current_directory = os.path.dirname(current_file)
+project_root = os.path.dirname(current_directory)
+sys.path.append(project_root)
+
 import json
 from re import findall
-from unidecode import unidecode
 
+from unidecode import unidecode
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait

@@ -1,3 +1,11 @@
+import os
+import sys
+
+current_file = os.path.abspath(__file__)
+current_directory = os.path.dirname(current_file)
+project_root = os.path.dirname(current_directory)
+sys.path.append(project_root)
+
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
@@ -8,7 +16,6 @@ from selenium.webdriver.common.keys import Keys
 
 from time import sleep
 import json
-import os
 
 from utils.constants import ConsoleColors as Console
 

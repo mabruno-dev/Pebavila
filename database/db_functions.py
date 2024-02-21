@@ -34,7 +34,6 @@ def add_states(jsonStates: models.states.Set_state):
     except Exception as E:
         print(E)
 
-
 states = models.states.Set_state(states=[
     {"state_name": "Acre", "state_acronym": "AC"},
     {"state_name": "Alagoas", "state_acronym": "AL"},
@@ -65,7 +64,6 @@ states = models.states.Set_state(states=[
     {"state_name": "Tocantins", "state_acronym": "TO"}
 ])
 
-
 def get_state_id(database: Database, state_acronym: str):
     state_acronym = state_acronym.upper()
     try:
@@ -76,7 +74,6 @@ def get_state_id(database: Database, state_acronym: str):
 
     except Exception as E:
         print(E)
-
 
 def get_or_insert_city(database: Database, city_name, state_id):
     try:
@@ -93,7 +90,6 @@ def get_or_insert_city(database: Database, city_name, state_id):
             return city_id
     except Exception as E:
         print(E)
-
 
 def get_or_insert_neighborhood(database: Database, neighborhood_name, city_id):
     try:
@@ -116,7 +112,6 @@ def get_or_insert_neighborhood(database: Database, neighborhood_name, city_id):
     except Exception as E:
         print(E)
 
-
 def check_street_exists(database: Database, street_name, neighborhood_id):
     try:
         street_id = database.queryone(
@@ -135,7 +130,6 @@ def check_street_exists(database: Database, street_name, neighborhood_id):
         database.commit()
     except Exception as E:
         print(E)
-
 
 def set_streets_neighborhoods_cities(json_streets):
     try:
@@ -197,7 +191,6 @@ def get_city_id(database: Database, city_name: str, state_id):
     except Exception as e:
         print(f"Error: {e}")
 
-
 def get_realty_street(database: Database, location):
     state_id = get_state_id(database, location["state"])
     city_id = get_city_id(database, location["city"], state_id)
@@ -205,7 +198,6 @@ def get_realty_street(database: Database, location):
     street_id = get_street_id(database, location["street"], neighborhood_id)
     if street_id:
         return street_id
-
 
 def insert_realties(realties_dict):
     with Database() as database:
@@ -290,3 +282,12 @@ def get_locations_from_city(city: str, state: str):
                 locations.append(location_dict)
 
     return locations
+
+def get_realty_urls():
+    with Database() as database:
+        url_list = list()
+        temp = database.query("SELECT realty_url FROM public.realties")
+        for item in temp:
+            url_list.append(item[0])
+        print(url_list)
+        return url_list
