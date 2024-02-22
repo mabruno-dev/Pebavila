@@ -8,6 +8,7 @@ sys.path.append(project_root)
 
 import json
 from re import findall
+from time import sleep
 
 from unidecode import unidecode
 from selenium import webdriver
@@ -62,27 +63,36 @@ def scrape_realty(url):
         status = RC.DONE
 
     # type é uma palavra reservada
-    type = unidecode(driver.find_element(By.CLASS_NAME,  "info__business-type").text.split("para")[0].strip().upper())
+    name = driver.find_element(By.CLASS_NAME,  "info__business-type")
+    type = unidecode(name.text.split("para")[0].strip().upper())
 
     location_button = driver.find_element(By.CLASS_NAME, "info__map-link")
-    location_list = location_button.text.replace("pin", "").split(",")
-    aux = list()
-    for item in location_list:
-        aux2 = item.split("-")
-        for item2 in aux2:
-            aux.append(unidecode(item2.strip().upper()))
-    location_list = aux
-    street = location_list[0]
-    if is_number(location_list[1]):
-        number = int(location_list[1])
-        neighborhood = location_list[2]
-        city = location_list[3]
-        state = location_list[4]
-    else:
-        number = None
-        neighborhood = location_list[1]
-        city = location_list[2]
-        state = location_list[3]
+    location = location_button.text.replace("pin", "").replace(",", "$").replace(" - ", "$").replace("\n", "")
+    location_list = location.split("$")
+    for index, item in enumerate(location_list):
+        location_list[index] = item.strip()
+    match(len(location_list)):
+        case 5:
+            street = location_list[0]
+            number = location_list[1]
+            neighborhood = location_list[2]
+            city = location_list[3]
+            state = location_list[4]
+        case 4:
+            street = None
+            number = location_list[0]
+            neighborhood = location_list[1]
+            city = location_list[2]
+            state = location_list[3]
+        case 3:
+            street = None
+            number = None
+            neighborhood = location_list[0]
+            city = location_list[1]
+            state = location_list[2]
+        case _:
+            print(f"Error scraping location\nurl: {url}")
+            return
 
     # DEFINIR TRATAMENTO DO CASO "Sob consulta"
     price_div = driver.find_element(By.CLASS_NAME, "prices__container")
@@ -183,15 +193,13 @@ def scrape_realty(url):
     }
 
     print(f"{json.dumps(realty_dict, indent=4, ensure_ascii=False)}")
-    print_log(f'''
-            Coletado imóvel: \n
-            ESTADO - {realty_dict["location"]["state"]}\n
-            CIDADE - {realty_dict["location"]["city"]}\n
-            BAIRRO - {realty_dict["location"]["city"]}\n
-            RUA - {realty_dict["location"]["rua"]}\n
-            NUMERO - {realty_dict["number"]}
-            ''', 
-            showCons=False
-    )
+    print_log(f"Scraped realty: {name}", showCons=False)
 
     return realty_dict
+
+
+def __main__():
+    print(scrape_realty("https://www.zapimoveis.com.br/imovel/venda-terreno-lote-condominio-itaipu-niteroi-rj-1400m2-id-2665924421/?"))
+
+if __name__ == "__main__":
+    __main__()
