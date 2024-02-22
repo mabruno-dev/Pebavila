@@ -1,6 +1,18 @@
-from database.db_connection import Database
+import os
+import sys
+
+current_file = os.path.abspath(__file__)
+current_directory = os.path.dirname(current_file)
+project_root = os.path.dirname(current_directory)
+sys.path.append(project_root)
+
+from db_connection import Database
+from utils.constants import ConsoleColors as console
+
 from datetime import datetime
-import models
+
+class QueryFormatingException(Exception):
+    pass
 
 def generic_delete(schema_name, table_name, id_record):
     try:
@@ -17,52 +29,6 @@ def generic_update():
         pass
     except Exception as E:
         print(E)
-        
-def add_states(jsonStates: models.states.Set_state):
-    try:
-        with Database() as database:
-            for state in jsonStates.states:
-                result = database.queryone(
-                    "SELECT state_id FROM public.states WHERE state_name = %s AND state_acronym = %s", (state.state_name, state.state_acronym))
-                if result:
-                    pass
-                else:
-                    database.execute("INSERT INTO public.states (state_name, state_acronym) VALUES(%s,%s)", (
-                        state.state_name.upper(), state.state_acronym.upper()))
-                    database.commit()
-        return print("Success")
-    except Exception as E:
-        print(E)
-
-states = models.states.Set_state(states=[
-    {"state_name": "Acre", "state_acronym": "AC"},
-    {"state_name": "Alagoas", "state_acronym": "AL"},
-    {"state_name": "Amapa", "state_acronym": "AP"},
-    {"state_name": "Amazonas", "state_acronym": "AM"},
-    {"state_name": "Bahia", "state_acronym": "BA"},
-    {"state_name": "Ceara", "state_acronym": "CE"},
-    {"state_name": "Distrito Federal", "state_acronym": "DF"},
-    {"state_name": "Espirito Santo", "state_acronym": "ES"},
-    {"state_name": "Goias", "state_acronym": "GO"},
-    {"state_name": "Maranhao", "state_acronym": "MA"},
-    {"state_name": "Mato Grosso", "state_acronym": "MT"},
-    {"state_name": "Mato Grosso do Sul", "state_acronym": "MS"},
-    {"state_name": "Minas Gerais", "state_acronym": "MG"},
-    {"state_name": "Para", "state_acronym": "PA"},
-    {"state_name": "Paraiba", "state_acronym": "PB"},
-    {"state_name": "Parana", "state_acronym": "PR"},
-    {"state_name": "Pernambuco", "state_acronym": "PE"},
-    {"state_name": "Piaui", "state_acronym": "PI"},
-    {"state_name": "Rio de Janeiro", "state_acronym": "RJ"},
-    {"state_name": "Rio Grande do Norte", "state_acronym": "RN"},
-    {"state_name": "Rio Grande do Sul", "state_acronym": "RS"},
-    {"state_name": "Rondonia", "state_acronym": "RO"},
-    {"state_name": "Roraima", "state_acronym": "RR"},
-    {"state_name": "Santa Catarina", "state_acronym": "SC"},
-    {"state_name": "Sao Paulo", "state_acronym": "SP"},
-    {"state_name": "Sergipe", "state_acronym": "SE"},
-    {"state_name": "Tocantins", "state_acronym": "TO"}
-])
 
 def get_state_id(database: Database, state_acronym: str):
     state_acronym = state_acronym.upper()
@@ -192,6 +158,7 @@ def get_city_id(database: Database, city_name: str, state_id):
         print(f"Error: {e}")
 
 def get_realty_street(database: Database, location):
+    # returns the foreign key for street
     state_id = get_state_id(database, location["state"])
     city_id = get_city_id(database, location["city"], state_id)
     neighborhood_id = get_neighborhood_id(database, location["neighborhood"], city_id)
@@ -199,35 +166,138 @@ def get_realty_street(database: Database, location):
     if street_id:
         return street_id
 
+def get_realty_neighborhood(database: Database, location):
+    # returns the foreign key for neighborhood
+    state_id = get_state_id(database, location["state"])
+    city_id = get_city_id(database, location["city"], state_id)
+    neighborhood_id = get_neighborhood_id(database, location["neighborhood"], city_id)
+    if neighborhood_id:
+        return neighborhood_id
+    
+def get_realty_advertiser(database: Database, advertiser: str):
+    # returns the foreign key for advertiser
+    advertiser = advertiser.upper()
+    try:
+        advertiser_id = database.queryone(
+            "SELECT advertiser_id FROM public.advertisers WHERE advertiser_name = %s", (advertiser,)
+        )
+        if advertiser_id:
+            return advertiser_id[0]
+    except Exception as e:
+        print(f"Error: {e}")
+
+def insert_advertiser(database: Database, advertiser: str):
+    try:
+        if not database.queryone(
+            "SELECT advertiser_id FROM public.advertisers WHERE advertiser_name = %s", (advertiser,)
+        ):
+            database.execute(
+                "INSERT INTO public.advertisers (advertiser_name) values (%s)", (advertiser,)
+            )
+            database.commit()
+            print("New advertiser inserted")
+        else:
+            print("Advertiser already exists")
+    except Exception as e:
+        print(f"Error {e}")
+
+def get_realty_type(database: Database, type: str):
+    # returns the foreign key for advertiser
+    type = type.upper()
+    try:
+        type_id = database.queryone(
+            "SELECT type_id FROM public.types WHERE type_name = %s", (type,)
+        )
+        if type_id:
+            return type_id[0]
+    except Exception as e:
+        print(f"Error: {e}")
+
+def insert_type(database: Database, type: str):
+    try:
+        if not database.queryone(
+            "SELECT type_id FROM public.types WHERE type_name = %s", (type,)
+        ):
+            database.execute(
+                "INSERT INTO public.types (type_name) values (%s)", (type,)
+            )
+            database.commit()
+            print("New type inserted")
+        else:
+            print("Type already exists")
+    except Exception as e:
+        print(f"Error {e}")
+
+def comparison_query(string: str, values: tuple):
+    # String must have 2x more %s's than the number of values.
+    # This function handles the presence of null values, 
+    # adapting it to a select query with comparison in PostgreSQL
+    if string.count("%s") / 2 == len(values):
+        temp = list()
+        for value in values:
+            if value is None:
+                temp.append("IS")
+                temp.append("NULL")
+            else:
+                temp.append("=")
+                temp.append(f"'{value}'")
+        string_values = tuple(temp)
+        return string % string_values
+    else:
+        raise QueryFormatingException("Mismatch between number of values and %s's")
+
 def insert_realties(realties_dict):
     with Database() as database:
         for realty in realties_dict["realties"]:
             realty = dict(realty)
 
-            street = get_realty_street(database, realty["realty_location"])
-            if not street:
-                set_streets_neighborhoods_cities({"addresses": [realty["realty_location"]]})
+            # get neighborhood FK
+            neighborhood = get_realty_neighborhood(database, realty["realty_location"])
+            if not neighborhood:
+                print("Location does not exist")
+                continue
+            else:
+                realty["realty_neighborhood"] = neighborhood
+
+            # get street FK
+            if realty["realty_location"]["street"] is not None:
                 street = get_realty_street(database, realty["realty_location"])
+                if not street:
+                    print("Location does not exist")
+                    continue
+                else:
+                    realty["realty_street"] = street
+            else:
+                realty["realty_street"] = None
+
             del realty["realty_location"]
-            realty["realty_street"] = street
 
-            aux = realty.copy()
-            for key, value in aux.items():
-                if value == None:
-                    del realty[f"{key}"]
-            print(realty)
+            # get type FK    
+            type = get_realty_type(database, realty["realty_type"])
+            if not type:
+                insert_type(database, realty["realty_type"])
+                type = get_realty_type(database, realty["realty_type"])
+            realty["realty_type"] = type
 
-            if not database.queryone('''
-                SELECT realty_id 
-                FROM public.realties 
-                WHERE realty_street = %s 
-                AND realty_number = %s 
-                AND realty_square_footage = %s 
-                AND realty_floor = %s 
-                AND realty_price = %s
-                ''',
-                (realty["realty_street"], realty["realty_number"], realty["realty_square_footage"], realty["realty_floor"], realty["realty_price"])
-            ):
+            # get advertiser FK
+            advertiser = get_realty_advertiser(database, realty["realty_advertiser"])
+            if not advertiser:
+                insert_advertiser(database, realty["realty_advertiser"])
+                advertiser = get_realty_advertiser(database, realty["realty_advertiser"])
+            realty["realty_advertiser"] = advertiser
+
+            if not database.queryone(
+                comparison_query('''
+                    SELECT realty_id 
+                    FROM public.realties 
+                    WHERE realty_street %s %s 
+                    AND realty_number %s %s
+                    AND realty_square_footage %s %s 
+                    AND realty_floor %s %s 
+                    AND realty_price %s %s
+                    ''',
+                    (realty["realty_street"], realty["realty_number"], realty["realty_square_footage"], realty["realty_floor"], realty["realty_price"])
+                )):
                 columns = list(realty.keys())
                 values = list(realty.values())
                 placeholders = ', '.join(['%s'] * len(columns))
@@ -239,6 +309,7 @@ def insert_realties(realties_dict):
                     database.commit()
                     print("Succesfully inserted")
                 except Exception as e:
+                    database.connection.rollback() # allow the function to continue inserting realties
                     print(f"Error inserting realty: {e}")
             else:
                 print("Record already exists")

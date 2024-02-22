@@ -5,4 +5,4 @@ __pycache__/
 .DS_Store
 
 # Ignore files ending with .log
-*.log
+./Log/Log_22022024.txt

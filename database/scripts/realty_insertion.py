@@ -7,7 +7,7 @@ project_root = os.path.dirname(current_directory)
 sys.path.append(project_root)
 
 import json
-from database.db_functions import insert_realties
+from db_functions import insert_realties
 
 REALTIES_JSON_PATH = r"output/realty_data/realties.json"
 

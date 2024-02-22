@@ -1,3 +1,5 @@
+from random import choice
+
 class RealtyConstants:
     DONE = 2
     FLOOR_PLAN = 0
@@ -34,3 +36,14 @@ class ConsoleColors:
     BG_PURPLE = "\033[45m"
     BG_CYAN = "\033[46m"
     BG_WHITE = "\033[47m"
+
+    @staticmethod
+    def random_color():
+        # Get all color attributes from the class
+        colors = [attr for attr in dir(ConsoleColors) if not callable(getattr(ConsoleColors, attr)) and not attr.startswith("__")]
+        # Remove RESET attribute
+        colors.remove("RESET")
+        # Choose a random color from the list
+        random_color = getattr(ConsoleColors, choice(colors))
+        return random_color
+

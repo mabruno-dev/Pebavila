@@ -45,7 +45,6 @@ def scrape_realty(url):
     
     driver.get(url)
 
-    # Sugerir troca de realty_done para realty_status
     try:
         status_span = WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.CLASS_NAME, "main__labels"))
@@ -62,7 +61,6 @@ def scrape_realty(url):
     else:
         status = RC.DONE
 
-    # type é uma palavra reservada
     name = driver.find_element(By.CLASS_NAME,  "info__business-type")
     type = unidecode(name.text.split("para")[0].strip().upper())
 
@@ -94,14 +92,13 @@ def scrape_realty(url):
             print(f"Error scraping location\nurl: {url}")
             return
 
-    # DEFINIR TRATAMENTO DO CASO "Sob consulta"
     price_div = driver.find_element(By.CLASS_NAME, "prices__container")
     try:
         price = float(find_numbers(price_div.text.replace(".", ""))[0])
 
     except:
-        print("Price not informed") # Normalmente sob consulta
-        price = None
+        print("Price not informed, skipping realty") # Normalmente sob consulta
+        return
     try:
         price_ul = price_div.find_element(By.TAG_NAME, "ul")
         price_li_list = price_ul.find_elements(By.TAG_NAME, "li")
@@ -151,13 +148,8 @@ def scrape_realty(url):
         print("Floor not informed")
         floor = None
 
-
-    # Sugerir criação de nova tabela advertiser contendo nome e número do anunciante ou utilizacao do creci 
-    # (acho que com o creci nao precisa de outra tabela e facilita pois deve ser padrao em todos os sites)
     advertiser_div = driver.find_element(By.CLASS_NAME, "advertser-info--wrapper")
     advertiser_name = unidecode(advertiser_div.find_element(By.CLASS_NAME, "advertiser-info__name").text.strip().upper())
-    advertiser_number = advertiser_div.find_element(By.CLASS_NAME, "advertiser-info__offer-codes--advertiser").text.replace("No anunciante:", "").strip() 
-    # Não deve ser "unidecodado" e nem capitalizado pois alguns se diferenciam por letras maiusculas e minusculas
 
     # Descrição deve ser conservada para exibição ao usuário caso necessária
     description = driver.find_element(By.CLASS_NAME, "amenities__description").text.strip()
@@ -167,33 +159,34 @@ def scrape_realty(url):
     else:
         furnished = RC.NOT_FURNISHED
 
+    # Huge gibberish is to ensure that the variables are the right type and not try to cast a null variable
     realty_dict = {
         "realty_location": {
-            "state": state,
-            "city": city,
-            "neighborhood": neighborhood,
-            "street": street
+            "state": str(state) if state else None,
+            "city": str(city) if city else None,
+            "neighborhood": str(neighborhood) if neighborhood else None,
+            "street": str(street) if street else None
         },
-        "realty_number": number,
-        "realty_square_footage": square_footage,
-        "realty_price": price,
-        "realty_description": description,
-        "realty_parking_spaces": parking_spaces,
-        "realty_bathrooms": bathrooms,
-        "realty_bedrooms": bedrooms,
-        "realty_advertiser": advertiser_name,
-        "realty_advertiser_number": advertiser_number,
-        "realty_done": status,
-        "realty_property_tax": property_tax,
-        "realty_furnished": furnished,
-        "realty_condo_price": condo_price,
-        "realty_floor": floor,
-        "realty_type": type,
-        "realty_url": url
+        "realty_number": str(number) if number else None,
+        "realty_square_footage": int(square_footage) if square_footage else None,
+        "realty_price": float(price) if price else None,
+        "realty_description": str(description) if description else None,
+        "realty_parking_spaces": int(parking_spaces) if parking_spaces else None,
+        "realty_bathrooms": int(bathrooms) if bathrooms else None,
+        "realty_bedrooms": int(bedrooms) if bedrooms else None,
+        "realty_advertiser": str(advertiser_name) if advertiser_name else None,
+        "realty_done": int(status) if status else None,
+        "realty_property_tax": float(property_tax) if property_tax else None,
+        "realty_furnished": str(furnished) if furnished else None,
+        "realty_condo_price": float(condo_price) if condo_price else None,
+        "realty_floor": int(floor) if floor else None,
+        "realty_type": str(type) if type else None,
+        "realty_url": str(url) if url else None
     }
 
+
     print(f"{json.dumps(realty_dict, indent=4, ensure_ascii=False)}")
-    print_log(f"Scraped realty: {name}", showCons=False)
+    print_log(f"Scraped realty: {name.text}", showCons=False)
 
     return realty_dict
 
