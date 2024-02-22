@@ -64,7 +64,7 @@ def load_realties(driver: webdriver.Chrome, realty_list_div: WebElement):
             driver.execute_script(f"window.scrollTo(0, {max_y * 0.2});")
         sleep(0.001)
 
-        while pause_loading:
+        while pause_loading and not break_loading:
             sleep(0.3)
 
     break_loading = False
