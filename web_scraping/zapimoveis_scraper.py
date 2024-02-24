@@ -114,7 +114,7 @@ def scrape_url(url: str):
                     try:
                         # Extract the URL of the realty
                         realty_a = realty_div.find_element(By.TAG_NAME, "a")
-                        url = realty_a.get_attribute("href")
+                        realty_url = realty_a.get_attribute("href")
                     except NoSuchElementException:
                         # Handle special case when link is not directly available
                         pause_loading = True
@@ -123,20 +123,20 @@ def scrape_url(url: str):
                         sleep(1.5)
                         duplicate_list_div = driver.find_element(By.CLASS_NAME, "deduplication-listings__listings")
                         duplicate_a_tags = duplicate_list_div.find_elements(By.TAG_NAME, "a")
-                        url = duplicate_a_tags[0].get_attribute("href")
+                        realty_url = duplicate_a_tags[0].get_attribute("href")
                         close_span = driver.find_element(By.CSS_SELECTOR, f'span[aria-label="Fechar modal lateral"]')
                         close_span.click()
                         pause_loading = False
                     finally:
-                        if not db_functions.check_realty_exists_by_url(database, url):
+                        if not db_functions.check_realty_exists_by_url(database, realty_url):
                             print(Console.BOLD_WHITE + f"Scraping realty number {data_position}" + Console.RESET)
                             try:
                                 # Scrape realty info
-                                realty_info = scrape_realty(url)
+                                realty_info = scrape_realty(realty_url)
                             except Exception as e:
                                 # Handle scraping errors
                                 realty_info = None
-                                print(Console.RED + f"Error at webpage: {url}" + Console.RESET)
+                                print(Console.RED + f"Error at webpage: {realty_url}" + Console.RESET)
                                 traceback.print_exc()
                             if realty_info != None:
                                 db_functions.insert_realty(database, realty_info)
