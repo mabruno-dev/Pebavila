@@ -37,7 +37,7 @@ def announce(func):
         output = captured_output.getvalue()
 
         if output:
-            print(Console.BLACK + f"From {func.__name__}: " + Console.RESET + output)
+            print(Console.BLACK + f"From {func.__name__}: " + Console.RESET + output, end="", flush=True)
 
         return result
     return wrapper

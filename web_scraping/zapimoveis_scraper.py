@@ -86,7 +86,9 @@ def scrape_url(url: str):
                 fix_hairline=True,
             )
             
-            driver.get(url + f"{current_page}")
+            page_url = url + f"{current_page}"
+            driver.get(page_url)
+            print(f"Scraping url: {page_url}")
             wait = WebDriverWait(driver, 10)
 
             try:
