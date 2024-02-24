@@ -1,49 +1,38 @@
-import os
-import sys
+import os, sys
+project_name = "the-beginning"; sys.path.append(os.path.abspath(__file__)[:os.path.abspath(__file__).find(project_name) + len(project_name)] if project_name in os.path.abspath(__file__) else os.path.abspath(__file__))
+# Resolve module imports
 
-current_file = os.path.abspath(__file__)
-current_directory = os.path.dirname(current_file)
-project_root = os.path.dirname(current_directory)
-sys.path.append(project_root)
-
-import json
 import threading
-from time import time, sleep
 import traceback
-import signal
+from time import sleep
 
 from selenium import webdriver
-from selenium.common.exceptions import NoSuchElementException
-from selenium.webdriver.common.by import By
-from selenium.webdriver.remote.webelement import WebElement
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.ui import WebDriverWait
 from selenium_stealth import stealth
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.remote.webelement import WebElement
+from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver.support import expected_conditions as EC
 
-from realty_scraper import scrape_realty
-from utils.constants import ConsoleColors as console
 from utils.functions import *
+from utils.wrappers import timed
+from realty_scraper import scrape_realty
+from database.connection import Database
+from database import functions as db_functions
+from utils.constants import ConsoleColors as Console
 
 REALTY_DIV_SIZE = 300
 REALTIES_PER_PAGE = 100
-OUTPUT_PATH = r"output/"
-REALTIES_JSON = OUTPUT_PATH + r"realty_data/realties.json"
-SCRAPED_REALTY_URLS_JSON = OUTPUT_PATH + r"scraped_urls/scraped_realty_urls.json"
-SCRAPED_STREET_URLS_JSON = OUTPUT_PATH + r"scraped_urls/scraped_street_urls.json"
-STREET_URLS_JSON = OUTPUT_PATH + r"location_data/street_urls.json"
 
 pause_loading = False
 scraped_realties = 0
 total_realties = 1
-all_realties = list()
 
 pause_loading = False
 break_loading = False
 
-# Signal handling function for termination signals (such as SIGINT, SIGTERM)
-def signal_handler(sig, frame):
-    print("Termination signal detected:", sig)
-    store_realties()
+database = Database()
+if not hasattr(database, "connection"):
     sys.exit(0)
 
 def load_realties(driver: webdriver.Chrome, realty_list_div: WebElement):
@@ -69,89 +58,21 @@ def load_realties(driver: webdriver.Chrome, realty_list_div: WebElement):
 
     break_loading = False
 
-def load_stored_realties():
-    global all_realties
-    try:
-        with open(REALTIES_JSON, "r") as json_file:
-            all_realties = json.load(json_file)["realties"]
-    except:
-        print("No realties stored")
-
-def store_realties():
-    global all_realties
-    print("Saving realties...", end=" ")
-    create_dirs(REALTIES_JSON)
-    with open(REALTIES_JSON, "w") as json_file:
-        json.dump({f"realties": all_realties}, json_file, indent=4, ensure_ascii=False)
-    print(console.GREEN + "Done" + console.RESET)
-    print_log(f"json saved with {len(all_realties)} realties")
-
-def get_scraped_realty_urls():
-    try:
-        with open(SCRAPED_REALTY_URLS_JSON) as json_file:
-            url_dict = json.load(json_file)
-        return url_dict["urls"]
-    except:
-        print(f"File not found: {SCRAPED_REALTY_URLS_JSON}")
-        return []
-
-def append_to_scraped_streets(url):
-    print("Saving scraped street urls...", end=" ")
-    create_dirs(SCRAPED_STREET_URLS_JSON)
-    url_list: list = list()
-    try:
-        with open(SCRAPED_STREET_URLS_JSON, "r") as json_file:
-            url_list = json.load(json_file)["scraped_street_urls"]
-            if url not in url_list:
-                url_list.append(url)
-    except:
-        pass
-    with open(SCRAPED_STREET_URLS_JSON, "w") as json_file:
-        json.dump({"scraped_street_urls": url_list}, json_file, indent=4, ensure_ascii=False)
-    print(console.GREEN + "Done" + console.RESET)
-    print_log(f"json saved with {len(url_list)} urls")
-
-def get_scraped_street_urls():
-    try:
-        with open(SCRAPED_STREET_URLS_JSON, "r") as json_file:
-            return json.load(json_file)["scraped_street_urls"]
-    except:
-        print(f"File not found: {SCRAPED_STREET_URLS_JSON}")
-        return []
-
-def get_street_urls():
-    try:
-        with open(STREET_URLS_JSON, "r") as json_file:
-            return json.load(json_file)["street_urls"]
-    except:
-        print(f"File not found: {STREET_URLS_JSON}")
-        return []
-    
-def get_stored_realty_urls():
-    try:
-        url_list = list()
-        with open(REALTIES_JSON, "r") as json_file:
-            temp = json.load(json_file)["realties"]
-            for item in temp:
-                url_list.append(item["realty_url"])
-            return url_list
-    except:
-        print("No realty urls stored")
-        return []
-
+@timed
 def scrape_url(url: str):
     url = url[:-1] # Remove the page index
+    
+    global database
 
     global scraped_realties
     global total_realties
     global pause_loading
     global break_loading
-    global all_realties
-    stored_urls = get_stored_realty_urls()
+    
     current_page = 1
     while scraped_realties < total_realties:
         try:
-            print(console.BLUE + f"PAGE {current_page}" + console.RESET)
+            print(Console.BLUE + f"PAGE {current_page}" + Console.RESET)
 
             driver = webdriver.Chrome()
 
@@ -203,31 +124,25 @@ def scrape_url(url: str):
                         close_span.click()
                         pause_loading = False
                     finally:
-                        if url not in stored_urls:
-                            print(f"Scraping realty number {data_position}")
+                        if not db_functions.check_realty_exists_by_url(database, url):
+                            print(Console.BOLD_WHITE + f"Scraping realty number {data_position}" + Console.RESET)
                             try:
                                 # Scrape realty info
-                                start_time = time()
                                 realty_info = scrape_realty(url)
-                                execution_time = time() - start_time
-                                print(f"Realty scraped in {format_time(execution_time)}")
                             except Exception as e:
                                 # Handle scraping errors
                                 realty_info = None
-                                print(console.RED + f"Error at webpage: {url}" + console.RESET)
+                                print(Console.RED + f"Error at webpage: {url}" + Console.RESET)
                                 traceback.print_exc()
-                                store_realties()
                             if realty_info != None:
-                                all_realties.append(realty_info)
+                                db_functions.insert_realty(database, realty_info)
                         else:
                             print(f"Skipped realty number {data_position} (already scraped)")
                         data_position += 1
                         scraped_realties += 1
                 except NoSuchElementException:
                     print("Loading...", end="\r")
-                    pass
                 except Exception as e:
-                    pass
                     print(f"Error: {e}")
 
             break_loading = True
@@ -238,43 +153,33 @@ def scrape_url(url: str):
                 print("Reached page limit")
                 break
         except Exception as e:
-            print(f"ERROR: {e}")
-            store_realties()
+            print(f"Error: {e}")
             break
 
-    store_realties()
-
-def __main__():
-
-    signal.signal(signal.SIGINT, signal_handler)  # Ctrl+C
-    signal.signal(signal.SIGTERM, signal_handler)  # Termination command
-
-    start_time = time()
+def reset_control_variables():
 
     global pause_loading
     global scraped_realties
     global total_realties
 
-    load_stored_realties() # Loads the stored realties to the global variable all_realties
+    pause_loading = False
+    scraped_realties = 0
+    total_realties = 1
 
-    street_urls = get_street_urls()
+@timed
+def __main__():
 
-    for street in street_urls:
-        if street["url"] != None:
-            print(f"Scraping realties from: {street['street']}")
+    global database
 
-            # Reset global variables
-            pause_loading = False
-            scraped_realties = 0
-            total_realties = 1
+    address_url_list = db_functions.Zapimoveis.get_address_urls(database)
 
-            scrape_url(street["url"])
-            append_to_scraped_streets(street["url"])
+    for address_url in address_url_list:
+        if address_url["url"] != None:
+            print(f"Scraping realties from: {address_url['address']}")
+            reset_control_variables()
+            scrape_url(address_url["url"])
+            db_functions.Zapimoveis.mark_address_url_as_scraped(database, address_url)
 
-    store_realties() # Stores the list in a json file
-
-    execution_time = time() - start_time
-    print(f"Total execution done in {format_time(execution_time)}")
     print("Remeber to turn your sleep timer back on")
 
 

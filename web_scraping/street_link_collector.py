@@ -1,46 +1,35 @@
-import os
-import sys
-
-current_file = os.path.abspath(__file__)
-current_directory = os.path.dirname(current_file)
-project_root = os.path.dirname(current_directory)
-sys.path.append(project_root)
+import os, sys
+project_name = "the-beginning"; sys.path.append(os.path.abspath(__file__)[:os.path.abspath(__file__).find(project_name) + len(project_name)] if project_name in os.path.abspath(__file__) else os.path.abspath(__file__))
+# Resolve module imports
 
 from selenium import webdriver
+from selenium_stealth import stealth
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support.ui import WebDriverWait as Wait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium_stealth import stealth
-from selenium.webdriver.common.keys import Keys
 
 from time import sleep
-import json
-import signal
-import atexit
 
+from utils.wrappers import timed
+from database.connection import Database
+from database import functions as db_functions
 from utils.constants import ConsoleColors as Console
-from utils.functions import create_dirs
 
-OUTPUT_PATH = r"output/location_data"
-OUTPUT_FILE_PATH = OUTPUT_PATH + r"/street_urls.json"
-LOCATIONS_FILE_PATH = OUTPUT_PATH + r"/locations.json"
-
-street_urls = list()
-stored_url_addresses = list()
-
-def wait(driver, sec):
-    return WebDriverWait(driver, sec)
+database = Database()
+if not hasattr(database, "connection"):
+    sys.exit()
 
 def get_street_url(driver: webdriver.Chrome, location: dict):
-    global stored_url_addresses
+
+    global database
     
     address = f"{location['street']}, {location['city']} - {location['state']}"
 
-    if address not in stored_url_addresses:
-        print(f"Getting url from address: {address}")
+    if not db_functions.Zapimoveis.check_address_url_exists(database, {"address": address, "url": None}):
+        print(Console.BOLD_WHITE + f"Getting url from address: {address}" + Console.RESET)
 
-        text_input = wait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'input[placeholder="Digite o nome da rua, bairro ou cidade"]')))
+        text_input = Wait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'input[placeholder="Digite o nome da rua, bairro ou cidade"]')))
 
         text_input.click()
         while True:
@@ -51,18 +40,17 @@ def get_street_url(driver: webdriver.Chrome, location: dict):
                 break
             except Exception as e:
                 print(f"Error: {e}\nTrying again...")
-                append_urls_to_json(street_urls)
 
         while True:
             try:
-                location_div = wait(driver, 1).until(EC.presence_of_element_located((By.CSS_SELECTOR, '[data-cy="locations-item-input"]')))
+                location_div = Wait(driver, 1).until(EC.presence_of_element_located((By.CSS_SELECTOR, '[data-cy="locations-item-input"]')))
                 break
             except:
                 try:
                     driver.find_element(By.CLASS_NAME, "locations-feedback") # Tries to find the "not found" element
                     print(Console.RED + "Invalid address" + Console.RESET)
                     return {
-                        "street": address,
+                        "address": address,
                         "url": None
                     }
                 except:
@@ -78,44 +66,16 @@ def get_street_url(driver: webdriver.Chrome, location: dict):
         location_div.click()
         
         return {
-            "street": address,
+            "address": address,
             "url": street_url
         }
     else:
         print(Console.BLUE + "Skipped " + Console.RESET + f"{address}")
 
-def append_urls_to_json():
-    global street_urls
-    print("Storing urls...", end=" ")
-    create_dirs(OUTPUT_FILE_PATH)
-    with open(OUTPUT_FILE_PATH, "w") as json_file:
-        json.dump({"street_urls": street_urls}, json_file, indent=4, ensure_ascii=False)
-    print(Console.GREEN + "Done" + Console.RESET)
-
-def get_stored_address_urls():
-    try:
-        stored_url_addresses: list = list()
-        with open(OUTPUT_FILE_PATH, "r") as json_file:
-            temp = json.load(json_file)["street_urls"]
-            for item in temp:
-                stored_url_addresses.append(item["street"])
-            return stored_url_addresses
-    except:
-        print("No urls stored")
-        return []
-
-# Signal handling function for termination signals (such as SIGINT, SIGTERM)
-def signal_handler(sig, frame):
-    print("\nTerminating")
-    append_urls_to_json()
-    sys.exit(0)
-
+@timed
 def __main__():
 
-    signal.signal(signal.SIGINT, signal_handler)  # Ctrl+C
-
-    global street_urls
-    global stored_url_addresses
+    global database
 
     driver = webdriver.Chrome()
 
@@ -130,16 +90,12 @@ def __main__():
 
     driver.get("https://www.zapimoveis.com.br/venda/?itl_id=1000063&itl_name=zap_-_link-header_comprar_to_zap_resultado-pesquisa")
 
-    with open(LOCATIONS_FILE_PATH, "r") as json_file:
-        locations = json.load(json_file)["locations"]
-    
-    stored_url_addresses = get_stored_address_urls()
-    for location in locations:
-        url = get_street_url(driver, location)
-        if url:
-            street_urls.append(url)
+    locations = db_functions.get_locations_from_city(database, "NITEROI", "RJ")
 
-    append_urls_to_json()
+    for location in locations:
+        address_url = get_street_url(driver, location)
+        if address_url:
+            db_functions.Zapimoveis.insert_address_url(database, address_url)
 
     driver.quit()
 

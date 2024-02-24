@@ -1,13 +1,9 @@
-import os
-import sys
-
-current_file = os.path.abspath(__file__)
-current_directory = os.path.dirname(current_file)
-project_root = os.path.dirname(current_directory)
-sys.path.append(project_root)
+import os, sys
+project_name = "the-beginning"; sys.path.append(os.path.abspath(__file__)[:os.path.abspath(__file__).find(project_name) + len(project_name)] if project_name in os.path.abspath(__file__) else os.path.abspath(__file__))
+# Resolve module imports
 
 import json
-from db_functions import insert_realties
+from database.functions import insert_realties
 
 REALTIES_JSON_PATH = r"output/realty_data/realties.json"
 

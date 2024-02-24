@@ -1,7 +1,6 @@
 import psycopg2 as postgre
 from psycopg2.extras import DictCursor
 
-
 class Database():
 
     def __init__(self) -> None:
@@ -15,7 +14,7 @@ class Database():
             """)
             self.cursor = self.connection.cursor(cursor_factory=DictCursor)
         except Exception as E:
-            print(f'Erro: {E}')
+            print(f'Error: {E}')
 
     def __enter__(self):
         return self

@@ -1,14 +1,9 @@
-import os
-import sys
-
-current_file = os.path.abspath(__file__)
-current_directory = os.path.dirname(current_file)
-project_root = os.path.dirname(current_directory)
-sys.path.append(project_root)
+import os, sys
+project_name = "the-beginning"; sys.path.append(os.path.abspath(__file__)[:os.path.abspath(__file__).find(project_name) + len(project_name)] if project_name in os.path.abspath(__file__) else os.path.abspath(__file__))
+# Resolve module imports
 
 import json
 from re import findall
-from time import sleep
 
 from unidecode import unidecode
 from selenium import webdriver
@@ -19,6 +14,7 @@ from selenium_stealth import stealth
 
 from utils.constants import RealtyConstants as RC
 from utils.functions import print_log
+from utils.wrappers import timed
 
 def find_numbers(s: str):
     result = findall(r"\d+\.*\d*", s)
@@ -30,6 +26,7 @@ def find_numbers(s: str):
 def is_number(s: str):
     return s.isdigit()
 
+@timed
 def scrape_realty(url):
 
     driver = webdriver.Chrome()
@@ -71,23 +68,23 @@ def scrape_realty(url):
         location_list[index] = item.strip()
     match(len(location_list)):
         case 5:
-            street = location_list[0]
-            number = location_list[1]
-            neighborhood = location_list[2]
-            city = location_list[3]
-            state = location_list[4]
+            street = unidecode(location_list[0].upper())
+            number = unidecode(location_list[1].upper())
+            neighborhood = unidecode(location_list[2].upper())
+            city = unidecode(location_list[3].upper())
+            state = unidecode(location_list[4].upper())
         case 4:
-            street = None
-            number = location_list[0]
-            neighborhood = location_list[1]
-            city = location_list[2]
-            state = location_list[3]
+            street = unidecode(location_list[0].upper())
+            number = None
+            neighborhood = unidecode(location_list[1].upper())
+            city = unidecode(location_list[2].upper())
+            state = unidecode(location_list[3].upper())
         case 3:
             street = None
             number = None
-            neighborhood = location_list[0]
-            city = location_list[1]
-            state = location_list[2]
+            neighborhood = unidecode(location_list[0].upper())
+            city = unidecode(location_list[1].upper())
+            state = unidecode(location_list[2].upper())
         case _:
             print(f"Error scraping location\nurl: {url}")
             return
@@ -184,13 +181,11 @@ def scrape_realty(url):
         "realty_url": str(url) if url else None
     }
 
-
-    print(f"{json.dumps(realty_dict, indent=4, ensure_ascii=False)}")
-    print_log(f"Scraped realty: {name.text}", showCons=False)
+    print(json.dumps(realty_dict, indent=4, ensure_ascii=False))
 
     return realty_dict
 
-
+# Main function for testing purposes
 def __main__():
     print(scrape_realty("https://www.zapimoveis.com.br/imovel/venda-terreno-lote-condominio-itaipu-niteroi-rj-1400m2-id-2665924421/?"))
 

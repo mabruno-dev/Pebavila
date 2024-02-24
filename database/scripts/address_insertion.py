@@ -1,12 +1,8 @@
-import os
-import sys
+import os, sys
+project_name = "the-beginning"; sys.path.append(os.path.abspath(__file__)[:os.path.abspath(__file__).find(project_name) + len(project_name)] if project_name in os.path.abspath(__file__) else os.path.abspath(__file__))
+# Resolve module imports
 
-current_file = os.path.abspath(__file__)
-current_directory = os.path.dirname(current_file)
-project_root = os.path.dirname(current_directory)
-sys.path.append(project_root)
-
-from database.db_functions import set_streets_neighborhoods_cities
+from database.functions import set_streets_neighborhoods_cities
 import json
 
 def __main__():
