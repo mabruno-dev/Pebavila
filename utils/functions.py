@@ -4,7 +4,6 @@ project_name = "the-beginning"; sys.path.append(os.path.abspath(__file__)[:os.pa
 
 import os
 from datetime import datetime
-from time import time
 
 from utils.constants import ConsoleColors as Console
 
@@ -39,10 +38,10 @@ def print_log(text: str, showDt: bool = False, onConsole: bool = True):
     create_dirs(LOG_FILE_PATH)
 
     with open(LOG_FILE_PATH, 'a') as file:
-        file.write(f'{text}{f"\nDate: {formatted_date}" if showDt else ""}\n\n')
+        new_line = "\n"
+        file.write(f'{text}{f"{new_line}Date: {formatted_date}" if showDt else ""}{new_line * 2}')
         if onConsole:
-            print((f'{text}{f"\nDate: {formatted_date}" if showDt else ""}\n'))
+            print((f'{text}{f"{new_line}Date: {formatted_date}" if showDt else ""}'))
 
 def print_error(error):
     print(Console.RED + "Error: " + Console.RESET + f"{error}")
-

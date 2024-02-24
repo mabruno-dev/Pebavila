@@ -21,7 +21,7 @@ from database.connection import Database
 from database import functions as db_functions
 from utils.constants import ConsoleColors as Console
 
-REALTY_DIV_SIZE = 300
+realty_div_size = 300 # Usually 300 but may vary
 REALTIES_PER_PAGE = 100
 
 pause_loading = False
@@ -36,6 +36,7 @@ if not hasattr(database, "connection"):
     sys.exit(0)
 
 def load_realties(driver: webdriver.Chrome, realty_list_div: WebElement):
+    global realty_div_size
     global pause_loading
     global break_loading
     global total_realties
@@ -47,7 +48,7 @@ def load_realties(driver: webdriver.Chrome, realty_list_div: WebElement):
         driver.execute_script(f"window.scrollBy(0, {STEP});")
 
         # Reset scrolling if needed
-        max_y = loaded_realties * REALTY_DIV_SIZE
+        max_y = loaded_realties * realty_div_size
         current_scroll_y = driver.execute_script("return window.scrollY;")
         if current_scroll_y >= max_y:
             driver.execute_script(f"window.scrollTo(0, {max_y * 0.2});")
@@ -63,7 +64,7 @@ def scrape_url(url: str):
     url = url[:-1] # Remove the page index
     
     global database
-
+    global realty_div_size
     global scraped_realties
     global total_realties
     global pause_loading
@@ -107,6 +108,7 @@ def scrape_url(url: str):
 
                 try:
                     realty_div = driver.find_element(By.CSS_SELECTOR, f'div[data-position="{data_position}"]')
+                    realty_div_size = realty_div.size["height"]
                     try:
                         # Extract the URL of the realty
                         realty_a = realty_div.find_element(By.TAG_NAME, "a")
@@ -175,10 +177,13 @@ def __main__():
 
     for address_url in address_url_list:
         if address_url["url"] != None:
-            print(f"Scraping realties from: {address_url['address']}")
-            reset_control_variables()
-            scrape_url(address_url["url"])
-            db_functions.Zapimoveis.mark_address_url_as_scraped(database, address_url)
+            if not db_functions.Zapimoveis.check_address_url_is_scraped(database, address_url["address"]):
+                print(f"Scraping realties from: {address_url['address']}")
+                reset_control_variables()
+                scrape_url(address_url["url"])
+                db_functions.Zapimoveis.mark_address_url_as_scraped(database, address_url)
+            else:
+                print(f"Skipped address: {address_url['address']} (already_scraped)")
 
     print("Remeber to turn your sleep timer back on")
 
