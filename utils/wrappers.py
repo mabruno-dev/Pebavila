@@ -23,6 +23,7 @@ from functools import wraps
 from io import StringIO
 import sys
 
+# WARNING: this breaks print statements from running threads
 def announce(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
@@ -38,6 +39,21 @@ def announce(func):
 
         if output:
             print(Console.BLACK + f"From {func.__name__}: " + Console.RESET + output, end="", flush=True)
+
+        return result
+    return wrapper
+
+def mute(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+
+        captured_output = StringIO()
+        old_stdout = sys.stdout
+        sys.stdout = captured_output
+
+        result = func(*args, **kwargs)
+
+        sys.stdout = old_stdout
 
         return result
     return wrapper

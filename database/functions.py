@@ -327,13 +327,14 @@ def check_realty_exists(database: Database, realty: dict):
             comparison_query('''
                 SELECT realty_id 
                 FROM public.realties 
-                WHERE realty_street %s %s 
+                WHERE realty_neighborhood %s %s
+                AND realty_street %s %s
                 AND realty_number %s %s
                 AND realty_square_footage %s %s 
                 AND realty_floor %s %s 
                 AND realty_price %s %s
                 ''',
-                (realty["realty_street"], realty["realty_number"], realty["realty_square_footage"], realty["realty_floor"], realty["realty_price"])
+                (realty["realty_neighborhood"], realty["realty_street"], realty["realty_number"], realty["realty_square_footage"], realty["realty_floor"], realty["realty_price"])
             )
         )
     except Exception as e:

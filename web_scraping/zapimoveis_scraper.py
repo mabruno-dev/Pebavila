@@ -15,7 +15,7 @@ from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.support import expected_conditions as EC
 
 from utils.functions import *
-from utils.wrappers import timed
+from utils.wrappers import timed, mute
 from realty_scraper import scrape_realty
 from database.connection import Database
 from database import functions as db_functions
@@ -31,9 +31,7 @@ total_realties = 1
 pause_loading = False
 break_loading = False
 
-database = Database()
-if not hasattr(database, "connection"):
-    sys.exit(0)
+database = Database(ensure_connection=True, persistent=True)
 
 def load_realties(driver: webdriver.Chrome, realty_list_div: WebElement):
     global realty_div_size
@@ -88,7 +86,6 @@ def scrape_url(url: str):
             
             page_url = url + f"{current_page}"
             driver.get(page_url)
-            print(f"Scraping url: {page_url}")
             wait = WebDriverWait(driver, 10)
 
             try:

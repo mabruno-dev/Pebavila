@@ -16,9 +16,7 @@ from database.connection import Database
 from database import functions as db_functions
 from utils.constants import ConsoleColors as Console
 
-database = Database()
-if not hasattr(database, "connection"):
-    sys.exit()
+database = Database(ensure_connection=True, persistent=True)
 
 def get_street_url(driver: webdriver.Chrome, location: dict):
 
