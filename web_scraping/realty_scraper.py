@@ -189,7 +189,7 @@ def scrape_realty(url):
 
 # Main function for testing purposes
 def __main__():
-    scrape_realty("https://www.zapimoveis.com.br/imovel/venda-apartamento-3-quartos-com-ar-condicionado-inga-niteroi-rj-120m2-id-2562152997/")
+    scrape_realty("https://www.zapimoveis.com.br/lancamento/venda-apartamento-2-quartos-sao-lourenco-niteroi-rj-279m2-id-2646116981/")
 
 if __name__ == "__main__":
     __main__()

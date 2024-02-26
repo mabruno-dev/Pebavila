@@ -11,7 +11,8 @@ database = Database(ensure_connection=True, persistent=True)
 def __main__():
     realty_urls = get_realty_urls(database)
     for url in realty_urls:
-        
+        realty = scrape_realty(url)
+        update_realty_by_url(database, realty)        
 
 if __name__ == "__main__":
     __main__()
