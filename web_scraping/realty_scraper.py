@@ -4,6 +4,7 @@ project_name = "the-beginning"; sys.path.append(os.path.abspath(__file__)[:os.pa
 
 import json
 from re import findall
+import traceback
 
 from unidecode import unidecode
 from selenium import webdriver
@@ -91,56 +92,57 @@ def scrape_realty(url):
 
     price_div = driver.find_element(By.CLASS_NAME, "prices__container")
     try:
-        price = float(find_numbers(price_div.text.replace(".", ""))[0])
+        price = find_numbers(price_div.text.replace(".", ""))[0]
 
     except:
         print("Price not informed, skipping realty") # Normalmente sob consulta
         return
     try:
-        price_ul = price_div.find_element(By.TAG_NAME, "ul")
+        price_ul = price_div.find_element(By.CLASS_NAME, "subinfo")
         price_li_list = price_ul.find_elements(By.TAG_NAME, "li")
+        condo_price = None
+        property_tax = None
         for price_li in price_li_list:
-
             if "condomínio" in price_li.text:
-                condo_price = float(find_numbers(price_li.text)[0])
-            else:
-                print("Condo price not informed")
-                condo_price = None
+                condo_price = find_numbers(price_li.text.replace(".", ""))[0]
 
             if "IPTU" in price_li.text:
-                property_tax = float(find_numbers(price_li.text)[0])
-            else:
-                print("Taxes not informed")
-                property_tax = None
+                property_tax = find_numbers(price_li.text.replace(".", ""))[0]
+
+        if not condo_price:
+            print("Condo price not informed")
+        if not property_tax:
+            print("Property tax not informed")
     except:
         print("Condo price and taxes not informed")
         condo_price = None
         property_tax = None
+    
 
     # Coleta os valores mais baixos
     features_ul = driver.find_element(By.CLASS_NAME, "info__base-amenities")
     try:
-        square_footage = int(find_numbers(features_ul.find_element(By.CSS_SELECTOR, 'span[itemprop="floorSize"]').text)[0])
+        square_footage = find_numbers(features_ul.find_element(By.CSS_SELECTOR, 'span[itemprop="floorSize"]').text)[0]
     except:
         print("Square footage not informed")
         square_footage = None
     try:
-        bedrooms = int(find_numbers(features_ul.find_element(By.CSS_SELECTOR, 'span[itemprop="numberOfRooms"]').text)[0])
+        bedrooms = find_numbers(features_ul.find_element(By.CSS_SELECTOR, 'span[itemprop="numberOfRooms"]').text)[0]
     except:
         print("Number of bedrooms not informed")
         bedrooms = None
     try:
-        parking_spaces = int(find_numbers(features_ul.find_element(By.CLASS_NAME, "js-parking-spaces").text)[0])
+        parking_spaces = find_numbers(features_ul.find_element(By.CLASS_NAME, "js-parking-spaces").text)[0]
     except:
         print("Number of parking spaces not informed")
         parking_spaces = None
     try:
-        bathrooms = int(find_numbers(features_ul.find_element(By.CSS_SELECTOR, 'span[itemprop="numberOfBathroomsTotal"]').text)[0])
+        bathrooms = find_numbers(features_ul.find_element(By.CSS_SELECTOR, 'span[itemprop="numberOfBathroomsTotal"]').text)[0]
     except:
         print("Number of bathrooms not informed")
         bathrooms = None
     try:
-        floor = int(find_numbers(features_ul.find_element(By.CSS_SELECTOR, 'span[itemprop="floorLevel"]').text)[0])
+        floor = find_numbers(features_ul.find_element(By.CSS_SELECTOR, 'span[itemprop="floorLevel"]').text)[0]
     except:
         print("Floor not informed")
         floor = None
@@ -167,15 +169,15 @@ def scrape_realty(url):
         "realty_number": str(number) if number else None,
         "realty_square_footage": int(square_footage) if square_footage else None,
         "realty_price": float(price) if price else None,
+        "realty_property_tax": float(property_tax) if property_tax else None,
+        "realty_condo_price": float(condo_price) if condo_price else None,
         "realty_description": str(description) if description else None,
         "realty_parking_spaces": int(parking_spaces) if parking_spaces else None,
         "realty_bathrooms": int(bathrooms) if bathrooms else None,
         "realty_bedrooms": int(bedrooms) if bedrooms else None,
         "realty_advertiser": str(advertiser_name) if advertiser_name else None,
         "realty_done": int(status) if status else None,
-        "realty_property_tax": float(property_tax) if property_tax else None,
         "realty_furnished": str(furnished) if furnished else None,
-        "realty_condo_price": float(condo_price) if condo_price else None,
         "realty_floor": int(floor) if floor else None,
         "realty_type": str(type) if type else None,
         "realty_url": str(url) if url else None
@@ -187,7 +189,7 @@ def scrape_realty(url):
 
 # Main function for testing purposes
 def __main__():
-    print(scrape_realty("https://www.zapimoveis.com.br/imovel/venda-terreno-lote-condominio-itaipu-niteroi-rj-1400m2-id-2665924421/?"))
+    scrape_realty("https://www.zapimoveis.com.br/imovel/venda-apartamento-3-quartos-com-ar-condicionado-inga-niteroi-rj-120m2-id-2562152997/")
 
 if __name__ == "__main__":
     __main__()
