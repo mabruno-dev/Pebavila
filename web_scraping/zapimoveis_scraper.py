@@ -2,6 +2,7 @@ import os, sys
 project_name = "the-beginning"; sys.path.append(os.path.abspath(__file__)[:os.path.abspath(__file__).find(project_name) + len(project_name)] if project_name in os.path.abspath(__file__) else os.path.abspath(__file__))
 # Resolve module imports
 
+import random
 import threading
 import traceback
 from time import sleep
@@ -24,7 +25,6 @@ from utils.constants import ConsoleColors as Console
 realty_div_size = 300 # Usually 300 but may vary
 REALTIES_PER_PAGE = 100
 
-pause_loading = False
 scraped_realties = 0
 total_realties = 1
 
@@ -46,7 +46,7 @@ def load_realties(driver: webdriver.Chrome, realty_list_div: WebElement):
         driver.execute_script(f"window.scrollBy(0, {STEP});")
 
         # Reset scrolling if needed
-        max_y = loaded_realties * realty_div_size
+        max_y = loaded_realties * realty_div_size * 1.2
         current_scroll_y = driver.execute_script("return window.scrollY;")
         if current_scroll_y >= max_y:
             driver.execute_script(f"window.scrollTo(0, {max_y * 0.2});")
@@ -142,7 +142,8 @@ def scrape_url(url: str):
                         data_position += 1
                         scraped_realties += 1
                 except NoSuchElementException:
-                    print("Loading...", end="\r")
+                    pause_loading = False
+                    print(f"Loading...", end="\r")
                 except Exception as e:
                     print(f"Error: {e}")
 
@@ -173,6 +174,7 @@ def __main__():
     global database
 
     address_url_list = db_functions.Zapimoveis.get_address_urls(database)
+    random.shuffle(address_url_list) # This is done so that multiple instances of the scraper have less chance of scraping the same url at the same time
 
     for address_url in address_url_list:
         if address_url["url"] != None:
