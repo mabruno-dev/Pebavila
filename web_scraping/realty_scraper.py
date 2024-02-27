@@ -158,29 +158,31 @@ def scrape_realty(url):
     else:
         furnished = RC.NOT_FURNISHED
 
+    print(furnished)
+
     # Huge gibberish is to ensure that the variables are the right type and not try to cast a null variable
     realty_dict = {
         "realty_location": {
-            "state": str(state) if state else None,
-            "city": str(city) if city else None,
-            "neighborhood": str(neighborhood) if neighborhood else None,
+            "state": str(state),
+            "city": str(city),
+            "neighborhood": str(neighborhood),
             "street": str(street) if street else None
         },
         "realty_number": str(number) if number else None,
         "realty_square_footage": int(square_footage) if square_footage else None,
-        "realty_price": float(price) if price else None,
+        "realty_price": float(price),
         "realty_property_tax": float(property_tax) if property_tax else None,
         "realty_condo_price": float(condo_price) if condo_price else None,
-        "realty_description": str(description) if description else None,
+        "realty_description": str(description),
         "realty_parking_spaces": int(parking_spaces) if parking_spaces else None,
         "realty_bathrooms": int(bathrooms) if bathrooms else None,
         "realty_bedrooms": int(bedrooms) if bedrooms else None,
         "realty_advertiser": str(advertiser_name) if advertiser_name else None,
-        "realty_done": int(status) if status else None,
-        "realty_furnished": str(furnished) if furnished else None,
+        "realty_status": int(status),
+        "realty_furnished": bool(furnished),
         "realty_floor": int(floor) if floor else None,
-        "realty_type": str(type) if type else None,
-        "realty_url": str(url) if url else None
+        "realty_type": str(type),
+        "realty_url": str(url)
     }
 
     print(json.dumps(realty_dict, indent=4, ensure_ascii=False))

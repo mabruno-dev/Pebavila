@@ -362,42 +362,42 @@ def insert_realty(database: Database, realty: dict):
         database.connection.rollback() # Allow the connection to continue operating
         print(f"Error: {e}")
 
-@announce
-def update_realty_by_url(database: Database, realty: dict):
-    try:
-        realty = normalize_realty_dict(database, realty)
-        result = database.queryone(
-            "SELECT realty_id, up_to_date FROM public.realties WHERE realty_url = %s",
-            (realty["realty_url"],)
-        )
-        print(result)
-        realty_id = result[0]
-        up_to_date = result[1]
-        if realty_id: 
-            if not up_to_date:
-                assignments = list()
-                for key, value in realty.items():
-                    if value == None:
-                        assignments.append(f"{key} = NULL")
-                    elif isinstance(value, str):
-                        temp = value.replace("'", "''")
-                        assignments.append(f"{key} = '{temp}'")
-                    else:
-                        assignments.append(f"{key} = {value}")
-                updates = ", ".join(assignments)
-                database.execute(
-                    f"UPDATE public.realties SET {updates}, up_to_date = 1, updated_at = %s WHERE realty_id = %s",
-                    (datetime.now(), realty_id)
-                )
-                database.commit()
-                print("Record successfuly updated")
-            else:
-                print("Record is up to date")
-        else:
-            print("Record not found")
-    except Exception as e:
-        database.connection.rollback()
-        print(f"Error: {e}")
+# @announce
+# def update_realty_by_url(database: Database, realty: dict):
+#     try:
+#         realty = normalize_realty_dict(database, realty)
+#         result = database.queryone(
+#             "SELECT realty_id, up_to_date FROM public.realties WHERE realty_url = %s",
+#             (realty["realty_url"],)
+#         )
+#         print(result)
+#         realty_id = result[0]
+#         up_to_date = result[1]
+#         if realty_id: 
+#             if not up_to_date:
+#                 assignments = list()
+#                 for key, value in realty.items():
+#                     if value == None:
+#                         assignments.append(f"{key} = NULL")
+#                     elif isinstance(value, str):
+#                         temp = value.replace("'", "''")
+#                         assignments.append(f"{key} = '{temp}'")
+#                     else:
+#                         assignments.append(f"{key} = {value}")
+#                 updates = ", ".join(assignments)
+#                 database.execute(
+#                     f"UPDATE public.realties SET {updates}, up_to_date = 1, updated_at = %s WHERE realty_id = %s",
+#                     (datetime.now(), realty_id)
+#                 )
+#                 database.commit()
+#                 print("Record successfuly updated")
+#             else:
+#                 print("Record is up to date")
+#         else:
+#             print("Record not found")
+#     except Exception as e:
+#         database.connection.rollback()
+#         print(f"Error: {e}")
 
 @announce
 def get_neighborhood_name(database: Database, neighborhood_id):
@@ -458,17 +458,17 @@ def get_realty_urls(database: Database):
         database.connection.rollback() # Allow the connection to continue operating
         print(f"Error: {e}")
 
-@announce
-def get_outdated_realty_urls(database: Database):
-    try:
-        url_list = list()
-        temp = database.query("SELECT realty_url FROM public.realties WHERE up_to_date = 0")
-        for item in temp:
-            url_list.append(item[0])
-        return url_list
-    except Exception as e:
-        database.connection.rollback() # Allow the connection to continue operating
-        print(f"Error: {e}")
+# @announce
+# def get_outdated_realty_urls(database: Database):
+#     try:
+#         url_list = list()
+#         temp = database.query("SELECT realty_url FROM public.realties WHERE up_to_date = 0")
+#         for item in temp:
+#             url_list.append(item[0])
+#         return url_list
+#     except Exception as e:
+#         database.connection.rollback() # Allow the connection to continue operating
+#         print(f"Error: {e}")
 
 @announce
 def check_realty_exists_by_url(database: Database, url: str):
@@ -479,19 +479,6 @@ def check_realty_exists_by_url(database: Database, url: str):
         )
     except Exception as e:
         database.connection.rollback() # Allow the connection to continue operating
-        print(f"Error: {e}")
-
-@announce
-def set_realties_not_up_to_date(database: Database):
-    try:
-        database.execute(
-            "UPDATE public.realties SET up_to_date = 0, updated_at = %s",
-            (datetime.now(),)
-        )
-        database.commit()
-        print("All realties are now set to outdated")
-    except Exception as e:
-        database.connection.rollback()
         print(f"Error: {e}")
 
 class Zapimoveis:
