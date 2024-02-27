@@ -182,7 +182,7 @@ def __main__():
                 print(f"Scraping realties from: {address_url['address']}")
                 reset_control_variables()
                 scrape_url(address_url["url"])
-                db_functions.Zapimoveis.mark_address_url_as_scraped(database, address_url)
+                db_functions.Zapimoveis.set_address_url_scraped(database, address_url)
             else:
                 print(f"Skipped address: {address_url['address']} (already_scraped)")
 

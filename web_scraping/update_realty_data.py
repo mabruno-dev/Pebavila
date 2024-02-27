@@ -18,7 +18,7 @@ def __main__():
         start_time = time()
         realty = scrape_realty(url)
         update_realty_by_url(database, realty)
-        while time() - start_time < 5:
+        while time() - start_time < 10:
             sleep(1)
 
 if __name__ == "__main__":
