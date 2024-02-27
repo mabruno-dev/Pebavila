@@ -6,7 +6,7 @@ from database.functions import set_streets_neighborhoods_cities
 import json
 
 def __main__():
-    file_path = 'C:/Users/matbr/OneDrive/Área de Trabalho/Projetos/the-beginning/address_collection/output/addresses.json'
+    file_path = 'output/addresses.json'
     with open(file_path, 'r') as file:
         streets = json.load(file)
 

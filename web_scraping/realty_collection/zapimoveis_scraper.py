@@ -17,7 +17,7 @@ from selenium.webdriver.support import expected_conditions as EC
 
 from utils.functions import *
 from utils.wrappers import timed, mute
-from realty_scraper import scrape_realty
+from web_scraping.realty_collection.realty_scraper import scrape_realty
 from database.connection import Database
 from database import functions as db_functions
 from utils.constants import ConsoleColors as Console

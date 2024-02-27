@@ -4,7 +4,6 @@ project_name = "the-beginning"; sys.path.append(os.path.abspath(__file__)[:os.pa
 
 import json
 from re import findall
-import traceback
 
 from unidecode import unidecode
 from selenium import webdriver
