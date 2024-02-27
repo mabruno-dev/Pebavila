@@ -1,0 +1,42 @@
+from fastapi import FastAPI, HTTPException
+import psycopg2
+
+# Criar uma instância do FastAPI
+app = FastAPI()
+
+# Configurar as credenciais de conexão com o banco de dados PostgreSQL
+# Substitua "user", "password", "host" e "database" pelos seus valores
+conn_params = {
+    "user": "user",
+    "password": "password",
+    "host": "host",
+    "port": "5432",
+    "database": "database"
+}
+def execute_query(query, *args):
+    conn = psycopg2.connect(**conn_params)
+    cur = conn.cursor()
+    cur.execute(query, args)
+    result = cur.fetchall()
+    cur.close()
+    conn.close()
+    return result
+
+@app.get("/items/{table_name}")
+
+async def get_items(table_name: str):
+    query = f"SELECT * FROM {table_name};"
+    items = execute_query(query)
+    if not items:
+        raise HTTPException(status_code=404, detail=f"No items found in table {table_name}")
+    return {table_name: items}
+
+@app.get("/items/{table_name}/{item_id}")
+
+async def get_item(table_name: str, item_id: int):
+    query = f"SELECT * FROM {table_name} WHERE id = %s;"
+    item = execute_query(query, item_id)
+    if not item:
+        raise HTTPException(status_code=404, detail=f"Item with ID {item_id} not found in table {table_name}")
+    return {table_name[:-1]: item}
+
