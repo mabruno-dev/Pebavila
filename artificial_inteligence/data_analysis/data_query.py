@@ -10,7 +10,7 @@ def bring_description(input_coluna, input_tabela):
 
         cursor = conexao.cursor()
         
-        consulta_sql = f"SELECT {input_coluna} FROM {input_tabela};"
+        consulta_sql = f"SELECT {input_coluna} FROM {input_tabela}_old;"
         
         cursor.execute(consulta_sql)
         
