@@ -367,12 +367,12 @@ def update_realty_by_url(database: Database, realty: dict):
     try:
         realty = normalize_realty_dict(database, realty)
         result = database.queryone(
-            "SELECT realty_id FROM public.realties WHERE realty_url = %s",
+            "SELECT realty_id, up_to_date FROM public.realties WHERE realty_url = %s",
             (realty["realty_url"],)
         )
         print(result)
         realty_id = result[0]
-        up_to_date = None # result[1]
+        up_to_date = result[1]
         if realty_id: 
             if not up_to_date:
                 assignments = list()
@@ -380,7 +380,8 @@ def update_realty_by_url(database: Database, realty: dict):
                     if value == None:
                         assignments.append(f"{key} = NULL")
                     elif isinstance(value, str):
-                        assignments.append(f"{key} = '{value}'")
+                        temp = value.replace("'", "''")
+                        assignments.append(f"{key} = '{temp}'")
                     else:
                         assignments.append(f"{key} = {value}")
                 updates = ", ".join(assignments)
@@ -450,6 +451,18 @@ def get_realty_urls(database: Database):
     try:
         url_list = list()
         temp = database.query("SELECT realty_url FROM public.realties")
+        for item in temp:
+            url_list.append(item[0])
+        return url_list
+    except Exception as e:
+        database.connection.rollback() # Allow the connection to continue operating
+        print(f"Error: {e}")
+
+@announce
+def get_outdated_realty_urls(database: Database):
+    try:
+        url_list = list()
+        temp = database.query("SELECT realty_url FROM public.realties WHERE up_to_date = 0")
         for item in temp:
             url_list.append(item[0])
         return url_list

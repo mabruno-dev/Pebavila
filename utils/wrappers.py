@@ -6,7 +6,7 @@ from time import time
 from io import StringIO
 from functools import wraps
 
-from utils.functions import format_time
+from utils.functions import format_time, remove_last_occurrence
 from utils.constants import ConsoleColors as Console
 
 def timed(func):
@@ -36,9 +36,10 @@ def announce(func):
 
         sys.stdout = old_stdout
         output = captured_output.getvalue()
-
+        output = remove_last_occurrence(output, "\n")
+        output = output.replace("\n", Console.BLACK + f"\nFrom {func.__name__}: " + Console.RESET)
         if output:
-            print(Console.BLACK + f"From {func.__name__}: " + Console.RESET + output, end="", flush=True)
+            print(Console.BLACK + f"From {func.__name__}: " + Console.RESET + output, flush=True)
 
         return result
     return wrapper

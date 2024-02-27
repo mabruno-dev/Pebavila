@@ -45,3 +45,9 @@ def print_log(text: str, showDt: bool = False, onConsole: bool = True):
 
 def print_error(error):
     print(Console.RED + "Error: " + Console.RESET + f"{error}")
+
+def remove_last_occurrence(main_string, sub_string):
+    index = main_string.rfind(sub_string)
+    if index != -1:  # If the substring is found
+        return main_string[:index] + main_string[index+len(sub_string):]
+    return main_string  # If the substring is not found, return the original string
