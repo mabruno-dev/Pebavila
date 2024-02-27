@@ -1,19 +1,41 @@
-import spacy
+import os, sys
+project_name = "the-beginning"; sys.path.append(os.path.abspath(__file__)[:os.path.abspath(__file__).find(project_name) + len(project_name)] if project_name in os.path.abspath(__file__) else os.path.abspath(__file__))
 
-# Carrega o modelo de linguagem
-nlp = spacy.load("pt_core_news_sm")
+import gensim
+from nltk.tokenize import word_tokenize
+from nltk.corpus import stopwords
+import numpy as np
+import nltk
+from googletrans import Translator, LANGUAGES
+import database
+from database.db_connection import Database
+import gensim.downloader as api
 
-# Texto para análise
-texto = "Esta sala comercial localiza-se no centro de Niterói, desfrutando de uma posição estratégica e conveniente. Com amplas janelas que permitem a entrada de luz natural, o espaço é arejado e proporciona uma atmosfera agradável para trabalho. Os acabamentos modernos e o design funcional garantem uma aparência profissional. Além disso, a proximidade a serviços essenciais e o fácil acesso a transportes públicos fazem deste local uma escolha ideal para negócios. Entre em contato e agendamos uma visita na Davi Saramago -"
 
-# Processa o texto
-doc = nlp(texto)
+model = api.load('word2vec-google-news-300')
 
-# Reconhecimento de Entidades Nomeadas (NER)
-for ent in doc.ents:
-    print(ent.text, ent.label_)
-    print(ent.sentiment)
+database = Database()
 
-# Tokenização e análise de POS (Part-of-Speech)
-for token in doc:
-    print(token.text, token.lemma_, token.pos_)
+
+translator = Translator()
+
+texts = database.query(" SELECT realty_description FROM relaties ")
+
+stop_words = set(stopwords.words('english'))
+
+for text in texts:
+    translated_text = translator.translate(text[0], src='pt', dest='en').text
+
+    tokens = word_tokenize((translated_text).lower())
+    filtered_tokens = [word for word in tokens if word.isalpha() and word not in stop_words]
+
+    word_vectors = []
+    for word in filtered_tokens:
+        if word in model.key_to_index:  
+            word_vectors.append(model[word])
+
+    if word_vectors:
+        average_vector = np.mean(word_vectors, axis=0)
+        print("Vetor médio da descrição:", average_vector)
+    else:
+        print("Nenhuma palavra encontrada nos embeddings.")
