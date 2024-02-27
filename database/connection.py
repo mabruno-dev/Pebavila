@@ -18,7 +18,7 @@ class Database():
             try:
                 self.connection = postgre.connect("""
                     dbname = 'postgres'
-                    host = '25.73.143.27'
+                    host = '25.4.215.168'
                     port = '5432'
                     user = 'postgres'
                     password = '$Pebav1la+' 
