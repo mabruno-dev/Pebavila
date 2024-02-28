@@ -24,6 +24,7 @@ def get_street_url(driver: webdriver.Chrome, location: dict):
     global database
     
     address = f"{location['street']}, {location['city']} - {location['state']}"
+    address = address.replace("'", "")
 
     if not db_functions.Zapimoveis.check_address_url_exists(database, {"address": address, "url": None}):
         print(Console.BOLD_WHITE + f"Getting url from address: {address}" + Console.RESET)
