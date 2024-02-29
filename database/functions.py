@@ -372,7 +372,7 @@ def get_all_streets(database: Database):
         streets = [{
             "street_id": item[0],
             "street_name": item[1],
-            "street_city": item[2]
+            "street_neighborhood": item[2]
             } for item in result]
         return streets
     except Exception as e:
@@ -408,8 +408,9 @@ def validate_location(database: Database, location: dict):
             # Attempt to find a match
             for item in neighborhood_list:
                 if item["neighborhood_name"].replace(" ", "") == location["neighborhood"].replace(" ", ""):
-                    valid_location["neighborhood"] = item["neighborhood_name"]
-                    break
+                    if item["neighborhood_city"] == city_id:
+                        valid_location["neighborhood"] = item["neighborhood_name"]
+                        break
         # If not found, insert it
         if not "neighborhood" in valid_location:
             neighborhood_id = get_or_insert_neighborhood(database, location["neighborhood"], city_id)
@@ -427,8 +428,9 @@ def validate_location(database: Database, location: dict):
                 # Attempt to find a match
                 for item in street_list:
                     if item["street_name"].replace(" ", "") == location["street"].replace(" ", ""):
-                        valid_location["street"] = item["street_name"]
-                        break
+                        if item["street_neighborhood"] == neighborhood_id:
+                            valid_location["street"] = item["street_name"]
+                            break
             # If not found, insert it
             if not "street" in valid_location:
                 insert_street(database, location["street"], neighborhood_id)
