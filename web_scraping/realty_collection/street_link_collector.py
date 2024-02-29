@@ -17,7 +17,7 @@ from database.connection import Database
 from database import functions as db_functions
 from utils.constants import ConsoleColors as Console
 
-database = Database(ensure_connection=True, persistent=True)
+database = Database(ensure_connection=True)
 
 def get_street_url(driver: webdriver.Chrome, location: dict):
 

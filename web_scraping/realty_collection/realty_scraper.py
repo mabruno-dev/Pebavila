@@ -157,8 +157,6 @@ def scrape_realty(url):
     else:
         furnished = RC.NOT_FURNISHED
 
-    print(furnished)
-
     # Huge gibberish is to ensure that the variables are the right type and not try to cast a null variable
     realty_dict = {
         "realty_location": {

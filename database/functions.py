@@ -10,6 +10,9 @@ from datetime import datetime
 class QueryFormatingException(Exception):
     pass
 
+class InvalidLocationException(Exception):
+    pass
+
 @announce
 def generic_delete(schema_name, table_name, id_record):
     try:
@@ -56,6 +59,7 @@ def get_or_insert_city(database: Database, city_name, state_id):
                 'INSERT INTO public.cities (city_name, city_state) VALUES(%s, %s) RETURNING city_id', (city_name, state_id))
             city_id = database.fetchone()[0]
             database.commit()
+            print("Record added to the database succesfully")
             return city_id
     except Exception as e:
         database.connection.rollback() # Allow the connection to continue operating
@@ -79,6 +83,7 @@ def get_or_insert_neighborhood(database: Database, neighborhood_name, city_id):
 
             neighborhood_id = database.fetchone()[0]
             database.commit()
+            print("Record added to the database succesfully")
             return neighborhood_id
     except Exception as e:
         database.connection.rollback() # Allow the connection to continue operating
@@ -107,27 +112,96 @@ def check_street_exists(database: Database, street_name, neighborhood_id):
         print(f"Error: {e}")
 
 @announce
+def check_neighborhood_exists(database: Database, neighborhood_name, city_id):
+    try:
+        neighborhood_id = database.queryone(
+            'SELECT neighborhood_id FROM public.neighborhoods WHERE neighborhood_name = %s AND neighborhood_city = %s',
+            (neighborhood_name, city_id)
+        )
+
+        return neighborhood_id is not None
+    except Exception as e:
+        database.connection.rollback() # Allow the connection to continue operating
+        print(f"Error: {e}")
+    try:
+        database.execute(
+            'INSERT INTO public.neighborhoods (neighborhood_name, neighborhood_city) VALUES (%s, %s)',
+            (neighborhood_name, city_id)
+        )
+        database.commit()
+    except Exception as e:
+        database.connection.rollback() # Allow the connection to continue operating
+        print(f"Error: {e}")
+
+@announce
+def insert_street(database: Database, street_name: str, neighborhood_id: int):
+    try:
+        if not check_street_exists(database, street_name, neighborhood_id):
+            database.execute(
+                "INSERT INTO public.streets (street_name, street_neighborhood) VALUES (%s, %s)",
+                (street_name, neighborhood_id)
+            )
+            database.commit()
+            print("Record added to database succesfully")
+        else:
+            print("Record already exists")
+    except Exception as e:
+        database.connection.rollback() # Allow the connection to continue operating
+        print(f"Error: {e}")
+
+@announce
+def insert_street_neighborhood_city(database: Database, location: dict):
+    try:
+        state_id = get_state_id(database, location['state'])
+        city_id = get_or_insert_city(database, location['city'], state_id)
+        neighborhood_id = get_or_insert_neighborhood(
+            database, location['neighborhood'], city_id)
+
+        if neighborhood_id is not None:
+            street_exists = check_street_exists(
+                database, location['street'], neighborhood_id)
+
+            if street_exists:
+                print('Record already exists')
+            else:
+                database.execute(
+                    'INSERT INTO public.streets (street_name, street_neighborhood) VALUES(%s, %s)', 
+                    (location['street'], neighborhood_id)
+                )
+                database.commit()
+                print('Record added to the database successfully')
+    except Exception as e:
+        database.connection.rollback() # Allow the connection to continue operating
+        print(f"Error: {e}")
+
+@announce
+def insert_neighborhood_city(database: Database, location: dict):
+    try:
+        state_id = get_state_id(database, location['state'])
+        city_id = get_or_insert_city(database, location['city'], state_id)
+        if city_id is not None:
+            neighborhood_exists = check_neighborhood_exists(
+                database, location['neighborhood'], city_id)
+
+            if neighborhood_exists:
+                print('Record already exists')
+            else:
+                database.execute(
+                    'INSERT INTO public.neighborhoods (neighborhood_name, neighborhood_city) VALUES(%s, %s)', 
+                    (location['neighborhood'], city_id)
+                )
+                database.commit()
+                print('Record added to the database successfully')
+    except Exception as e:
+        database.connection.rollback() # Allow the connection to continue operating
+        print(f"Error: {e}")
+
+@announce
 def set_streets_neighborhoods_cities(json_streets):
     try:
         with Database() as database:
             for street in json_streets['addresses']:
-                state_id = get_state_id(database, street['state'])
-                city_id = get_or_insert_city(database, street['city'], state_id)
-                neighborhood_id = get_or_insert_neighborhood(
-                    database, street['neighborhood'], city_id)
-
-                if neighborhood_id is not None:
-                    street_exists = check_street_exists(
-                        database, street['street'], neighborhood_id)
-
-                    if street_exists:
-                        print('Record already exists')
-                    else:
-                        database.execute('INSERT INTO public.streets (street_name, street_neighborhood) VALUES(%s, %s)', (
-                            street['street'], neighborhood_id))
-                        database.commit()
-                        print('Record added to the database successfully')
-
+                insert_street_neighborhood_city(database, street)
     except Exception as e:
         database.connection.rollback() # Allow the connection to continue operating
         print(f"Error: {e}")
@@ -142,6 +216,8 @@ def get_street_id(database: Database, street_name: str, neighborhood_id):
         )
         if street_id:
             return street_id[0]
+        else:
+            pass
     except Exception as e:
         database.connection.rollback() # Allow the connection to continue operating
         print(f"Error: {e}")
@@ -272,52 +348,137 @@ def comparison_query(string: str, values: tuple):
         raise QueryFormatingException("Mismatch between number of values and %s's")
 
 @announce
-def normalize_realty_dict(database: Database, realty: dict):
+def get_all_neighborhoods(database: Database):
     try:
-        realty["realty_location"]
-    except:
+        result = database.query(
+            "SELECT * FROM public.neighborhoods"
+        )
+        neighborhoods = [{
+            "neighborhood_id": item[0],
+            "neighborhood_name": item[1],
+            "neighborhood_city": item[2]
+            } for item in result]
+        return neighborhoods
+    except Exception as e:
+        database.connection.rollback() # Allow the connection to continue operating
+        print(f"Error {e}")
+
+@announce
+def get_all_streets(database: Database):
+    try:
+        result = database.query(
+            "SELECT * FROM public.streets"
+        )
+        streets = [{
+            "street_id": item[0],
+            "street_name": item[1],
+            "street_city": item[2]
+            } for item in result]
+        return streets
+    except Exception as e:
+        database.connection.rollback() # Allow the connection to continue operating
+        print(f"Error {e}")
+
+@announce
+def validate_location(database: Database, location: dict):
+    valid_location = dict()
+
+    # Validate state
+    state_id = get_state_id(database, location["state"])
+    if state_id:
+        valid_location["state"] = location["state"]
+    else:
+        raise InvalidLocationException("State does not exist")
+
+    # Validate city
+    city_id = get_city_id(database, location["city"], state_id)
+    if city_id:
+        valid_location["city"] = location["city"]
+    else:
+        raise InvalidLocationException("City does not exist")
+    
+    # Validate neighborhood
+    neighborhood_id = get_neighborhood_id(database, location["neighborhood"], city_id)
+    if neighborhood_id:
+        valid_location["neighborhood"] = location["neighborhood"]
+    else:
+        # Check if neighborhood exists in the database
+        neighborhood_list = get_all_neighborhoods(database)
+        if neighborhood_list:
+            # Attempt to find a match
+            for item in neighborhood_list:
+                if item["neighborhood_name"].replace(" ", "") == location["neighborhood"].replace(" ", ""):
+                    valid_location["neighborhood"] = item["neighborhood_name"]
+                    break
+        # If not found, insert it
+        if not "neighborhood" in valid_location:
+            neighborhood_id = get_or_insert_neighborhood(database, location["neighborhood"], city_id)
+            valid_location["neighborhood"] = location["neighborhood"]
+
+    # Validate street if provided
+    if location["street"] is not None:
+        street_id = get_street_id(database, location["street"], neighborhood_id)
+        if street_id:
+            valid_location["street"] = location["street"]
+        else:
+            # Check if street exists in the database
+            street_list = get_all_streets(database)
+            if street_list:
+                # Attempt to find a match
+                for item in street_list:
+                    if item["street_name"].replace(" ", "") == location["street"].replace(" ", ""):
+                        valid_location["street"] = item["street_name"]
+                        break
+            # If not found, insert it
+            if not "street" in valid_location:
+                insert_street(database, location["street"], neighborhood_id)
+                valid_location["street"] = location["street"]
+    else:
+        valid_location["street"] = None
+
+    return valid_location
+
+@announce
+def normalize_realty_dict(database: Database, realty: dict):
+    if not "realty_location" in realty:
         return realty
     
-    try:
-        normalized_realty = realty.copy()
-        # get neighborhood FK
-        neighborhood = get_realty_neighborhood(database, realty["realty_location"])
-        if not neighborhood:
-            print("Location does not exist")
-            return
+    normalized_realty = realty.copy()
+    # get neighborhood FK
+    neighborhood = get_realty_neighborhood(database, realty["realty_location"])
+    if not neighborhood:
+        raise InvalidLocationException("Neighborhood does not exist")
+    else:
+        normalized_realty["realty_neighborhood"] = neighborhood
+
+    # get street FK
+    if realty["realty_location"]["street"] is not None:
+        street = get_realty_street(database, realty["realty_location"])
+        if not street:
+            raise InvalidLocationException("Street does not exist")
         else:
-            normalized_realty["realty_neighborhood"] = neighborhood
+            normalized_realty["realty_street"] = street
+    else:
+        normalized_realty["realty_street"] = None
 
-        # get street FK
-        if realty["realty_location"]["street"] is not None:
-            street = get_realty_street(database, realty["realty_location"])
-            if not street:
-                print("Location does not exist")
-                return
-            else:
-                normalized_realty["realty_street"] = street
-        else:
-            normalized_realty["realty_street"] = None
+    del normalized_realty["realty_location"]
 
-        del normalized_realty["realty_location"]
-
-        # get type FK    
+    # get type FK    
+    type = get_realty_type(database, realty["realty_type"])
+    if not type:
+        insert_type(database, realty["realty_type"])
         type = get_realty_type(database, realty["realty_type"])
-        if not type:
-            insert_type(database, realty["realty_type"])
-            type = get_realty_type(database, realty["realty_type"])
-        normalized_realty["realty_type"] = type
+    normalized_realty["realty_type"] = type
 
-        # get advertiser FK
+    # get advertiser FK
+    advertiser = get_realty_advertiser(database, realty["realty_advertiser"])
+    if not advertiser:
+        insert_advertiser(database, realty["realty_advertiser"])
         advertiser = get_realty_advertiser(database, realty["realty_advertiser"])
-        if not advertiser:
-            insert_advertiser(database, realty["realty_advertiser"])
-            advertiser = get_realty_advertiser(database, realty["realty_advertiser"])
-        normalized_realty["realty_advertiser"] = advertiser
+    normalized_realty["realty_advertiser"] = advertiser
 
-        return normalized_realty
-    except:
-        print("Wrong dict format")
+    return normalized_realty
+
 
 @announce
 def check_realty_exists(database: Database, realty: dict):
@@ -344,6 +505,7 @@ def check_realty_exists(database: Database, realty: dict):
 @announce
 def insert_realty(database: Database, realty: dict):
     try:
+        realty["realty_location"] = validate_location(database, realty["realty_location"])
         realty = normalize_realty_dict(database, realty)
         if realty:
             if not check_realty_exists(database, realty):

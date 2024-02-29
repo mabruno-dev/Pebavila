@@ -31,7 +31,7 @@ total_realties = 1
 pause_loading = False
 break_loading = False
 
-database = Database(ensure_connection=True, persistent=True)
+database = Database(ensure_connection=True)
 
 def load_realties(driver: webdriver.Chrome, realty_list_div: WebElement):
     global realty_div_size

@@ -6,7 +6,7 @@ from time import time
 from io import StringIO
 from functools import wraps
 
-from utils.functions import format_time, remove_last_occurrence
+from utils.functions import format_time
 from utils.constants import ConsoleColors as Console
 
 def timed(func):
@@ -19,31 +19,42 @@ def timed(func):
         return result
     return wrapper
 
-from functools import wraps
-from io import StringIO
-import sys
 
-# WARNING: this breaks print statements from running threads
+# Capture the original built-in print function
+original_print = print
+
 def announce(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
-
-        captured_output = StringIO()
-        old_stdout = sys.stdout
-        sys.stdout = captured_output
-
-        result = func(*args, **kwargs)
-
-        sys.stdout = old_stdout
-        output = captured_output.getvalue()
-        output = remove_last_occurrence(output, "\n")
-        output = output.replace("\n", Console.BLACK + f"\nFrom {func.__name__}: " + Console.RESET)
-        if output:
-            print(Console.BLACK + f"From {func.__name__}: " + Console.RESET + output, flush=True)
-
+        # Define a custom print function that prepends the message
+        def custom_print(*pargs, **pkwargs):
+            original_print(Console.BLACK + f"From {func.__name__}: " + Console.RESET, end="")
+            original_print(*pargs, **pkwargs)
+        
+        # Check if __builtins__ is a dictionary or a module and adjust accordingly
+        if isinstance(__builtins__, dict):
+            # If __builtins__ is a dictionary, use dictionary methods to replace 'print'
+            original_builtins_print = __builtins__['print']
+            __builtins__['print'] = custom_print
+        else:
+            # If __builtins__ is a module, use attribute assignment
+            original_builtins_print = getattr(__builtins__, 'print')
+            setattr(__builtins__, 'print', custom_print)
+        
+        try:
+            # Execute the function
+            result = func(*args, **kwargs)
+        finally:
+            # Restore the original print function
+            if isinstance(__builtins__, dict):
+                __builtins__['print'] = original_builtins_print
+            else:
+                setattr(__builtins__, 'print', original_builtins_print)
         return result
+
     return wrapper
 
+# WARNING: This will also mute running threads while the function executes
 def mute(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
