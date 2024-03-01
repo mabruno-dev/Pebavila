@@ -46,7 +46,7 @@ def print_log(text: str, showDt: bool = False, onConsole: bool = True):
 def print_error(error):
     print(Console.RED + "Error: " + Console.RESET + f"{error}")
 
-def print_dict(dictionary: dict, max_length: int = 69):
+def print_dict(dictionary: dict, max_length: int = 50):
     def format_value(value: str) -> str:
         if isinstance(value, str) and len(value) > max_length:
             return value[:max_length-3] + "..."
