@@ -39,7 +39,7 @@ def load_realties(driver: webdriver.Chrome, realty_list_div: WebElement):
     global break_loading
     global total_realties
     global scraped_realties
-    STEP = 100
+    STEP = 50
     while not break_loading:
         loaded_realties = len(realty_list_div.find_elements(By.CLASS_NAME, "l-card__wrapper"))
 
@@ -49,7 +49,7 @@ def load_realties(driver: webdriver.Chrome, realty_list_div: WebElement):
         max_y = loaded_realties * realty_div_size
         current_scroll_y = driver.execute_script("return window.scrollY;")
         if current_scroll_y >= max_y:
-            driver.execute_script(f"window.scrollTo(0, {max_y * 0.2});")
+            driver.execute_script(f"window.scrollTo(0, {max_y * 0.15});")
         sleep(0.001)
 
         while pause_loading and not break_loading:
@@ -94,7 +94,7 @@ def scrape_url(url: str):
                 )
             except:
                 print("Connection error")
-                continue
+                break
             total_realties = int(total_realties_h1.text.split(" ")[0].replace(".", ""))
 
             realty_list_div = driver.find_element(By.CLASS_NAME, "listing-wrapper")

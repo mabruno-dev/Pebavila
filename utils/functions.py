@@ -2,7 +2,7 @@ import os, sys
 project_name = "the-beginning"; sys.path.append(os.path.abspath(__file__)[:os.path.abspath(__file__).find(project_name) + len(project_name)] if project_name in os.path.abspath(__file__) else os.path.abspath(__file__))
 # Resolve module imports
 
-import os
+import json
 from datetime import datetime
 
 from utils.constants import ConsoleColors as Console
@@ -45,3 +45,22 @@ def print_log(text: str, showDt: bool = False, onConsole: bool = True):
 
 def print_error(error):
     print(Console.RED + "Error: " + Console.RESET + f"{error}")
+
+def print_dict(dictionary: dict, max_length: int = 100):
+    def format_value(value: str) -> str:
+        if isinstance(value, str) and len(value) > max_length:
+            return value[:max_length-3] + "..."
+        elif isinstance(value, dict):
+            return format_dict(value)
+        else:
+            return value
+
+    def format_dict(inner_dict: dict) -> dict:
+        formatted_inner_dict = {}
+        for key, value in inner_dict.items():
+            formatted_value = format_value(value)
+            formatted_inner_dict[key] = formatted_value
+        return formatted_inner_dict
+
+    formatted_dict = format_dict(dictionary)
+    print(json.dumps(formatted_dict, indent=4, ensure_ascii=False))
