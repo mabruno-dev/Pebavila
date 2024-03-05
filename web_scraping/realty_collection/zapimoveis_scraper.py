@@ -5,7 +5,7 @@ project_name = "the-beginning"; sys.path.append(os.path.abspath(__file__)[:os.pa
 import random
 import threading
 import traceback
-from time import sleep
+from time import sleep, time
 
 from selenium import webdriver
 from selenium_stealth import stealth
@@ -103,8 +103,10 @@ def scrape_url(url: str):
             loader.start()
 
             data_position = 1
-            while data_position <= REALTIES_PER_PAGE and scraped_realties < total_realties:
 
+            loading_time = 0
+            while data_position <= REALTIES_PER_PAGE and scraped_realties < total_realties:
+                start_time = time()
                 try:
                     realty_div = driver.find_element(By.CSS_SELECTOR, f'div[data-position="{data_position}"]')
                     realty_div_size = realty_div.size["height"]
@@ -143,6 +145,14 @@ def scrape_url(url: str):
                         scraped_realties += 1
                 except NoSuchElementException:
                     pause_loading = False
+
+                    loading_time += time() - start_time
+                    if loading_time > 300:
+                        print("Loading took too long, skipping url")
+                        loader.join()
+                        driver.quit()
+                        break
+
                     print(f"Loading...", end="\r")
                 except Exception as e:
                     print(f"Error: {e}")
