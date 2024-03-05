@@ -15,7 +15,7 @@ def timed(func):
         start_time = time()
         result = func(*args, **kwargs)
         total_time = time() - start_time
-        print(f"{func.__name__} was executed in {format_time(total_time)}")
+        print(Console.BLACK + f"{func.__name__} was executed in {format_time(total_time)}" + Console.RESET)
         return result
     return wrapper
 
