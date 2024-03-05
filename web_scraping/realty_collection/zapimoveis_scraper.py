@@ -71,7 +71,7 @@ def scrape_url(url: str):
     current_page = 1
     while scraped_realties < total_realties:
         try:
-            print(Console.BLUE + f"PAGE {current_page}" + Console.RESET)
+            print(Console.BLACK + f"PAGE {current_page}" + Console.RESET)
 
             driver = webdriver.Chrome()
 
@@ -93,7 +93,7 @@ def scrape_url(url: str):
                     EC.presence_of_element_located((By.CSS_SELECTOR, "h1.l-text.l-u-color-neutral-12.l-text--variant-heading-small.l-text--weight-semibold.undefined"))
                 )
             except:
-                print("Connection error")
+                print(Console.RED + "Connection error" + Console.RESET)
                 break
             total_realties = int(total_realties_h1.text.split(" ")[0].replace(".", ""))
 
@@ -128,7 +128,7 @@ def scrape_url(url: str):
                         pause_loading = False
                     finally:
                         if not db_functions.check_realty_exists_by_url(database, realty_url):
-                            print(Console.BOLD_WHITE + f"Scraping realty number {data_position}" + Console.RESET)
+                            print(Console.YELLOW + "Scraping" + Console.RESET + f" realty number {data_position}")
                             try:
                                 # Scrape realty info
                                 realty_info = scrape_realty(realty_url)
@@ -140,17 +140,19 @@ def scrape_url(url: str):
                             if realty_info != None:
                                 db_functions.insert_realty(database, realty_info)
                         else:
-                            print(f"Skipped realty number {data_position} (already scraped)")
+                            print(Console.BLUE + "Skipped"  + Console.RESET + f" realty number {data_position} (already scraped)")
                         data_position += 1
                         scraped_realties += 1
                 except NoSuchElementException:
                     pause_loading = False
 
                     loading_time += time() - start_time
-                    if loading_time > 300:
-                        print("Loading took too long, skipping url")
+                    if loading_time > 120:
+                        print("Loading took too long")
+                        break_loading = True
                         loader.join()
                         driver.quit()
+                        current_page += 1
                         break
 
                     print(f"Loading...", end="\r")
@@ -189,12 +191,12 @@ def __main__():
     for address_url in address_url_list:
         if address_url["url"] != None:
             if not db_functions.Zapimoveis.check_address_url_is_scraped(database, address_url["address"]):
-                print(f"Scraping realties from: {address_url['address']}")
+                print(Console.YELLOW + "Scraping" + Console.RESET + f" realties from: {address_url['address']}")
                 reset_control_variables()
                 scrape_url(address_url["url"])
                 db_functions.Zapimoveis.set_address_url_scraped(database, address_url)
             else:
-                print(f"Skipped address: {address_url['address']} (already_scraped)")
+                print(Console.BLUE + "Skipped" + Console.RESET + f" address: {address_url['address']} (already_scraped)")
 
     print("Remeber to turn your sleep timer back on")
 

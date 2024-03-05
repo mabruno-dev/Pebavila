@@ -182,6 +182,7 @@ def scrape_realty(url):
         "realty_url": str(url)
     }
 
+    print("Data: ", end="")
     print_dict(realty_dict)
 
     return realty_dict
