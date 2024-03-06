@@ -153,9 +153,10 @@ def scrape_url(address_url: dict):
                         stop_loading = True
                         loader.join()
                         driver.quit()
+                        current_page -= 1
                         break
 
-                    print(f"Loading... {loading_time}s", end="\r")
+                    print(f"Loading...", end="\r")
                 except Exception as e:
                     print(f"Error: {e}")
             stop_loading = True
