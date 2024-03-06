@@ -141,7 +141,7 @@ def scrape_url(address_url: dict):
                             if realty_info != None:
                                 db_functions.insert_realty(database, realty_info)
                         else:
-                            print(Console.BLUE + "Skipped"  + Console.RESET + f" realty number {data_position} (already scraped)")
+                            print(Console.BLUE + "Skipped"  + Console.RESET + f" realty number {data_position}")
                         data_position += 1
                         scraped_realties += 1
                 except NoSuchElementException:
@@ -150,9 +150,6 @@ def scrape_url(address_url: dict):
                     loading_time += time() - start_time
                     if loading_time > 120:
                         print("Loading took too long, reloading page")
-                        stop_loading = True
-                        loader.join()
-                        driver.quit()
                         current_page -= 1
                         break
 
@@ -196,7 +193,7 @@ def __main__():
                 reset_control_variables()
                 scrape_url(address_url)
             else:
-                print(Console.BLUE + "Skipped" + Console.RESET + f" address: {address_url['address']} (already_scraped)")
+                print(Console.BLUE + "Skipped" + Console.RESET + f" address: {address_url['address']}")
 
 if __name__ == "__main__":
     __main__()
