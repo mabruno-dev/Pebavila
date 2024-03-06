@@ -193,7 +193,7 @@ def __main__():
             if not db_functions.Zapimoveis.check_address_url_is_scraped(database, address_url["address"]):
                 print(Console.YELLOW + "Scraping" + Console.RESET + f" realties from: {address_url['address']}")
                 reset_control_variables()
-                scrape_url(address_url["url"])
+                scrape_url(address_url)
             else:
                 print(Console.BLUE + "Skipped" + Console.RESET + f" address: {address_url['address']} (already_scraped)")
 
