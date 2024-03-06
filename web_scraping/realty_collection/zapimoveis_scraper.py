@@ -29,18 +29,18 @@ scraped_realties = 0
 total_realties = 1
 
 pause_loading = False
-break_loading = False
+stop_loading = False
 
 database = Database(ensure_connection=True)
 
 def load_realties(driver: webdriver.Chrome, realty_list_div: WebElement):
     global realty_div_size
     global pause_loading
-    global break_loading
+    global stop_loading
     global total_realties
     global scraped_realties
     STEP = 50
-    while not break_loading:
+    while not stop_loading:
         loaded_realties = len(realty_list_div.find_elements(By.CLASS_NAME, "l-card__wrapper"))
 
         driver.execute_script(f"window.scrollBy(0, {STEP});")
@@ -52,21 +52,21 @@ def load_realties(driver: webdriver.Chrome, realty_list_div: WebElement):
             driver.execute_script(f"window.scrollTo(0, {max_y * 0.15});")
         sleep(0.001)
 
-        while pause_loading and not break_loading:
+        while pause_loading and not stop_loading:
             sleep(0.3)
 
-    break_loading = False
+    stop_loading = False
 
 @timed
-def scrape_url(url: str):
-    url = url[:-1] # Remove the page index
+def scrape_url(address_url: dict):
+    url = address_url["url"][:-1] # Remove the page index
     
     global database
     global realty_div_size
     global scraped_realties
     global total_realties
     global pause_loading
-    global break_loading
+    global stop_loading
     
     current_page = 1
     while scraped_realties < total_realties:
@@ -149,17 +149,16 @@ def scrape_url(url: str):
                     loading_time += time() - start_time
                     if loading_time > 120:
                         print("Loading took too long")
-                        break_loading = True
+                        stop_loading = True
                         loader.join()
                         driver.quit()
                         current_page += 1
                         break
 
-                    print(f"Loading...", end="\r")
+                    print(f"Loading... {loading_time}s", end="\r")
                 except Exception as e:
                     print(f"Error: {e}")
-
-            break_loading = True
+            stop_loading = True
             loader.join()
             driver.quit()
             current_page += 1
@@ -169,6 +168,7 @@ def scrape_url(url: str):
         except Exception as e:
             print(f"Error: {e}")
             break
+    db_functions.Zapimoveis.set_address_url_scraped(database, address_url)
 
 def reset_control_variables():
 
@@ -194,12 +194,8 @@ def __main__():
                 print(Console.YELLOW + "Scraping" + Console.RESET + f" realties from: {address_url['address']}")
                 reset_control_variables()
                 scrape_url(address_url["url"])
-                db_functions.Zapimoveis.set_address_url_scraped(database, address_url)
             else:
                 print(Console.BLUE + "Skipped" + Console.RESET + f" address: {address_url['address']} (already_scraped)")
-
-    print("Remeber to turn your sleep timer back on")
-
 
 if __name__ == "__main__":
     __main__()
