@@ -13,7 +13,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium_stealth import stealth
 
 from utils.constants import RealtyConstants as RC
-from utils.functions import print_log, print_dict
+from utils.functions import print_log
 from utils.wrappers import timed
 
 def find_numbers(s: str):
