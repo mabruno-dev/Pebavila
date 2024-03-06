@@ -39,6 +39,7 @@ def load_realties(driver: webdriver.Chrome, realty_list_div: WebElement):
     global stop_loading
     global total_realties
     global scraped_realties
+    stop_loading = False
     STEP = 50
     while not stop_loading:
         loaded_realties = len(realty_list_div.find_elements(By.CLASS_NAME, "l-card__wrapper"))
@@ -148,11 +149,10 @@ def scrape_url(address_url: dict):
 
                     loading_time += time() - start_time
                     if loading_time > 120:
-                        print("Loading took too long")
+                        print("Loading took too long, reloading page")
                         stop_loading = True
                         loader.join()
                         driver.quit()
-                        current_page += 1
                         break
 
                     print(f"Loading... {loading_time}s", end="\r")
