@@ -1,0 +1,88 @@
+import os, sys
+project_name = "the-beginning"; sys.path.append(os.path.abspath(__file__)[:os.path.abspath(__file__).find(project_name) + len(project_name)] if project_name in os.path.abspath(__file__) else os.path.abspath(__file__))
+
+import pandas as pd
+import nltk
+from nltk.tokenize import word_tokenize
+from nltk.corpus import stopwords
+import numpy as np
+from googletrans import Translator, LANGUAGES
+from database.db_connection import Database
+import gensim.downloader as api
+import pandas as pd 
+
+
+def convert_data_description(text, model):
+    if text is None:
+        return None 
+
+    stop_words = set(stopwords.words('english'))
+
+    translator = Translator()
+
+    translated_text = translator.translate(text, src='pt', dest='en').text
+    print(translated_text)
+
+    tokens = word_tokenize(translated_text.lower())
+    filtered_tokens = [word for word in tokens if word.isalpha() and word not in stop_words]
+
+    word_vectors = []
+    for word in filtered_tokens:
+        if word in model.key_to_index:  
+            word_vectors.append(model[word])
+
+    if word_vectors:
+        average_vector = np.mean(word_vectors, axis=0)
+        print("Vetor médio da descrição:", average_vector)
+    else:
+        print("Nenhuma palavra encontrada nos embeddings.")
+
+    return average_vector
+
+def database_df():
+    database = Database()
+    model = api.load('word2vec-google-news-300')
+    response = database.query("""
+        SELECT
+        r.realty_id,
+        r.realty_square_footage,
+        r.realty_parking_spaces,
+        r.realty_bathrooms,
+        r.realty_bedrooms,
+        r.realty_advertiser,
+        r.realty_status,
+        r.realty_furnished,
+        r.realty_type,
+        r.realty_floor,
+		r.realty_condo_price,
+		r.realty_property_tax,
+        s.street_id,
+        ci.city_id,
+        n.neighborhood_id,
+        r.realty_description
+        r.realty_price
+
+        FROM public.realties r
+
+        INNER JOIN public.streets s ON r.realty_street = s.street_id
+        INNER JOIN public.neighborhoods n ON s.street_neighborhood = n.neighborhood_id
+        INNER JOIN public.cities ci ON n.neighborhood_city = ci.city_id
+
+        ORDER BY realty_id
+        """)
+
+    for element in response:
+        if element[7] == True:
+            element[7] = 1
+        else:
+            element[7] = 0
+
+        converted_description = convert_data_description(element[-1], model)
+        element.pop(-1)
+
+        for number in converted_description:
+            element.append(number)
+
+    realties_df = pd.DataFrame(response)
+    
+    return realties_df
