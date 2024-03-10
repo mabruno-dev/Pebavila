@@ -3,6 +3,7 @@ project_name = "the-beginning"; sys.path.append(os.path.abspath(__file__)[:os.pa
 # Resolve module imports
 
 import json
+import inspect
 from datetime import datetime
 
 from utils.constants import ConsoleColors as Console
@@ -30,10 +31,14 @@ def create_dirs(file_path):
 
 def print_log(text: str, showDt: bool = False, onConsole: bool = True):
 
+    caller_frame = inspect.stack()[1]
+    calling_script_path = caller_frame.filename
+    script_name = os.path.basename(calling_script_path).replace(".py", "")
+
     current_date = datetime.today().strftime('%d%m%Y')
     formatted_date = datetime.today().strftime('%d/%m/%Y %H:%M:%S')
 
-    LOG_FILE_PATH = f"log/log_{current_date}.txt"
+    LOG_FILE_PATH = f"logs/{script_name}/log_{current_date}.txt"
 
     create_dirs(LOG_FILE_PATH)
 
@@ -41,7 +46,10 @@ def print_log(text: str, showDt: bool = False, onConsole: bool = True):
         new_line = "\n"
         file.write(f'{text}{f"{new_line}Date: {formatted_date}" if showDt else ""}{new_line * 2}')
         if onConsole:
-            print((f'{text}{f"{new_line}Date: {formatted_date}" if showDt else ""}'))
+            print(text)
 
 def print_error(error):
     print(Console.RED + "Error: " + Console.RESET + f"{error}")
+
+
+print(os.path.abspath(__file__))

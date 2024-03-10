@@ -29,21 +29,21 @@ class Database():
                 sleep(0.46)
 
         try:
-                printer_thread = Thread(target=printer)
-                printer_thread.start()
+            printer_thread = Thread(target=printer)
+            printer_thread.start()
 
-                self.connection = postgre.connect("""
-                    dbname = 'postgres'
-                    host = '25.11.120.164'
-                    port = '5432'
-                    user = 'postgres'
-                    password = '$Pebav1la+' 
-                """)
-                self.cursor = self.connection.cursor(cursor_factory=DictCursor)
+            self.connection = postgre.connect("""
+                dbname = 'postgres'
+                host = '25.11.120.164'
+                port = '5432'
+                user = 'postgres'
+                password = '$Pebav1la+' 
+            """)
+            self.cursor = self.connection.cursor(cursor_factory=DictCursor)
 
-                stop_event.set()
-                printer_thread.join()
-                print(Console.GREEN + "\rNow connected to the database" + Console.RESET)
+            stop_event.set()
+            printer_thread.join()
+            print(Console.GREEN + "\rNow connected to the database" + Console.RESET)
         except Exception as E:
             stop_event.set()
             printer_thread.join()
