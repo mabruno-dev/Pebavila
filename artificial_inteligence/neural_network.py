@@ -8,28 +8,38 @@ import database
 from database.db_connection import Database
 from dabase_df import database_df
 
-import tensorflow as tf
+import tensorflow
 from tensorflow.keras import layers, models
 
 
 def neural_network(data = database_df()):
 
     shuffled_df = data.sample(frac=1, random_state=42)
-    #Codigo acima para aleatorizar o dataframe, falta ajeitar resultados NaN dentro dele
+    #ADICIONAR RELATY_PRICE QUE TAVA DANDO ERRO
     #PEGAR 70% DA DATA PARA TREINAR
-    X_train = shuffled_df.iloc[1:, :-2]
-    y_train = shuffled_df.iloc[-2:, :] 
+    X_train = shuffled_df.iloc[1:28000, :].drop(columns= 15)
+    print(X_train)
+    y_train = shuffled_df.iloc[1:28000, 15]
+    print(y_train)
     #PEGAR 15% DA DATA PARA VALIDACAO
-    X_val = 0
-    y_val = 0
+    X_val = shuffled_df.iloc[28000:32000, :].drop(columns= 15)
+    y_val = shuffled_df.iloc[28000:32000, 15]
     #PEGAR 15% DA DATA PARA TESTE
-    X_test = 0
-    y_test = 0
+    X_test = shuffled_df.iloc[32000:35366, :].drop(columns= 15)
+    y_test = shuffled_df.iloc[32000:35366, 15]
 
-#testar no pc q tem acesso ao hamachi 
+    X_train = X_train.to_numpy()
+    y_train = y_train.to_numpy()
+
+    X_val = X_val.to_numpy()
+    y_val = y_val.to_numpy()
+
+    X_test = X_test.to_numpy()
+    y_test = y_test.to_numpy()
 
     num_features = 314
 
+    print('Comeco treinamento!!')
     model = models.Sequential()
     model.add(layers.Dense(128, activation='relu', input_shape=(num_features,)))
     model.add(layers.Dense(64, activation='relu'))
@@ -49,3 +59,5 @@ def neural_network(data = database_df()):
     print(f'Predicted Price: {predicted_price}')
 
 
+print('comeco')
+neural_network()

@@ -6,10 +6,13 @@ import nltk
 from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
 import numpy as np
-from googletrans import Translator, LANGUAGES
+from deep_translator import GoogleTranslator
 from database.db_connection import Database
 import gensim.downloader as api
 import pandas as pd 
+
+import time
+
 
 
 def convert_data_description(text, model):
@@ -18,22 +21,22 @@ def convert_data_description(text, model):
 
     stop_words = set(stopwords.words('english'))
 
-    translator = Translator()
-
-    translated_text = translator.translate(text, src='pt', dest='en').text
-    print(translated_text)
+    translator = GoogleTranslator(source='pt', target='en')
+    translated_text = translator.translate(text)
 
     tokens = word_tokenize(translated_text.lower())
     filtered_tokens = [word for word in tokens if word.isalpha() and word not in stop_words]
 
     word_vectors = []
+    i = 0
     for word in filtered_tokens:
         if word in model.key_to_index:  
             word_vectors.append(model[word])
+            print(f"Etapa concluida {i}")
+            i += 1
 
     if word_vectors:
         average_vector = np.mean(word_vectors, axis=0)
-        print("Vetor médio da descrição:", average_vector)
     else:
         print("Nenhuma palavra encontrada nos embeddings.")
 
@@ -59,8 +62,8 @@ def database_df():
         s.street_id,
         ci.city_id,
         n.neighborhood_id,
+        r.realty_price,
         r.realty_description
-        r.realty_price
 
         FROM public.realties r
 
@@ -76,13 +79,17 @@ def database_df():
             element[7] = 1
         else:
             element[7] = 0
+    
 
         converted_description = convert_data_description(element[-1], model)
+
         element.pop(-1)
 
         for number in converted_description:
             element.append(number)
 
     realties_df = pd.DataFrame(response)
-    
+    print('Translated with sucsess!!')
     return realties_df
+
+
