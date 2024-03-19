@@ -17,7 +17,7 @@ def neural_network(data = database_df()):
     shuffled_df = data.sample(frac=1, random_state=42)
     #ADICIONAR RELATY_PRICE QUE TAVA DANDO ERRO
     #PEGAR 70% DA DATA PARA TREINAR
-    X_train = shuffled_df.iloc[1:28000, :].drop(columns= 15)
+    ''' X_train = shuffled_df.iloc[1:28000, :].drop(columns= 15)
     print(X_train)
     y_train = shuffled_df.iloc[1:28000, 15]
     print(y_train)
@@ -26,7 +26,17 @@ def neural_network(data = database_df()):
     y_val = shuffled_df.iloc[28000:32000, 15]
     #PEGAR 15% DA DATA PARA TESTE
     X_test = shuffled_df.iloc[32000:35366, :].drop(columns= 15)
-    y_test = shuffled_df.iloc[32000:35366, 15]
+    y_test = shuffled_df.iloc[32000:35366, 15]'''
+    X_train = shuffled_df.iloc[1:20, :].drop(columns= 15)
+    print(X_train)
+    y_train = shuffled_df.iloc[1:20, 15]
+    print(y_train)
+    #PEGAR 15% DA DATA PARA VALIDACAO
+    X_val = shuffled_df.iloc[20:30, :].drop(columns= 15)
+    y_val = shuffled_df.iloc[20:30, 15]
+    #PEGAR 15% DA DATA PARA TESTE
+    X_test = shuffled_df.iloc[30:35, :].drop(columns= 15)
+    y_test = shuffled_df.iloc[30:35, 15]
 
     X_train = X_train.to_numpy()
     y_train = y_train.to_numpy()
@@ -37,7 +47,7 @@ def neural_network(data = database_df()):
     X_test = X_test.to_numpy()
     y_test = y_test.to_numpy()
 
-    num_features = 314
+    num_features = 315
 
     print('Comeco treinamento!!')
     model = models.Sequential()

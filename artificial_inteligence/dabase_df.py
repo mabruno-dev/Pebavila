@@ -20,9 +20,11 @@ def convert_data_description(text, model):
         return None 
 
     stop_words = set(stopwords.words('english'))
-
-    translator = GoogleTranslator(source='pt', target='en')
-    translated_text = translator.translate(text)
+    try:
+        translator = GoogleTranslator(source='pt', target='en')
+        translated_text = translator.translate(text)
+    except:
+        translated_text = text
 
     tokens = word_tokenize(translated_text.lower())
     filtered_tokens = [word for word in tokens if word.isalpha() and word not in stop_words]
@@ -72,6 +74,7 @@ def database_df():
         INNER JOIN public.cities ci ON n.neighborhood_city = ci.city_id
 
         ORDER BY realty_id
+        LIMIT 35
         """)
 
     for element in response:
