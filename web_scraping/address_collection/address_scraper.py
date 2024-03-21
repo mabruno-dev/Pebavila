@@ -1,19 +1,25 @@
+import os, sys
+project_name = "the-beginning"; sys.path.append(os.path.abspath(__file__)[:os.path.abspath(__file__).find(project_name) + len(project_name)] if project_name in os.path.abspath(__file__) else os.path.abspath(__file__))
+# Resolve module imports
+
 from selenium import webdriver
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait as wait
 
-from time import sleep
 import json
 import os
 from unidecode import unidecode
+
+from utils.wrappers import timed
 
 # Retorna as linhas de uma tabela passada por parâmetro
 def find_table_rows(table: WebElement):
     table_body = table.find_element(By.TAG_NAME, "tbody")
     return table_body.find_elements(By.TAG_NAME, "tr")
 
+@timed
 def __main__():
     all_addresses = list()
 
