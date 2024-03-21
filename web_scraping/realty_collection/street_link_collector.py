@@ -92,16 +92,13 @@ def __main__():
 
     cities = db_functions.get_all_cities(database)
     for city in cities:
-        @timed
-        def loop_cities():
-            locations = db_functions.get_locations_from_city(database, city["city_name"], "RJ")
+        locations = db_functions.get_locations_from_city(database, city["city_name"], "RJ")
 
-            for index, location in enumerate(locations):
-                print(Console.BLACK + f"{index + 1}/{len(locations)}" + Console.RESET, end=" ")
-                address_url = get_street_url(driver, location)
-                if address_url:
-                    db_functions.Zapimoveis.insert_address_url(database, address_url)
-        loop_cities()
+        for index, location in enumerate(locations):
+            print(Console.BLACK + f"{index + 1}/{len(locations)}" + Console.RESET, end=" ")
+            address_url = get_street_url(driver, location)
+            if address_url:
+                db_functions.Zapimoveis.insert_address_url(database, address_url)
 
     driver.quit()
 
