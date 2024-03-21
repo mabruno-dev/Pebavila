@@ -17,7 +17,7 @@ def find_table_rows(table: WebElement):
 def __main__():
     all_addresses = list()
 
-    driver = webdriver.Safari()
+    driver = webdriver.Chrome()
 
     driver.get("https://codigo-postal.org/pt-br/brasil/rio-de-janeiro/")
 
