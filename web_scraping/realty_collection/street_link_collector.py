@@ -48,7 +48,7 @@ def get_street_url(driver: webdriver.Chrome, location: dict):
             except:
                 try:
                     driver.find_element(By.CLASS_NAME, "locations-feedback") # Tries to find the "not found" element
-                    print(Console.RED + "Invalid address" + Console.RESET)
+                    print(Console.RED + "No results" + Console.RESET)
                     return {
                         "address": address,
                         "url": None
@@ -95,7 +95,7 @@ def __main__():
         locations = db_functions.get_locations_from_city(database, city["city_name"], "RJ")
 
         for index, location in enumerate(locations):
-            print(f"{index + 1}/{len(locations)}", end=" ")
+            print(Console.BLACK + f"{index + 1}/{len(locations)}" + Console.RESET, end=" ")
             address_url = get_street_url(driver, location)
             if address_url:
                 db_functions.Zapimoveis.insert_address_url(database, address_url)
