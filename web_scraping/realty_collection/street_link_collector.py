@@ -91,7 +91,6 @@ def __main__():
     driver.get("https://www.zapimoveis.com.br/venda/?itl_id=1000063&itl_name=zap_-_link-header_comprar_to_zap_resultado-pesquisa")
 
     locations = db_functions.get_locations_from_city(database, "NITEROI", "RJ")
-    random.shuffle(locations)
 
     for location in locations:
         address_url = get_street_url(driver, location)
