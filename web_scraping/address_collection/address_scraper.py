@@ -50,7 +50,7 @@ def __main__():
                 driver.back()
                 sleep(5)
         except Exception as e:
-            print(f"Error in {city_li.text}")
+            print(f"Error: {e}")
 
         driver.back()
         sleep(5)
