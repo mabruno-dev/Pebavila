@@ -25,19 +25,33 @@ def __main__():
         EC.presence_of_element_located((By.CLASS_NAME, "column-list"))
     )
     city_li_list = city_ul.find_elements(By.TAG_NAME, "li")
-    
+    city_a_list = list()
     for city_li in city_li_list:
-        city_a = city_li.find_element(By.TAG_NAME, "a")
-        driver.get(city_a.get_attribute("href"))
+        try:
+            city_a_list.append(city_li.find_element(By.TAG_NAME, "a").get_attribute("href"))
+        except Exception as e:
+            print(f"Error: {e}")
+
+    for city_a in city_a_list:
+        
+        driver.get(city_a)
+
         try:
             neighborhood_ul = wait(driver, 10).until(
                 EC.presence_of_element_located((By.CLASS_NAME, "column-list"))
             )
             neighborhood_li_list = neighborhood_ul.find_elements(By.TAG_NAME, "li")
-
+            neighborhood_a_list = list()
             for neighborhood_li in neighborhood_li_list:
-                neighbordhood_a = neighborhood_li.find_element(By.TAG_NAME, "a")
-                driver.get(neighbordhood_a.get_attribute("href"))
+                try:
+                    neighborhood_a_list.append(neighborhood_li.find_element(By.TAG_NAME, "a").get_attribute("href"))
+                except Exception as e:
+                    print(f"Error: {e}")
+
+            for neighborhood_a in neighborhood_a_list:
+
+                driver.get(neighborhood_a)
+
                 street_tr_list = find_table_rows(
                     wait(driver, 10).until(
                         EC.presence_of_element_located((By.TAG_NAME, "table"))
@@ -55,11 +69,8 @@ def __main__():
                     print(address)
                     all_addresses.append(address)
 
-                driver.back()
         except Exception as e:
             print(f"Error: {e}")
-
-        driver.back()
 
     driver.quit()
 
