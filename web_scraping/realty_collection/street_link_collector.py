@@ -91,6 +91,7 @@ def __main__():
     driver.get("https://www.zapimoveis.com.br/venda/?itl_id=1000063&itl_name=zap_-_link-header_comprar_to_zap_resultado-pesquisa")
 
     cities = db_functions.get_all_cities(database)
+    random.shuffle(cities)
     for city in cities:
         locations = db_functions.get_locations_from_city(database, city["city_name"], "RJ")
 
