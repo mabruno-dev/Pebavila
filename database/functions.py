@@ -348,6 +348,22 @@ def comparison_query(string: str, values: tuple):
         raise QueryFormatingException("Mismatch between number of values and %s's")
 
 @announce
+def get_all_cities(database: Database):
+    try:
+        result = database.query(
+            "SELECT * FROM public.cities"
+        )
+        cities = [{
+            "city_id": item[0],
+            "city_name": item[1],
+            "city_state": item[2]
+            } for item in result]
+        return cities
+    except Exception as e:
+        database.connection.rollback() # Allow the connection to continue operating
+        print(f"Error {e}")
+
+@announce
 def get_all_neighborhoods(database: Database):
     try:
         result = database.query(
