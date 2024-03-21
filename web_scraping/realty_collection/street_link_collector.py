@@ -48,7 +48,7 @@ def get_street_url(driver: webdriver.Chrome, location: dict):
             except:
                 try:
                     driver.find_element(By.CLASS_NAME, "locations-feedback") # Tries to find the "not found" element
-                    print(Console.RED + "No results" + Console.RESET)
+                    print(Console.RED + "No results  " + Console.RESET)
                     return {
                         "address": address,
                         "url": None
