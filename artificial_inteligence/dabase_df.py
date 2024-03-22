@@ -83,6 +83,7 @@ def database_df():
         LIMIT 5000
         """)
     i = 0
+    realty_avarege_description = []
     for element in response:
         i += 1
         if element[7] == True:
@@ -98,13 +99,13 @@ def database_df():
             converted_description = np.array([0]*300)
         print(f"Etapa concluida {i}")
         element.pop(-1)
-
         for number in converted_description:
-            element.append(number)
+            realty_avarege_description.append(number)
             
 
     realties_df = pd.DataFrame(response)
     print('Translated with sucsess!!')
-    return realties_df
+    return realty_avarege_description, realties_df
 
-
+def insert_df(description = database_df()[0]):
+    pass
