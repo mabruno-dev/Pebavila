@@ -99,14 +99,16 @@ def database_df():
         print(f"Etapa concluida {i}")
         element.pop(-1)
         realty_avarege_description = []
-        realty_avarege_description.append(element[0])
+
+
         for number in converted_description:
             realty_avarege_description.append(number)
             
-
+        realty_avarege_description_tuple = (element[0], realty_avarege_description)
+        
     realties_df = pd.DataFrame(response)
     print('Translated with sucsess!!')
-    return realty_avarege_description, realties_df
+    return realty_avarege_description_tuple, realties_df
 
 def insert_df(description = database_df()[0]):
     pass
