@@ -83,7 +83,6 @@ def database_df():
         LIMIT 5000
         """)
     i = 0
-    realty_avarege_description = []
     for element in response:
         i += 1
         if element[7] == True:
@@ -99,6 +98,8 @@ def database_df():
             converted_description = np.array([0]*300)
         print(f"Etapa concluida {i}")
         element.pop(-1)
+        realty_avarege_description = []
+        realty_avarege_description.append(element[0])
         for number in converted_description:
             realty_avarege_description.append(number)
             
