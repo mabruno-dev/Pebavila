@@ -13,7 +13,8 @@ import pandas as pd
 
 import time
 
-
+nltk.download('stopwords')
+nltk.download('punkt')
 
 def convert_data_description(text, model):
     if text is None:
@@ -24,29 +25,34 @@ def convert_data_description(text, model):
         translator = GoogleTranslator(source='pt', target='en')
         translated_text = translator.translate(text)
     except:
-        translated_text = text
+        translated_text = 'Cannot translate description'
 
     tokens = word_tokenize(translated_text.lower())
     filtered_tokens = [word for word in tokens if word.isalpha() and word not in stop_words]
 
     word_vectors = []
     i = 0
+    word_vectors_error = [0] * 300
     for word in filtered_tokens:
         if word in model.key_to_index:  
             word_vectors.append(model[word])
-            print(f"Etapa concluida {i}")
+            
             i += 1
-
     if word_vectors:
         average_vector = np.mean(word_vectors, axis=0)
     else:
-        print("Nenhuma palavra encontrada nos embeddings.")
+        average_vector = np.array(word_vectors_error)
 
-    return average_vector
+    try:
+        return average_vector
+    except:
+        print('Erro grave na traducao')
 
 def database_df():
     database = Database()
+    print('Download...')
     model = api.load('word2vec-google-news-300')
+    print('Donload Concluido!')
     response = database.query("""
         SELECT
         r.realty_id,
@@ -59,8 +65,8 @@ def database_df():
         r.realty_furnished,
         r.realty_type,
         r.realty_floor,
-		r.realty_condo_price,
-		r.realty_property_tax,
+        r.realty_condo_price,
+        r.realty_property_tax,
         s.street_id,
         ci.city_id,
         n.neighborhood_id,
@@ -74,22 +80,28 @@ def database_df():
         INNER JOIN public.cities ci ON n.neighborhood_city = ci.city_id
 
         ORDER BY realty_id
-        LIMIT 35
+        LIMIT 5000
         """)
-
+    i = 0
     for element in response:
+        i += 1
         if element[7] == True:
             element[7] = 1
         else:
             element[7] = 0
     
-
-        converted_description = convert_data_description(element[-1], model)
-
+        try:
+            converted_description = convert_data_description(element[-1], model)
+            if converted_description == None:
+                raise Exception
+        except:
+            converted_description = np.array([0]*300)
+        print(f"Etapa concluida {i}")
         element.pop(-1)
 
         for number in converted_description:
             element.append(number)
+            
 
     realties_df = pd.DataFrame(response)
     print('Translated with sucsess!!')
