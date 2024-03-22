@@ -54,7 +54,15 @@ def get_street_url(driver: webdriver.Chrome, location: dict):
                         "url": None
                     }
                 except:
-                    print("Searching...", end="\r")
+                    try:
+                        driver.find_element(By.CSS_SELECTOR, 'a[class="multiselect__redirect"]') # Tries to find the first element of "Imobiliárias"
+                        print(Console.RED + "No results  " + Console.RESET)
+                        return {
+                            "address": address,
+                            "url": None
+                        }
+                    except:
+                        print("Searching...", end="\r")
 
         location_div.click()
 
@@ -92,7 +100,7 @@ def __main__():
 
     cities = db_functions.get_all_cities(database)
     for city in cities:
-        locations = db_functions.get_locations_from_city(database, city["city_name"], "RJ")
+        locations = db_functions.get_locations_from_city(database, "DUQUE DE CAXIAS", "RJ")
 
         for index, location in enumerate(locations):
             print(Console.BLACK + f"{index + 1}/{len(locations)}" + Console.RESET, end=" ")
