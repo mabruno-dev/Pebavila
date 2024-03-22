@@ -100,7 +100,7 @@ def __main__():
 
     cities = db_functions.get_all_cities(database)
     for city in cities:
-        locations = db_functions.get_locations_from_city(database, "DUQUE DE CAXIAS", "RJ")
+        locations = db_functions.get_locations_from_city(database, city["city_name"], "RJ")
 
         for index, location in enumerate(locations):
             print(Console.BLACK + f"{index + 1}/{len(locations)}" + Console.RESET, end=" ")
