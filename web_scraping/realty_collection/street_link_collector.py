@@ -129,7 +129,7 @@ def __main__():
         fix_hairline=True,
     )
 
-    driver.get("https://www.com.br/venda/?itl_id=1000063&itl_name=zap_-_link-header_comprar_to_zap_resultado-pesquisa")
+    driver.get("https://www.zapimoveis.com.br/venda/?itl_id=1000063&itl_name=zap_-_link-header_comprar_to_zap_resultado-pesquisa")
 
     cities = db_functions.get_all_cities(database)
     for city in cities:
