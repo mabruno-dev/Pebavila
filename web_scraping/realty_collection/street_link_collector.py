@@ -19,14 +19,14 @@ from utils.constants import ConsoleColors as Console
 
 database = Database(ensure_connection=True)
 
-def get_address_url(driver: webdriver.Chrome, location: dict):
+def get_address_url(driver: webdriver.Chrome, location: dict, update = False):
 
     global database
     
     address = f"{location['street']}, {location['city']} - {location['state']}"
     address = address.replace("'", "")
 
-    if not db_functions.Zapimoveis.check_address_url_exists(database, {"address": address, "url": None}):
+    if not db_functions.Zapimoveis.check_address_url_exists(database, {"address": address, "url": None}) and not update:
         print(Console.BOLD_WHITE + f"Getting url from address: {address}" + Console.RESET)
 
         text_input = Wait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'input[placeholder="Digite o nome da rua, bairro ou cidade"]')))
@@ -83,8 +83,8 @@ def get_address_url(driver: webdriver.Chrome, location: dict):
 def fix_unwanted_urls(driver: webdriver):
     print("Looking for mistakes...")
     result = database.query(
-        "SELECT id, address FROM zapimoveis.address_urls WHERE url NOT LIKE '%https://www.zapimoveis.com.br/venda/imoveis/rj%'"
-    )
+        "SELECT id, address FROM zapimoveis.address_urls WHERE url NOT LIKE '%%https://www.zapimoveis.com.br/venda/imoveis/rj%%'"
+        )
     if result:
         for item in result:
             address = item[1]
@@ -120,6 +120,8 @@ def __main__():
 
     driver.get("https://www.zapimoveis.com.br/venda/?itl_id=1000063&itl_name=zap_-_link-header_comprar_to_zap_resultado-pesquisa")
 
+    fix_unwanted_urls(driver)
+
     cities = db_functions.get_all_cities(database)
     for city in cities:
         locations = db_functions.get_locations_from_city(database, city["city_name"], "RJ")
@@ -130,7 +132,7 @@ def __main__():
             if address_url:
                 db_functions.Zapimoveis.insert_address_url(database, address_url)
         
-        fix_unwanted_urls(driver)
+        # fix_unwanted_urls(driver)
         
 
 
