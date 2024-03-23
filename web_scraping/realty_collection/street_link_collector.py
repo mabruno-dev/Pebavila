@@ -120,8 +120,6 @@ def __main__():
 
     driver.get("https://www.zapimoveis.com.br/venda/?itl_id=1000063&itl_name=zap_-_link-header_comprar_to_zap_resultado-pesquisa")
 
-    fix_unwanted_urls(driver)
-
     cities = db_functions.get_all_cities(database)
     for city in cities:
         locations = db_functions.get_locations_from_city(database, city["city_name"], "RJ")
@@ -132,7 +130,7 @@ def __main__():
             if address_url:
                 db_functions.Zapimoveis.insert_address_url(database, address_url)
         
-        # fix_unwanted_urls(driver)
+        fix_unwanted_urls(driver)
         
 
 
