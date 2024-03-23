@@ -94,7 +94,7 @@ def get_address_url(driver: webdriver.Chrome, location: dict, update = False):
 def fix_unwanted_urls(driver: webdriver):
     print("Looking for mistakes...")
     result = database.query(
-        "SELECT id, address FROM address_urls WHERE url NOT LIKE '%%https://www.com.br/venda/imoveis/rj%%'"
+        "SELECT id, zapimoves.address FROM address_urls WHERE url NOT LIKE '%%https://www.com.br/venda/imoveis/rj%%'"
         )
     if result:
         for item in result:
