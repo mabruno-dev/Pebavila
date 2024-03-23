@@ -64,26 +64,16 @@ def get_address_url(driver: webdriver.Chrome, location: dict, update = False):
                         }
                     except:
                         print("Searching...", end="\r")
-        while True:
-            try:
-                location_div.click()
-                break
-            except Exception as e:
-                print(f"Error: {e}", end="\r")
-                sleep(1)
+                        
+        location_div.click()
 
         sleep(1)
 
         street_url = driver.current_url
         print(Console.GREEN + "Success: " + Console.RESET + f"{street_url}")
 
-        while True:
-            try:
-                location_div.click()
-                break
-            except Exception as e:
-                print(f"Error: {e}", end="\r")
-                sleep(1)
+        clear_button = Wait(driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, "search-multiselect__clean-button")))
+        clear_button.click()
         
         return {
             "address": address,
@@ -95,8 +85,8 @@ def get_address_url(driver: webdriver.Chrome, location: dict, update = False):
 def fix_unwanted_urls(driver: webdriver):
     print("Looking for mistakes...")
     result = database.query(
-        "SELECT id, address FROM zapimoves.address_urls WHERE url NOT LIKE '%%https://www.com.br/venda/imoveis/rj%%'"
-        )
+        "SELECT id, address FROM zapimoveis.address_urls WHERE url NOT LIKE '%%https://www.com.br/venda/imoveis/rj%%'"
+    )
     if result:
         for item in result:
             address = item[1]
@@ -119,7 +109,10 @@ def __main__():
 
     global database
 
-    driver = webdriver.Chrome()
+    options = webdriver.ChromeOptions()
+    options.add_argument('--log-level=3')
+
+    driver = webdriver.Chrome(options=options)
 
     stealth(driver,
         languages=["en-US", "en"],
