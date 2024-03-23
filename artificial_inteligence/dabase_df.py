@@ -15,6 +15,9 @@ import time
 
 nltk.download('stopwords')
 nltk.download('punkt')
+print('Download...')
+model = api.load('word2vec-google-news-300')
+print('Donload Concluido!')
 
 def convert_data_description(text, model):
     if text is None:
@@ -49,10 +52,9 @@ def convert_data_description(text, model):
         print('Erro grave na traducao')
 
 def database_df():
+    global database
+    
     database = Database()
-    print('Download...')
-    model = api.load('word2vec-google-news-300')
-    print('Donload Concluido!')
     response = database.query("""
         SELECT
         r.realty_id,
@@ -79,8 +81,7 @@ def database_df():
         INNER JOIN public.neighborhoods n ON s.street_neighborhood = n.neighborhood_id
         INNER JOIN public.cities ci ON n.neighborhood_city = ci.city_id
 
-        ORDER BY realty_id
-        LIMIT 5000
+        ORDER BY realty_id 
         """)
     i = 0
     for element in response:
@@ -104,9 +105,10 @@ def database_df():
 
 
             for number in converted_description:
-                realty_avarege_description.append(number)
+                realty_avarege_description.append(float(number))
                 
             realty_avarege_description_tuple = (element[0], realty_avarege_description)
+            insert_df(realty_avarege_description_tuple)
             print(f"Etapa concluida {i}")
         else:
             print("Description already converted and stored.")
@@ -115,22 +117,11 @@ def database_df():
     print('Translated with sucsess!!')
     return realty_avarege_description_tuple, realties_df
 
-def insert_df():
-    with Database() as database:
-        df_result = database_df()
-        realty_id, avg_vector = df_result[0]
-
-        result = database.queryone(
-            "SELECT desc_id FROM ai.realty_descriptions WHERE realty_id = %s",
-            (realty_id,)
-        )
-        if not result:
-            database.execute(
-                "INSERT INTO ai.realty_descriptions (desc_avg_vector, desc_realty) VALUES (%s, %s)",
-                (avg_vector, realty_id)
-            )
-            database.commit()
-        else:
-            print("Description already converted and stored.")
-
-insert_df()
+def insert_df(data):
+    realty_id, avg_vector = data
+    database.execute(
+        "INSERT INTO ai.realty_descriptions (desc_avg_vector, desc_realty) VALUES (%s, %s)",
+        (avg_vector, realty_id)
+    )
+    database.commit()
+database_df()
