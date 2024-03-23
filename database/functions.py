@@ -3,6 +3,7 @@ project_name = "the-beginning"; sys.path.append(os.path.abspath(__file__)[:os.pa
 # Resolve module imports
 
 from utils.wrappers import announce
+from utils.constants import ConsoleColors as Console
 from database.connection import Database
 
 from datetime import datetime
@@ -13,6 +14,10 @@ class QueryFormatingException(Exception):
 class InvalidLocationException(Exception):
     pass
 
+def error(database: Database, e: Exception):
+    database.connection.rollback() # Allow the connection to continue operating
+    print(f"{Console.RED} {e}{Console.RESET}")
+
 @announce
 def generic_delete(schema_name, table_name, id_record):
     try:
@@ -22,16 +27,15 @@ def generic_delete(schema_name, table_name, id_record):
             database.commit()
         return "success"
     except Exception as e:
-        database.connection.rollback() # Allow the connection to continue operating
-        print(f"Error: {e}")
+        error(database, e)
 
 @announce
 def generic_update():
     try:
         pass
     except Exception as e:
-        # database.connection.rollback() # Allow the connection to continue operating
-        print(f"Error: {e}")
+        # error(database, e)
+        pass
 
 @announce
 def get_state_id(database: Database, state_acronym: str):
@@ -43,8 +47,7 @@ def get_state_id(database: Database, state_acronym: str):
             return state_id[0]
 
     except Exception as e:
-        database.connection.rollback() # Allow the connection to continue operating
-        print(f"Error: {e}")
+        error(database, e)
 
 @announce
 def get_or_insert_city(database: Database, city_name, state_id):
@@ -62,8 +65,7 @@ def get_or_insert_city(database: Database, city_name, state_id):
             print("Record added to the database succesfully")
             return city_id
     except Exception as e:
-        database.connection.rollback() # Allow the connection to continue operating
-        print(f"Error: {e}")
+        error(database, e)
 
 @announce
 def get_or_insert_neighborhood(database: Database, neighborhood_name, city_id):
@@ -86,8 +88,7 @@ def get_or_insert_neighborhood(database: Database, neighborhood_name, city_id):
             print("Record added to the database succesfully")
             return neighborhood_id
     except Exception as e:
-        database.connection.rollback() # Allow the connection to continue operating
-        print(f"Error: {e}")
+        error(database, e)
 
 @announce
 def check_street_exists(database: Database, street_name, neighborhood_id):
@@ -99,8 +100,7 @@ def check_street_exists(database: Database, street_name, neighborhood_id):
 
         return street_id is not None
     except Exception as e:
-        database.connection.rollback() # Allow the connection to continue operating
-        print(f"Error: {e}")
+        error(database, e)
     try:
         database.execute(
             'INSERT INTO public.streets (street_name, street_neighborhood) VALUES (%s, %s)',
@@ -108,8 +108,7 @@ def check_street_exists(database: Database, street_name, neighborhood_id):
         )
         database.commit()
     except Exception as e:
-        database.connection.rollback() # Allow the connection to continue operating
-        print(f"Error: {e}")
+        error(database, e)
 
 @announce
 def check_neighborhood_exists(database: Database, neighborhood_name, city_id):
@@ -121,8 +120,7 @@ def check_neighborhood_exists(database: Database, neighborhood_name, city_id):
 
         return neighborhood_id is not None
     except Exception as e:
-        database.connection.rollback() # Allow the connection to continue operating
-        print(f"Error: {e}")
+        error(database, e)
     try:
         database.execute(
             'INSERT INTO public.neighborhoods (neighborhood_name, neighborhood_city) VALUES (%s, %s)',
@@ -130,8 +128,7 @@ def check_neighborhood_exists(database: Database, neighborhood_name, city_id):
         )
         database.commit()
     except Exception as e:
-        database.connection.rollback() # Allow the connection to continue operating
-        print(f"Error: {e}")
+        error(database, e)
 
 @announce
 def insert_street(database: Database, street_name: str, neighborhood_id: int):
@@ -146,8 +143,7 @@ def insert_street(database: Database, street_name: str, neighborhood_id: int):
         else:
             print("Record already exists")
     except Exception as e:
-        database.connection.rollback() # Allow the connection to continue operating
-        print(f"Error: {e}")
+        error(database, e)
 
 @announce
 def insert_street_neighborhood_city(database: Database, location: dict):
@@ -171,8 +167,7 @@ def insert_street_neighborhood_city(database: Database, location: dict):
                 database.commit()
                 print('Record added to the database successfully')
     except Exception as e:
-        database.connection.rollback() # Allow the connection to continue operating
-        print(f"Error: {e}")
+        error(database, e)
 
 @announce
 def insert_neighborhood_city(database: Database, location: dict):
@@ -193,8 +188,7 @@ def insert_neighborhood_city(database: Database, location: dict):
                 database.commit()
                 print('Record added to the database successfully')
     except Exception as e:
-        database.connection.rollback() # Allow the connection to continue operating
-        print(f"Error: {e}")
+        error(database, e)
 
 @announce
 def set_streets_neighborhoods_cities(json_streets):
@@ -203,8 +197,7 @@ def set_streets_neighborhoods_cities(json_streets):
             for street in json_streets['addresses']:
                 insert_street_neighborhood_city(database, street)
     except Exception as e:
-        database.connection.rollback() # Allow the connection to continue operating
-        print(f"Error: {e}")
+        error(database, e)
 
 @announce
 def get_street_id(database: Database, street_name: str, neighborhood_id):
@@ -219,8 +212,7 @@ def get_street_id(database: Database, street_name: str, neighborhood_id):
         else:
             pass
     except Exception as e:
-        database.connection.rollback() # Allow the connection to continue operating
-        print(f"Error: {e}")
+        error(database, e)
 
 @announce
 def get_neighborhood_id(database: Database, neighborhood_name: str, city_id):
@@ -517,8 +509,7 @@ def check_realty_exists(database: Database, realty: dict):
             )
         )
     except Exception as e:
-        database.connection.rollback() # Allow the connection to continue operating
-        print(f"Error: {e}")
+        error(database, e)
 
 @announce
 def insert_realty(database: Database, realty: dict):
@@ -539,8 +530,7 @@ def insert_realty(database: Database, realty: dict):
             else:
                 print("Record already exists")
     except Exception as e:
-        database.connection.rollback() # Allow the connection to continue operating
-        print(f"Error: {e}")
+        error(database, e)
 
 # @announce
 # def update_realty_by_url(database: Database, realty: dict):
@@ -588,8 +578,7 @@ def get_neighborhood_name(database: Database, neighborhood_id):
         )
         return data[1]
     except Exception as e:
-        database.connection.rollback() # Allow the connection to continue operating
-        print(f"Error: {e}")
+        error(database, e)
 
 @announce
 def get_locations_from_city(database: Database, city: str, state: str):
@@ -623,8 +612,7 @@ def get_locations_from_city(database: Database, city: str, state: str):
             locations.append(location)
         return locations
     except Exception as e:
-        database.connection.rollback() # Allow the connection to continue operating
-        print(f"Error: {e}")
+        error(database, e)
 
 @announce
 def get_realty_urls(database: Database):
@@ -635,8 +623,7 @@ def get_realty_urls(database: Database):
             url_list.append(item[0])
         return url_list
     except Exception as e:
-        database.connection.rollback() # Allow the connection to continue operating
-        print(f"Error: {e}")
+        error(database, e)
 
 # @announce
 # def get_outdated_realty_urls(database: Database):
@@ -658,8 +645,7 @@ def check_realty_exists_by_url(database: Database, url: str):
             (url,)
         )
     except Exception as e:
-        database.connection.rollback() # Allow the connection to continue operating
-        print(f"Error: {e}")
+        error(database, e)
 
 class Zapimoveis:
 
@@ -688,6 +674,21 @@ class Zapimoveis:
                 print("Record added to the database successfully")
             else:
                 print("Record already exists")
+        except Exception as e:
+            database.connection.rollback() # Allow the connection to continue operating
+            print(f"Error: {e}")
+
+    @staticmethod
+    @announce
+    def update_address_url(database: Database, address_url: dict):
+        try:
+            if Zapimoveis.check_address_url_exists(database, address_url):
+                database.execute(
+                    "UPDATE zapimoveis.address_urls SET url = %s, updated_at = %s WHERE address = %s",
+                    (address_url["url"], datetime.now(), address_url["address"])
+                )
+                database.commit()
+                print("Record updated successfully")
         except Exception as e:
             database.connection.rollback() # Allow the connection to continue operating
             print(f"Error: {e}")

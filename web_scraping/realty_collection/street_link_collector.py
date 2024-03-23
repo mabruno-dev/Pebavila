@@ -19,7 +19,7 @@ from utils.constants import ConsoleColors as Console
 
 database = Database(ensure_connection=True)
 
-def get_street_url(driver: webdriver.Chrome, location: dict):
+def get_address_url(driver: webdriver.Chrome, location: dict):
 
     global database
     
@@ -80,6 +80,28 @@ def get_street_url(driver: webdriver.Chrome, location: dict):
     else:
         print(Console.BLUE + "Skipped " + Console.RESET + f"{address}")
 
+def fix_unwanted_urls(driver: webdriver):
+    print("Looking for mistakes...")
+    result = database.query(
+        "SELECT id, address FROM zapimoveis.address_urls WHERE url NOT LIKE '%https://www.zapimoveis.com.br/venda/imoveis/rj%'"
+    )
+    if result:
+        for item in result:
+            address = item[1]
+            street_and_city, state = address.split(" - ")
+            street, city = street_and_city.split(", ")
+            location = {
+                "state": state,
+                "city": city,
+                "neighborhood": None,
+                "street": street
+            }
+            address_url = get_address_url(driver, location)
+            if address_url:
+                    db_functions.Zapimoveis.update_address_url(database, address_url)
+    else:
+        print("All good!")
+
 @timed
 def __main__():
 
@@ -104,9 +126,13 @@ def __main__():
 
         for index, location in enumerate(locations):
             print(Console.BLACK + f"{index + 1}/{len(locations)}" + Console.RESET, end=" ")
-            address_url = get_street_url(driver, location)
+            address_url = get_address_url(driver, location)
             if address_url:
                 db_functions.Zapimoveis.insert_address_url(database, address_url)
+        
+        fix_unwanted_urls(driver)
+        
+
 
     driver.quit()
 
