@@ -26,7 +26,7 @@ def get_address_url(driver: webdriver.Chrome, location: dict, update = False):
     address = f"{location['street']}, {location['city']} - {location['state']}"
     address = address.replace("'", "")
 
-    if not (db_functions.Zapimoveis.check_address_url_exists(database, {"address": address, "url": None}) or update):
+    if not db_functions.Zapimoveis.check_address_url_exists(database, {"address": address, "url": None}) or update:
         print(Console.BOLD_WHITE + f"Getting url from address: {address}" + Console.RESET)
 
         text_input = Wait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'input[placeholder="Digite o nome da rua, bairro ou cidade"]')))
@@ -63,8 +63,13 @@ def get_address_url(driver: webdriver.Chrome, location: dict, update = False):
                         }
                     except:
                         print("Searching...", end="\r")
-
-        location_div.click()
+        while True:
+            try:
+                location_div.click()
+                break
+            except Exception as e:
+                print(f"Error: {e}", end="\r")
+                sleep(1)
 
         sleep(1)
 
@@ -98,7 +103,7 @@ def fix_unwanted_urls(driver: webdriver):
             }
             address_url = get_address_url(driver, location, update=True)
             if address_url:
-                    db_functions.Zapimoveis.update_address_url(database, address_url)
+                db_functions.Zapimoveis.update_address_url(database, address_url)
     else:
         print("All good!")
 
