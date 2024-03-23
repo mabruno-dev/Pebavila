@@ -14,7 +14,8 @@ import random
 
 from utils.wrappers import timed
 from database.connection import Database
-from database import functions as db_functions
+from database.functions.zapimoveis import *
+from database.functions.public import *
 from utils.constants import ConsoleColors as Console
 
 database = Database(ensure_connection=True)
@@ -26,7 +27,7 @@ def get_address_url(driver: webdriver.Chrome, location: dict, update = False):
     address = f"{location['street']}, {location['city']} - {location['state']}"
     address = address.replace("'", "")
 
-    if not db_functions.check_address_url_exists(database, {"address": address, "url": None}) or update:
+    if not check_address_url_exists(database, {"address": address, "url": None}) or update:
         print(Console.BOLD_WHITE + f"Getting url from address: {address}" + Console.RESET)
 
         text_input = Wait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'input[placeholder="Digite o nome da rua, bairro ou cidade"]')))
@@ -94,7 +95,7 @@ def get_address_url(driver: webdriver.Chrome, location: dict, update = False):
 def fix_unwanted_urls(driver: webdriver):
     print("Looking for mistakes...")
     result = database.query(
-        "SELECT id, zapimoves.address FROM address_urls WHERE url NOT LIKE '%%https://www.com.br/venda/imoveis/rj%%'"
+        "SELECT id, address FROM zapimoves.address_urls WHERE url NOT LIKE '%%https://www.com.br/venda/imoveis/rj%%'"
         )
     if result:
         for item in result:
@@ -109,7 +110,7 @@ def fix_unwanted_urls(driver: webdriver):
             }
             address_url = get_address_url(driver, location, update=True)
             if address_url:
-                db_functions.update_address_url(database, address_url)
+                update_address_url(database, address_url)
     else:
         print("All good!")
 
@@ -131,15 +132,15 @@ def __main__():
 
     driver.get("https://www.zapimoveis.com.br/venda/?itl_id=1000063&itl_name=zap_-_link-header_comprar_to_zap_resultado-pesquisa")
 
-    cities = db_functions.get_all_cities(database)
+    cities = get_all_cities(database)
     for city in cities:
-        locations = db_functions.get_locations_from_city(database, city["city_name"], "RJ")
+        locations = get_locations_from_city(database, city["city_name"], "RJ")
 
         for index, location in enumerate(locations):
             print(Console.BLACK + f"{index + 1}/{len(locations)}" + Console.RESET, end=" ")
             address_url = get_address_url(driver, location)
             if address_url:
-                db_functions.insert_address_url(database, address_url)
+                insert_address_url(database, address_url)
         
         fix_unwanted_urls(driver)
         

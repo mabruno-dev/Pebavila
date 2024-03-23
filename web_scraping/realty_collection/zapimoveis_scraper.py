@@ -19,7 +19,8 @@ from utils.functions import *
 from utils.wrappers import timed, mute
 from web_scraping.realty_collection.realty_scraper import scrape_realty
 from database.connection import Database
-from database import functions as db_functions
+from database.functions.public import *
+from database.functions.zapimoveis import *
 from utils.constants import ConsoleColors as Console
 
 realty_div_size = 300 # Usually 300 but may vary
@@ -128,7 +129,7 @@ def scrape_url(address_url: dict):
                         close_span.click()
                         pause_loading = False
                     finally:
-                        if not db_functions.check_realty_exists_by_url(database, realty_url):
+                        if not check_realty_exists_by_url(database, realty_url):
                             print(Console.YELLOW + "Scraping" + Console.RESET + f" realty number {data_position}")
                             try:
                                 # Scrape realty info
@@ -139,7 +140,7 @@ def scrape_url(address_url: dict):
                                 print(Console.RED + f"Error at webpage: {realty_url}" + Console.RESET)
                                 traceback.print_exc()
                             if realty_info != None:
-                                db_functions.insert_realty(database, realty_info)
+                                insert_realty(database, realty_info)
                         else:
                             print(Console.BLUE + "Skipped"  + Console.RESET + f" realty number {data_position}")
                         data_position += 1
@@ -166,7 +167,7 @@ def scrape_url(address_url: dict):
         except Exception as e:
             print(f"Error: {e}")
             break
-    db_functions.set_address_url_scraped(database, address_url)
+    set_address_url_scraped(database, address_url)
 
 def reset_control_variables():
 
@@ -183,12 +184,12 @@ def __main__():
 
     global database
 
-    address_url_list = db_functions.get_address_urls(database)
+    address_url_list = get_address_urls(database)
     random.shuffle(address_url_list) # This is done so that multiple instances of the scraper have less chance of scraping the same url at the same time
 
     for address_url in address_url_list:
         if address_url["url"] != None:
-            if not db_functions.check_address_url_is_scraped(database, address_url["address"]):
+            if not check_address_url_is_scraped(database, address_url["address"]):
                 print(Console.YELLOW + "Scraping" + Console.RESET + f" realties from: {address_url['address']}")
                 reset_control_variables()
                 scrape_url(address_url)
