@@ -26,7 +26,7 @@ def get_address_url(driver: webdriver.Chrome, location: dict, update = False):
     address = f"{location['street']}, {location['city']} - {location['state']}"
     address = address.replace("'", "")
 
-    if not db_functions.Zapimoveis.check_address_url_exists(database, {"address": address, "url": None}) or update:
+    if not db_functions.check_address_url_exists(database, {"address": address, "url": None}) or update:
         print(Console.BOLD_WHITE + f"Getting url from address: {address}" + Console.RESET)
 
         text_input = Wait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'input[placeholder="Digite o nome da rua, bairro ou cidade"]')))
@@ -76,7 +76,13 @@ def get_address_url(driver: webdriver.Chrome, location: dict, update = False):
         street_url = driver.current_url
         print(Console.GREEN + "Success: " + Console.RESET + f"{street_url}")
 
-        location_div.click()
+        while True:
+            try:
+                location_div.click()
+                break
+            except Exception as e:
+                print(f"Error: {e}", end="\r")
+                sleep(1)
         
         return {
             "address": address,
@@ -88,7 +94,7 @@ def get_address_url(driver: webdriver.Chrome, location: dict, update = False):
 def fix_unwanted_urls(driver: webdriver):
     print("Looking for mistakes...")
     result = database.query(
-        "SELECT id, address FROM zapimoveis.address_urls WHERE url NOT LIKE '%%https://www.zapimoveis.com.br/venda/imoveis/rj%%'"
+        "SELECT id, address FROM address_urls WHERE url NOT LIKE '%%https://www.com.br/venda/imoveis/rj%%'"
         )
     if result:
         for item in result:
@@ -103,7 +109,7 @@ def fix_unwanted_urls(driver: webdriver):
             }
             address_url = get_address_url(driver, location, update=True)
             if address_url:
-                db_functions.Zapimoveis.update_address_url(database, address_url)
+                db_functions.update_address_url(database, address_url)
     else:
         print("All good!")
 
@@ -123,7 +129,7 @@ def __main__():
         fix_hairline=True,
     )
 
-    driver.get("https://www.zapimoveis.com.br/venda/?itl_id=1000063&itl_name=zap_-_link-header_comprar_to_zap_resultado-pesquisa")
+    driver.get("https://www.com.br/venda/?itl_id=1000063&itl_name=zap_-_link-header_comprar_to_zap_resultado-pesquisa")
 
     cities = db_functions.get_all_cities(database)
     for city in cities:
@@ -133,12 +139,10 @@ def __main__():
             print(Console.BLACK + f"{index + 1}/{len(locations)}" + Console.RESET, end=" ")
             address_url = get_address_url(driver, location)
             if address_url:
-                db_functions.Zapimoveis.insert_address_url(database, address_url)
+                db_functions.insert_address_url(database, address_url)
         
         fix_unwanted_urls(driver)
         
-
-
     driver.quit()
 
 if __name__ == "__main__":

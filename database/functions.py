@@ -625,18 +625,6 @@ def get_realty_urls(database: Database):
     except Exception as e:
         error(database, e)
 
-# @announce
-# def get_outdated_realty_urls(database: Database):
-#     try:
-#         url_list = list()
-#         temp = database.query("SELECT realty_url FROM public.realties WHERE up_to_date = 0")
-#         for item in temp:
-#             url_list.append(item[0])
-#         return url_list
-#     except Exception as e:
-#         database.connection.rollback() # Allow the connection to continue operating
-#         print(f"Error: {e}")
-
 @announce
 def check_realty_exists_by_url(database: Database, url: str):
     try:
@@ -647,103 +635,94 @@ def check_realty_exists_by_url(database: Database, url: str):
     except Exception as e:
         error(database, e)
 
-class Zapimoveis:
-
-    @staticmethod
-    @announce
-    def check_address_url_exists(database: Database, address_url: dict):
-        try:
-            return database.queryone(
-                "SELECT id FROM zapimoveis.address_urls WHERE address = %s", 
-                (address_url["address"],)
-            )
-        except Exception as e:
-            database.connection.rollback() # Allow the connection to continue operating
-            print(f"Error: {e}")
-            
-    @staticmethod
-    @announce
-    def insert_address_url(database: Database, address_url: dict):
-        try:
-            if not Zapimoveis.check_address_url_exists(database, address_url):
-                database.execute(
-                    "INSERT INTO zapimoveis.address_urls (address, url) VALUES (%s, %s)", 
-                    (address_url["address"], address_url["url"])
-                )
-                database.commit()
-                print("Record added to the database successfully")
-            else:
-                print("Record already exists")
-        except Exception as e:
-            database.connection.rollback() # Allow the connection to continue operating
-            print(f"Error: {e}")
-
-    @staticmethod
-    @announce
-    def update_address_url(database: Database, address_url: dict):
-        try:
-            if Zapimoveis.check_address_url_exists(database, address_url):
-                database.execute(
-                    "UPDATE zapimoveis.address_urls SET url = %s, updated_at = %s WHERE address = %s",
-                    (address_url["url"], datetime.now(), address_url["address"])
-                )
-                database.commit()
-                print("Record updated successfully")
-        except Exception as e:
-            database.connection.rollback() # Allow the connection to continue operating
-            print(f"Error: {e}")
-
-    @staticmethod
-    @announce
-    def get_address_urls(database: Database):
-        try:
-            result = database.query(
-                "SELECT * FROM zapimoveis.address_urls"
-            )
-            address_url_list = list()
-            for item in result:
-                address_url = {
-                    "address": item[1],
-                    "url": item[2]
-                }
-                address_url_list.append(address_url)
-            return address_url_list
-        except Exception as e:
-            database.connection.rollback()
-            print(f"Error: {e}")
-
-    @staticmethod
-    @announce
-    def set_address_url_scraped(database: Database, address_url: dict):
-        try:
+@announce
+def check_address_url_exists(database: Database, address_url: dict):
+    try:
+        return database.queryone(
+            "SELECT id FROM address_urls WHERE address = %s", 
+            (address_url["address"],)
+        )
+    except Exception as e:
+        database.connection.rollback() # Allow the connection to continue operating
+        print(f"Error: {e}")
+        
+@announce
+def insert_address_url(database: Database, address_url: dict):
+    try:
+        if not check_address_url_exists(database, address_url):
             database.execute(
-                "UPDATE zapimoveis.address_urls SET scraped = 1 WHERE address = %s",
-                (address_url["address"],)
+                "INSERT INTO address_urls (address, url) VALUES (%s, %s)", 
+                (address_url["address"], address_url["url"])
             )
             database.commit()
-        except Exception as e:
-            database.connection.rollback()
-            print(f"Error: {e}")
-    
-    @staticmethod
-    @announce
-    def set_address_url_not_scraped(database: Database, address_url: dict):
-        try:
+            print("Record added to the database successfully")
+        else:
+            print("Record already exists")
+    except Exception as e:
+        database.connection.rollback() # Allow the connection to continue operating
+        print(f"Error: {e}")
+
+@announce
+def update_address_url(database: Database, address_url: dict):
+    try:
+        if check_address_url_exists(database, address_url):
             database.execute(
-                "UPDATE zapimoveis.address_urls SET scraped = 0 WHERE address = %s",
-                (address_url["address"],)
+                "UPDATE address_urls SET url = %s, updated_at = %s WHERE address = %s",
+                (address_url["url"], datetime.now(), address_url["address"])
             )
             database.commit()
-        except Exception as e:
-            database.connection.rollback()
-            print(f"Error: {e}")
+            print("Record updated successfully")
+    except Exception as e:
+        database.connection.rollback() # Allow the connection to continue operating
+        print(f"Error: {e}")
 
-    @staticmethod
-    @announce
-    def check_address_url_is_scraped(database: Database, address: str):
+@announce
+def get_address_urls(database: Database):
+    try:
+        result = database.query(
+            "SELECT * FROM address_urls"
+        )
+        address_url_list = list()
+        for item in result:
+            address_url = {
+                "address": item[1],
+                "url": item[2]
+            }
+            address_url_list.append(address_url)
+        return address_url_list
+    except Exception as e:
+        database.connection.rollback()
+        print(f"Error: {e}")
+
+@announce
+def set_address_url_scraped(database: Database, address_url: dict):
+    try:
+        database.execute(
+            "UPDATE address_urls SET scraped = 1 WHERE address = %s",
+            (address_url["address"],)
+        )
+        database.commit()
+    except Exception as e:
+        database.connection.rollback()
+        print(f"Error: {e}")
+
+@announce
+def set_address_url_not_scraped(database: Database, address_url: dict):
+    try:
+        database.execute(
+            "UPDATE address_urls SET scraped = 0 WHERE address = %s",
+            (address_url["address"],)
+        )
+        database.commit()
+    except Exception as e:
+        database.connection.rollback()
+        print(f"Error: {e}")
+
+@announce
+def check_address_url_is_scraped(database: Database, address: str):
         try:
             result = database.queryone(
-                "SELECT scraped FROM zapimoveis.address_urls WHERE address = %s",
+                "SELECT scraped FROM address_urls WHERE address = %s",
                 (address,)
             )
             return result[0]
