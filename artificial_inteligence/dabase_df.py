@@ -96,8 +96,6 @@ def database_df():
         if [element[0]] not in result:
             try:
                 converted_description = convert_data_description(element[-1], model)
-                if converted_description == None:
-                    raise Exception
             except:
                 converted_description = np.array([0]*300)
             element.pop(-1)
@@ -110,6 +108,16 @@ def database_df():
             realty_avarege_description_tuple = (element[0], realty_avarege_description)
             insert_df(realty_avarege_description_tuple)
             print(f"Etapa concluida {i}")
+            '''data_description_translated = database.query(
+
+                SELECT 
+                desc_avg_vector 
+                FROM
+                ai.realty_descriptions
+                ORDER BY desc_id ASC 
+
+                                                )
+            print(data_description_translated)'''
         else:
             print("Description already converted and stored.")
 
@@ -124,4 +132,6 @@ def insert_df(data):
         (avg_vector, realty_id)
     )
     database.commit()
+
+
 database_df()
