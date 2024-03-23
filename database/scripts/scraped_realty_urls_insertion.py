@@ -3,7 +3,7 @@ project_name = "the-beginning"; sys.path.append(os.path.abspath(__file__)[:os.pa
 # Resolve module imports
 
 import json
-from database.functions import Zapimoveis
+from database.functions_old import Zapimoveis
 from database.connection import Database
 
 def __main__():
