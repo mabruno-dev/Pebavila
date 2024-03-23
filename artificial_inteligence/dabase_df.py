@@ -89,26 +89,48 @@ def database_df():
             element[7] = 1
         else:
             element[7] = 0
-    
-        try:
-            converted_description = convert_data_description(element[-1], model)
-            if converted_description == None:
-                raise Exception
-        except:
-            converted_description = np.array([0]*300)
-        print(f"Etapa concluida {i}")
-        element.pop(-1)
-        realty_avarege_description = []
+        result = database.query(
+            "SELECT desc_id FROM ai.realty_descriptions"
+        )
+        if [element[0]] not in result:
+            try:
+                converted_description = convert_data_description(element[-1], model)
+                if converted_description == None:
+                    raise Exception
+            except:
+                converted_description = np.array([0]*300)
+            element.pop(-1)
+            realty_avarege_description = []
 
 
-        for number in converted_description:
-            realty_avarege_description.append(number)
-            
-        realty_avarege_description_tuple = (element[0], realty_avarege_description)
-        
+            for number in converted_description:
+                realty_avarege_description.append(number)
+                
+            realty_avarege_description_tuple = (element[0], realty_avarege_description)
+            print(f"Etapa concluida {i}")
+        else:
+            print("Description already converted and stored.")
+
     realties_df = pd.DataFrame(response)
     print('Translated with sucsess!!')
     return realty_avarege_description_tuple, realties_df
 
-def insert_df(description = database_df()[0]):
-    pass
+def insert_df():
+    with Database() as database:
+        df_result = database_df()
+        realty_id, avg_vector = df_result[0]
+
+        result = database.queryone(
+            "SELECT desc_id FROM ai.realty_descriptions WHERE realty_id = %s",
+            (realty_id,)
+        )
+        if not result:
+            database.execute(
+                "INSERT INTO ai.realty_descriptions (desc_avg_vector, desc_realty) VALUES (%s, %s)",
+                (avg_vector, realty_id)
+            )
+            database.commit()
+        else:
+            print("Description already converted and stored.")
+
+insert_df()
