@@ -107,7 +107,7 @@ def get_address_url(driver: webdriver.Chrome, location: dict, update = False):
         while not (
             location["state"].lower() in driver.current_url and
             location["city"].lower().replace(" ", "-") in driver.current_url and
-            location["street"].lower().replace(" ", "-") in driver.current_url
+            location["street"].lower().replace(" ", "-").replace(".", "") in driver.current_url
         ):
             sleep(0.1)
 
