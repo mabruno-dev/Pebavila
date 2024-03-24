@@ -141,7 +141,6 @@ def scrape_url(address_url: dict):
                                 # Handle scraping errors
                                 realty_info = None
                                 print(Console.RED + f"Error at webpage: {realty_url}" + Console.RESET)
-                                traceback.print_exc()
                             if realty_info != None:
                                 insert_realty(database, realty_info)
                         else:
