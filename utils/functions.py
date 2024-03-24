@@ -32,7 +32,10 @@ def create_dirs(file_path):
 def get_caller_path():
     caller_frame = inspect.stack()[-1]
     calling_script_path = caller_frame.filename
-    path_list = calling_script_path.split("/")
+    if sys.platform.startswith('darwin'):
+        path_list = calling_script_path.split("/")
+    else:
+        path_list = calling_script_path.split(r"\\")
     return "/".join(path_list[(path_list.index("the-beginning") + 1):])
 
 def print_log(text: str, showDt: bool = False, onConsole: bool = True, section: bool = False):
