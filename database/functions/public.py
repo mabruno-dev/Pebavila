@@ -3,7 +3,6 @@ project_name = "the-beginning"; sys.path.append(os.path.abspath(__file__)[:os.pa
 # Resolve module imports
 
 from utils.wrappers import announce
-from utils.constants import ConsoleColors as Console
 from database.connection import Database
 from database.functions.common import db_error, comparison_query, InvalidLocationException
 

@@ -17,7 +17,7 @@ class InvalidLocationException(Exception):
 
 def db_error(database: Database, e: Exception):
     database.connection.rollback() # Allow the connection to continue operating
-    print_log(e, showDt=True, onConsole=False)
+    print_log(e, showDt=True, onConsole=False, section=True)
     print(f"{Console.RED} {e}{Console.RESET}")
 
 @announce

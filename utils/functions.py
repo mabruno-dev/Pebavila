@@ -29,7 +29,7 @@ def format_time(seconds):
 def create_dirs(file_path):
     os.makedirs(os.path.dirname(file_path), exist_ok=True)
 
-def print_log(text: str, showDt: bool = False, onConsole: bool = True):
+def print_log(text: str, showDt: bool = False, onConsole: bool = True, section: bool = False):
 
     caller_frame = inspect.stack()[1]
     calling_script_path = caller_frame.filename
@@ -45,12 +45,14 @@ def print_log(text: str, showDt: bool = False, onConsole: bool = True):
     with open(LOG_FILE_PATH, 'a') as file:
         new_line = "\n"
         file.write(f'{text}{f"{new_line}Date: {formatted_date}" if showDt else ""}{new_line * 2}')
+        if section:
+            file.write("---//---\n\n")
         if onConsole:
             print(text)
 
 def error(e):
     print(f"{Console.RED} {e}{Console.RESET}")
-    print_log(e, showDt=True, onConsole=False)
+    print_log(e, showDt=True, onConsole=False, section=True)
 
 
 print(os.path.abspath(__file__))

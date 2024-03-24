@@ -22,9 +22,7 @@ def __main__():
     not_scraped_urls = result[1]
     
     print_log(f"TOTAL REALTIES: {total_realties}", showDt=True)
-    print_log(f"SCRAPED URLS: {scraped_urls} | NOT SCRAPED URLS: {not_scraped_urls}", showDt=True)
-
-    print_log("-" * 40, onConsole=False)
+    print_log(f"SCRAPED URLS: {scraped_urls} | NOT SCRAPED URLS: {not_scraped_urls}", showDt=True, section=True)
 
 if __name__ == "__main__":
     __main__()

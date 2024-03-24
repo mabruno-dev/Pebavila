@@ -94,8 +94,6 @@ def get_address_url(driver: webdriver.Chrome, location: dict, update = False) ->
         while True:
             try:
                 location_div = Wait(driver, 1).until(EC.presence_of_element_located((By.CSS_SELECTOR, '[data-cy="locations-item-input"]'))) # Tries to find the address selection element
-                print(unidecode(location_div.text.upper()))
-                print(address)
                 if not check_address_similarity(address, unidecode(location_div.text.upper())):
                     print(Console.RED + "No results  " + Console.RESET)
                     clear_inputs()

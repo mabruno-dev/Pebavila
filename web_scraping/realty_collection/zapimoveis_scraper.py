@@ -75,7 +75,10 @@ def scrape_url(address_url: dict):
         try:
             print(Console.BLACK + f"PAGE {current_page}" + Console.RESET)
 
-            driver = webdriver.Chrome()
+            options = webdriver.ChromeOptions()
+            options.add_argument('--log-level=3')
+
+            driver = webdriver.Chrome(options=options)
 
             stealth(driver,
                 languages=["en-US", "en"],

@@ -29,7 +29,10 @@ def is_number(s: str):
 @timed
 def scrape_realty(url):
 
-    driver = webdriver.Chrome()
+    options = webdriver.ChromeOptions()
+    options.add_argument('--log-level=3')
+
+    driver = webdriver.Chrome(options=options)
 
     stealth(driver,
         languages=["en-US", "en"],
