@@ -35,7 +35,7 @@ def get_caller_path():
     if sys.platform.startswith('darwin'):
         path_list = calling_script_path.split("/")
     else:
-        path_list = calling_script_path.split(r"\\")
+        path_list = calling_script_path.split("\\")
     return "/".join(path_list[(path_list.index("the-beginning") + 1):])
 
 def print_log(text: str, showDt: bool = False, onConsole: bool = True, section: bool = False):
