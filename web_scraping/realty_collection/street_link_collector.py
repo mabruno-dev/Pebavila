@@ -139,7 +139,7 @@ def get_address_url(driver: webdriver.Chrome, location: dict, update = False) ->
         clear_button = Wait(driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, "search-multiselect__clean-button")))
         clear_button.click()
 
-        while driver.current_url != street_url:
+        while driver.current_url == street_url:
             sleep(0.1)
 
         clear_inputs()
