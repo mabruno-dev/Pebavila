@@ -15,7 +15,7 @@ class QueryFormatingException(Exception):
 class InvalidLocationException(Exception):
     pass
 
-def error(database: Database, e: Exception):
+def db_error(database: Database, e: Exception):
     database.connection.rollback() # Allow the connection to continue operating
     print_log(e, showDt=True, onConsole=False)
     print(f"{Console.RED} {e}{Console.RESET}")
@@ -29,14 +29,14 @@ def generic_delete(schema_name, table_name, id_record):
             database.commit()
         return "success"
     except Exception as e:
-        error(database, e)
+        db_error(database, e)
 
 @announce
 def generic_update():
     try:
         pass
     except Exception as e:
-        # error(database, e)
+        # db_error(database, e)
         pass
 
 def comparison_query(string: str, values: tuple):
