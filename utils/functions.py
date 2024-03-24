@@ -29,16 +29,20 @@ def format_time(seconds):
 def create_dirs(file_path):
     os.makedirs(os.path.dirname(file_path), exist_ok=True)
 
+def get_caller_path():
+    caller_frame = inspect.stack()[-1]
+    calling_script_path = caller_frame.filename
+    path_list = calling_script_path.split("/")
+    return "/".join(path_list[(path_list.index("the-beginning") + 1):])
+
 def print_log(text: str, showDt: bool = False, onConsole: bool = True, section: bool = False):
 
-    caller_frame = inspect.stack()[1]
-    calling_script_path = caller_frame.filename
-    script_name = os.path.basename(calling_script_path).replace(".py", "")
+    caller_path = get_caller_path().replace(".py", "")
 
     current_date = datetime.today().strftime('%d%m%Y')
     formatted_date = datetime.today().strftime('%d/%m/%Y %H:%M:%S')
 
-    LOG_FILE_PATH = f"logs/{script_name}/log_{current_date}.txt"
+    LOG_FILE_PATH = f"logs/{caller_path}/log_{current_date}.txt"
 
     create_dirs(LOG_FILE_PATH)
 
@@ -53,6 +57,5 @@ def print_log(text: str, showDt: bool = False, onConsole: bool = True, section: 
 def error(e):
     print(f"{Console.RED} {e}{Console.RESET}")
     print_log(e, showDt=True, onConsole=False, section=True)
-
 
 print(os.path.abspath(__file__))
