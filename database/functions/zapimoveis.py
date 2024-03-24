@@ -16,7 +16,7 @@ def check_address_url_exists(database: Database, address_url: dict):
             (address_url["address"],)
         )
     except Exception as e:
-        error(e)
+        error(database, e)
         
 @announce
 def insert_address_url(database: Database, address_url: dict):
@@ -31,7 +31,7 @@ def insert_address_url(database: Database, address_url: dict):
         else:
             print("Record already exists")
     except Exception as e:
-        error(e)
+        error(database, e)
 
 @announce
 def update_address_url(database: Database, address_url: dict):
@@ -44,7 +44,7 @@ def update_address_url(database: Database, address_url: dict):
             database.commit()
             print("Record updated successfully")
     except Exception as e:
-        error(e)
+        error(database, e)
 
 @announce
 def get_address_urls(database: Database):
@@ -61,7 +61,7 @@ def get_address_urls(database: Database):
             address_url_list.append(address_url)
         return address_url_list
     except Exception as e:
-        error(e)
+        error(database, e)
 
 @announce
 def set_address_url_scraped(database: Database, address_url: dict):
@@ -94,6 +94,5 @@ def check_address_url_is_scraped(database: Database, address: str):
             )
             return result[0]
         except Exception as e:
-
-            error(e)
+            error(database, e)
 
