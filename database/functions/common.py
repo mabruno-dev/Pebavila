@@ -4,6 +4,7 @@ project_name = "the-beginning"; sys.path.append(os.path.abspath(__file__)[:os.pa
 
 from utils.wrappers import announce
 from utils.constants import ConsoleColors as Console
+from utils.functions import print_log
 from database.connection import Database
 
 from datetime import datetime
@@ -16,6 +17,7 @@ class InvalidLocationException(Exception):
 
 def error(database: Database, e: Exception):
     database.connection.rollback() # Allow the connection to continue operating
+    print_log(e, showDt=True, onConsole=False)
     print(f"{Console.RED} {e}{Console.RESET}")
 
 @announce

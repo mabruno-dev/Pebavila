@@ -3,6 +3,7 @@ project_name = "the-beginning"; sys.path.append(os.path.abspath(__file__)[:os.pa
 # Resolve module imports
 
 from utils.wrappers import announce
+from utils.constants import ConsoleColors as Console
 from database.connection import Database
 from database.functions.common import error, comparison_query, InvalidLocationException
 
@@ -196,8 +197,7 @@ def get_neighborhood_id(database: Database, neighborhood_name: str, city_id):
         if neighborhood_id:
             return neighborhood_id[0]
     except Exception as e:
-        database.connection.rollback() # Allow the connection to continue operating    
-        print(f"Error: {e}")
+        error(database, e)
 
 @announce
 def get_city_id(database: Database, city_name: str, state_id):
@@ -210,8 +210,7 @@ def get_city_id(database: Database, city_name: str, state_id):
         if city_id:
             return city_id[0]
     except Exception as e:
-        database.connection.rollback() # Allow the connection to continue operating 
-        print(f"Error: {e}")
+        error(database, e)
 
 def get_realty_street(database: Database, location):
     # returns the foreign key for street
@@ -240,9 +239,8 @@ def get_realty_advertiser(database: Database, advertiser: str):
         )
         if advertiser_id:
             return advertiser_id[0]
-    except Exception as e:
-        database.connection.rollback() # Allow the connection to continue operating       
-        print(f"Error: {e}")
+    except Exception as e:       
+        error(database, e)
 
 @announce
 def insert_advertiser(database: Database, advertiser: str):
@@ -258,7 +256,6 @@ def insert_advertiser(database: Database, advertiser: str):
         else:
             print("Record already exists")
     except Exception as e:
-        database.connection.rollback() # Allow the connection to continue operating
         print(f"Error {e}")
 
 @announce
@@ -271,9 +268,8 @@ def get_realty_type(database: Database, type: str):
         )
         if type_id:
             return type_id[0]
-    except Exception as e:
-        database.connection.rollback() # Allow the connection to continue operating  
-        print(f"Error: {e}")
+    except Exception as e:  
+        error(database, e)
 
 @announce
 def insert_type(database: Database, type: str):
@@ -289,7 +285,6 @@ def insert_type(database: Database, type: str):
         else:
             print("Record already exists")
     except Exception as e:
-        database.connection.rollback() # Allow the connection to continue operating
         print(f"Error {e}")
 
 @announce
@@ -305,7 +300,6 @@ def get_all_cities(database: Database):
             } for item in result]
         return cities
     except Exception as e:
-        database.connection.rollback() # Allow the connection to continue operating
         print(f"Error {e}")
 
 @announce
@@ -321,7 +315,6 @@ def get_all_neighborhoods(database: Database):
             } for item in result]
         return neighborhoods
     except Exception as e:
-        database.connection.rollback() # Allow the connection to continue operating
         print(f"Error {e}")
 
 @announce
@@ -337,7 +330,6 @@ def get_all_streets(database: Database):
             } for item in result]
         return streets
     except Exception as e:
-        database.connection.rollback() # Allow the connection to continue operating
         print(f"Error {e}")
 
 @announce
@@ -520,7 +512,7 @@ def insert_realty(database: Database, realty: dict):
 #             print("Record not found")
 #     except Exception as e:
 #         database.connection.rollback()
-#         print(f"Error: {e}")
+#         error(database, e)
 
 @announce
 def get_neighborhood_name(database: Database, neighborhood_id):

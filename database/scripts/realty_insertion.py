@@ -3,7 +3,7 @@ project_name = "the-beginning"; sys.path.append(os.path.abspath(__file__)[:os.pa
 # Resolve module imports
 
 import json
-from database.functions_old import insert_realties
+from database.functions.public import insert_realties
 
 REALTIES_JSON_PATH = r"output/realty_data/realties.json"
 

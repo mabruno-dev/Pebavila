@@ -4,7 +4,7 @@ project_name = "the-beginning"; sys.path.append(os.path.abspath(__file__)[:os.pa
 
 from utils.wrappers import announce
 from database.connection import Database
-from database.functions.common import error, comparison_query, InvalidLocationException
+from database.functions.common import error
 
 from datetime import datetime
 
@@ -16,8 +16,7 @@ def check_address_url_exists(database: Database, address_url: dict):
             (address_url["address"],)
         )
     except Exception as e:
-        database.connection.rollback() # Allow the connection to continue operating
-        print(f"Error: {e}")
+        error(e)
         
 @announce
 def insert_address_url(database: Database, address_url: dict):
@@ -32,8 +31,7 @@ def insert_address_url(database: Database, address_url: dict):
         else:
             print("Record already exists")
     except Exception as e:
-        database.connection.rollback() # Allow the connection to continue operating
-        print(f"Error: {e}")
+        error(e)
 
 @announce
 def update_address_url(database: Database, address_url: dict):
@@ -46,8 +44,7 @@ def update_address_url(database: Database, address_url: dict):
             database.commit()
             print("Record updated successfully")
     except Exception as e:
-        database.connection.rollback() # Allow the connection to continue operating
-        print(f"Error: {e}")
+        error(e)
 
 @announce
 def get_address_urls(database: Database):
@@ -64,8 +61,7 @@ def get_address_urls(database: Database):
             address_url_list.append(address_url)
         return address_url_list
     except Exception as e:
-        database.connection.rollback()
-        print(f"Error: {e}")
+        error(e)
 
 @announce
 def set_address_url_scraped(database: Database, address_url: dict):
@@ -76,8 +72,7 @@ def set_address_url_scraped(database: Database, address_url: dict):
         )
         database.commit()
     except Exception as e:
-        database.connection.rollback()
-        print(f"Error: {e}")
+        error(e)
 
 @announce
 def set_address_url_not_scraped(database: Database, address_url: dict):
@@ -88,8 +83,7 @@ def set_address_url_not_scraped(database: Database, address_url: dict):
         )
         database.commit()
     except Exception as e:
-        database.connection.rollback()
-        print(f"Error: {e}")
+        error(e)
 
 @announce
 def check_address_url_is_scraped(database: Database, address: str):
@@ -100,6 +94,6 @@ def check_address_url_is_scraped(database: Database, address: str):
             )
             return result[0]
         except Exception as e:
-            database.connection.rollback()
-            print(f"Error: {e}")
+
+            error(e)
 

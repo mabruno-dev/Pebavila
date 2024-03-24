@@ -3,7 +3,7 @@ project_name = "the-beginning"; sys.path.append(os.path.abspath(__file__)[:os.pa
 # Resolve module imports
 
 import json
-from database.functions_old import Zapimoveis
+from database.functions.zapimoveis import insert_address_url
 from database.connection import Database
 
 def __main__():
@@ -11,7 +11,7 @@ def __main__():
         list = json.load(json_file)["street_urls"]
         for item in list:
             item["address"] = item["street"]
-            Zapimoveis.insert_address_url(Database(), item)
+            insert_address_url(Database(), item)
 
 if __name__ == "__main__":
     __main__()

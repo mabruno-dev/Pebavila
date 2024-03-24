@@ -12,7 +12,6 @@ from unidecode import unidecode
 
 from time import sleep
 import random
-from datetime import datetime
 
 from utils.wrappers import timed
 from database.connection import Database
@@ -30,33 +29,14 @@ def get_address_url(driver: webdriver.Chrome, location: dict, update = False):
     address = address.replace("'", "")
 
     if not check_address_url_exists(database, {"address": address, "url": None}) or update:
-
         print(Console.BOLD_WHITE + f"Getting url from address: {address}" + Console.RESET)
 
+        text_input = Wait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'input[placeholder="Digite o nome da rua, bairro ou cidade"]')))
+
+        text_input.click()
         while True:
             try:
-                text_input = Wait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'input[placeholder="Digite o nome da rua, bairro ou cidade"]')))
-                text_input.click()
-                break
-            except:
-                continue
-
-        def clear_inputs():
-            text_input.click()
-            if sys.platform.startswith('darwin'):
-                text_input.send_keys(Keys.COMMAND, "a")
-            else:
-                text_input.send_keys(Keys.CONTROL, "a")
-            text_input.send_keys("-" * 10)
-            while True:
-                try:
-                    driver.find_element(By.CSS_SELECTOR, '[data-cy="locations-item-input"]')
-                except:
-                    break
-            text_input.send_keys(Keys.BACKSPACE * 10)
-
-        while True:
-            try:
+                sleep(1)
                 driver.execute_script(f"arguments[0].value = '{address}';", text_input)
                 text_input.send_keys(Keys.SPACE)
                 break
@@ -69,23 +49,12 @@ def get_address_url(driver: webdriver.Chrome, location: dict, update = False):
                 print(unidecode(location_div.text.upper()))
                 print(address)
                 if unidecode(location_div.text.upper()) != address:
-                    print(Console.RED + "No results  " + Console.RESET)
-                    clear_inputs()
-                    while True:
-                        try:
-                            driver.find(By.CSS_SELECTOR, '[data-cy="locations-item-input"]')
-                        except:
-                            break
-                    return {
-                        "address": address,
-                        "url": None
-                    }
+                    pass
                 break
             except:
                 try:
                     driver.find_element(By.CLASS_NAME, "locations-feedback") # Tries to find the "not found" element
                     print(Console.RED + "No results  " + Console.RESET)
-                    clear_inputs()
                     return {
                         "address": address,
                         "url": None
@@ -94,14 +63,13 @@ def get_address_url(driver: webdriver.Chrome, location: dict, update = False):
                     try:
                         driver.find_element(By.CSS_SELECTOR, 'a[class="multiselect__redirect"]') # Tries to find the first element of "Imobiliárias"
                         print(Console.RED + "No results  " + Console.RESET)
-                        clear_inputs()
                         return {
                             "address": address,
                             "url": None
                         }
                     except:
                         print("Searching...", end="\r")
-        
+                        
         location_div.click()
 
         while not (
@@ -109,20 +77,25 @@ def get_address_url(driver: webdriver.Chrome, location: dict, update = False):
             location["city"].lower().replace(" ", "-") in driver.current_url and
             location["street"].lower().replace(" ", "-") in driver.current_url
         ):
+            # print(location["state"].lower())
+            # print(location["city"].lower().replace(" ", "-"))
+            # print(location["street"].lower().replace(" ", "-"))
+            # print(driver.current_url)
             sleep(0.1)
 
         street_url = driver.current_url
-
-        clear_button = Wait(driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, "search-multiselect__clean-button")))
-        clear_button.click()
-
-        while driver.current_url != street_url:
-            sleep(0.1)
-
-        clear_inputs()
-
         print(Console.GREEN + "Success: " + Console.RESET + f"{street_url}")
 
+
+        clear_button = Wait(driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, "search-multiselect__clean-button")))
+        while True:
+            try:
+                clear_button.click()
+                sleep(0.5)
+                driver.find_element(By.CLASS_NAME, "search-multiselect__clean-button")
+            except:
+                break
+        
         return {
             "address": address,
             "url": street_url
@@ -130,55 +103,14 @@ def get_address_url(driver: webdriver.Chrome, location: dict, update = False):
     else:
         print(Console.BLUE + "Skipped " + Console.RESET + f"{address}")
 
-def fix_nullified_urls(driver: webdriver):
-    print("Fixing nullified")
-    result = database.query(
-        "SELECT address FROM zapimoveis.address_urls WHERE updated_at <= %s AND url IS NULL",
-        (datetime(2024, 4, 24, 16, 0),)
-    )
-    if result:
-        for item in result:
-            address = item[0]
-            street_and_city, state = address.split(" - ")
-            street, city = street_and_city.split(", ")
-            location = {
-                "state": state,
-                "city": city,
-                "neighborhood": None,
-                "street": street
-            }
-            address_url = get_address_url(driver, location, update=True)
-            if address_url:
-                update_address_url(database, address_url)
-
 def fix_unwanted_urls(driver: webdriver):
-    print("Fixing wrong addresses")
+    print("Looking for mistakes...")
     result = database.query(
-        "SELECT address, url FROM zapimoveis.address_urls WHERE url IS NOT NULL"
+        "SELECT id, address FROM zapimoveis.address_urls WHERE url NOT LIKE '%%https://www.com.br/venda/imoveis/rj%%'"
     )
     if result:
-        addresses = list()
-
         for item in result:
-            address = item[0]
-            url = item[1]
-            street_and_city, state = address.split(" - ")
-            street, city = street_and_city.split(", ")
-            location = {
-                "state": state,
-                "city": city,
-                "neighborhood": None,
-                "street": street
-            }
-            if not (
-                location["state"].lower() in url and
-                location["city"].lower().replace(" ", "-") in url and
-                location["street"].lower().replace(" ", "-") in url
-            ):
-                addresses.append(item)
-
-        for item in addresses:
-            address = item[0]
+            address = item[1]
             street_and_city, state = address.split(" - ")
             street, city = street_and_city.split(", ")
             location = {
@@ -190,6 +122,8 @@ def fix_unwanted_urls(driver: webdriver):
             address_url = get_address_url(driver, location, update=True)
             if address_url:
                 update_address_url(database, address_url)
+    else:
+        print("All good!")
 
 @timed
 def __main__():
@@ -211,10 +145,7 @@ def __main__():
     )
 
     driver.get("https://www.zapimoveis.com.br/venda/?itl_id=1000063&itl_name=zap_-_link-header_comprar_to_zap_resultado-pesquisa")
-
-    fix_nullified_urls(driver)
     fix_unwanted_urls(driver)
-    
     cities = get_all_cities(database)
     for city in cities:
         locations = get_locations_from_city(database, city["city_name"], "RJ")
@@ -224,7 +155,9 @@ def __main__():
             address_url = get_address_url(driver, location)
             if address_url:
                 insert_address_url(database, address_url)
-                
+        
+        fix_unwanted_urls(driver)
+        
     driver.quit()
 
 if __name__ == "__main__":

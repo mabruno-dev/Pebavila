@@ -156,7 +156,7 @@ def scrape_url(address_url: dict):
 
                     print(f"Loading...", end="\r")
                 except Exception as e:
-                    print(f"Error: {e}")
+                    error(e)
             stop_loading = True
             loader.join()
             driver.quit()
@@ -165,7 +165,7 @@ def scrape_url(address_url: dict):
                 print("Reached page limit")
                 break
         except Exception as e:
-            print(f"Error: {e}")
+            error(e)
             break
     set_address_url_scraped(database, address_url)
 

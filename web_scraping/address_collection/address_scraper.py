@@ -13,6 +13,7 @@ import os
 from unidecode import unidecode
 
 from utils.wrappers import timed
+from utils.functions import error
 
 # Retorna as linhas de uma tabela passada por parâmetro
 def find_table_rows(table: WebElement):
@@ -36,7 +37,7 @@ def __main__():
         try:
             city_a_list.append(city_li.find_element(By.TAG_NAME, "a").get_attribute("href"))
         except Exception as e:
-            print(f"Error: {e}")
+            error(e)
 
     for city_a in city_a_list:
         
@@ -52,7 +53,7 @@ def __main__():
                 try:
                     neighborhood_a_list.append(neighborhood_li.find_element(By.TAG_NAME, "a").get_attribute("href"))
                 except Exception as e:
-                    print(f"Error: {e}")
+                    error(e)
 
             for neighborhood_a in neighborhood_a_list:
 
@@ -76,7 +77,7 @@ def __main__():
                     all_addresses.append(address)
 
         except Exception as e:
-            print(f"Error: {e}")
+            error(e)
 
     driver.quit()
 

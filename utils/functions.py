@@ -48,8 +48,9 @@ def print_log(text: str, showDt: bool = False, onConsole: bool = True):
         if onConsole:
             print(text)
 
-def print_error(error):
-    print(Console.RED + "Error: " + Console.RESET + f"{error}")
+def error(e):
+    print(f"{Console.RED} {e}{Console.RESET}")
+    print_log(e, showDt=True, onConsole=False)
 
 
 print(os.path.abspath(__file__))
