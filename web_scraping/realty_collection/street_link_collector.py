@@ -133,8 +133,8 @@ def get_address_url(driver: webdriver.Chrome, location: dict, update = False):
 def fix_nullified_urls(driver: webdriver):
     print("Fixing nullified")
     result = database.query(
-        "SELECT address FROM zapimoveis.address_urls WHERE updated_at <= %s AND url IS NULL",
-        (datetime(2024, 4, 24, 16, 0),)
+        "SELECT address FROM zapimoveis.address_urls WHERE updated_at >= %s AND url IS NULL",
+        (datetime(2024, 3, 23, 16, 0),)
     )
     if result:
         for item in result:
@@ -214,7 +214,7 @@ def __main__():
 
     fix_nullified_urls(driver)
     fix_unwanted_urls(driver)
-    
+
     cities = get_all_cities(database)
     for city in cities:
         locations = get_locations_from_city(database, city["city_name"], "RJ")
