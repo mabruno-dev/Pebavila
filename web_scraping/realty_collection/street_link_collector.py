@@ -23,7 +23,6 @@ from utils.constants import ConsoleColors as Console
 database = Database(ensure_connection=True)
 
 main_url = "https://www.zapimoveis.com.br/venda/?__ab=exp-aa-test:control,rec-cta:rcta,desc-phone:pcta&transacao=venda&pagina=1"
-last_gathered_url = ""
 
 def check_address_similarity(local_address: str, web_address: str) -> bool:
     # format: STREET, CITY - STATE
@@ -50,7 +49,6 @@ def get_address_url(driver: webdriver.Chrome, location: dict, update = False) ->
 
     global database
     global main_url
-    global last_gathered_url
     
     address = location_to_address(location)
 
@@ -130,7 +128,7 @@ def get_address_url(driver: webdriver.Chrome, location: dict, update = False) ->
         
         location_div.click()
 
-        while driver.current_url == main_url or driver.current_url == last_gathered_url:
+        while driver.current_url == main_url:
             sleep(0.1)
 
         street_url = driver.current_url
@@ -138,9 +136,6 @@ def get_address_url(driver: webdriver.Chrome, location: dict, update = False) ->
 
         clear_button = Wait(driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, "search-multiselect__clean-button")))
         clear_button.click()
-
-        while driver.current_url == street_url:
-            sleep(0.1)
 
         clear_inputs()
 
@@ -153,27 +148,27 @@ def get_address_url(driver: webdriver.Chrome, location: dict, update = False) ->
     else:
         print(Console.BLUE + "Skipped " + Console.RESET + f"{address}")
 
-# def fix_null_urls(driver: webdriver):
-#     print("Fixing nulls")
-#     result = database.query(
-#         "SELECT address FROM zapimoveis.address_urls WHERE  url IS NULL AND updated_at < %s",
-#         (datetime(2024, 3, 24, 11, 50),)
-#     )
-#     if result:
-#         for index, item in enumerate(result):
-#             print(f"{index + 1}/{len(result)}", end=" ")
-#             address = item[0]
-#             street_and_city, state = address.split(" - ")
-#             street, city = street_and_city.split(", ")
-#             location = {
-#                 "state": state,
-#                 "city": city,
-#                 "neighborhood": None,
-#                 "street": street
-#             }
-#             address_url = get_address_url(driver, location, update=True)
-#             if address_url:
-#                 update_address_url(database, address_url)
+def fix_mistakes(driver: webdriver):
+    print("Fixing nulls")
+    result = database.query(
+        "SELECT address FROM zapimoveis.address_urls WHERE created_at > %s AND updated_at IS NULL",
+        (datetime(2024, 3, 24, 19, 30),)
+    )
+    if result:
+        for index, item in enumerate(result):
+            print(f"{index + 1}/{len(result)}", end=" ")
+            address = item[0]
+            street_and_city, state = address.split(" - ")
+            street, city = street_and_city.split(", ")
+            location = {
+                "state": state,
+                "city": city,
+                "neighborhood": None,
+                "street": street
+            }
+            address_url = get_address_url(driver, location, update=True)
+            if address_url:
+                update_address_url(database, address_url)
 
 @timed
 def __main__():
@@ -200,7 +195,7 @@ def __main__():
     cities = get_all_cities(database)
     stored_addresses = [item["address"] for item in get_address_urls(database)]
 
-    # fix_null_urls(driver) # !!!
+    fix_mistakes(driver) # !!!
 
     for city in cities:
 
