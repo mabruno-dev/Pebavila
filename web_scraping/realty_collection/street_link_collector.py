@@ -153,27 +153,27 @@ def get_address_url(driver: webdriver.Chrome, location: dict, update = False) ->
     else:
         print(Console.BLUE + "Skipped " + Console.RESET + f"{address}")
 
-def fix_null_urls(driver: webdriver):
-    print("Fixing nulls")
-    result = database.query(
-        "SELECT address FROM zapimoveis.address_urls WHERE  url IS NULL AND updated_at < %s",
-        (datetime(2024, 3, 24, 11, 50),)
-    )
-    if result:
-        for index, item in enumerate(result):
-            print(f"{index + 1}/{len(result)}", end=" ")
-            address = item[0]
-            street_and_city, state = address.split(" - ")
-            street, city = street_and_city.split(", ")
-            location = {
-                "state": state,
-                "city": city,
-                "neighborhood": None,
-                "street": street
-            }
-            address_url = get_address_url(driver, location, update=True)
-            if address_url:
-                update_address_url(database, address_url)
+# def fix_null_urls(driver: webdriver):
+#     print("Fixing nulls")
+#     result = database.query(
+#         "SELECT address FROM zapimoveis.address_urls WHERE  url IS NULL AND updated_at < %s",
+#         (datetime(2024, 3, 24, 11, 50),)
+#     )
+#     if result:
+#         for index, item in enumerate(result):
+#             print(f"{index + 1}/{len(result)}", end=" ")
+#             address = item[0]
+#             street_and_city, state = address.split(" - ")
+#             street, city = street_and_city.split(", ")
+#             location = {
+#                 "state": state,
+#                 "city": city,
+#                 "neighborhood": None,
+#                 "street": street
+#             }
+#             address_url = get_address_url(driver, location, update=True)
+#             if address_url:
+#                 update_address_url(database, address_url)
 
 @timed
 def __main__():
@@ -200,13 +200,13 @@ def __main__():
     cities = get_all_cities(database)
     stored_addresses = [item["address"] for item in get_address_urls(database)]
 
-    fix_null_urls(driver) # !!!
+    # fix_null_urls(driver) # !!!
 
     for city in cities:
 
         locations = get_locations_from_city(database, city["city_name"], "RJ")
 
-        aux = locations
+        aux = locations[:]
         for item in aux:
             if location_to_address(item) in stored_addresses:
                 locations.remove(item)
