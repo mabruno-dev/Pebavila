@@ -134,7 +134,7 @@ def fix_nullified_urls(driver: webdriver):
     print("Fixing nullified")
     result = database.query(
         "SELECT address FROM zapimoveis.address_urls WHERE updated_at >= %s AND updated_at < %s AND url IS NULL",
-        (datetime(2024, 3, 23, 16, 0), datetime(2024, 4, 23, 2, 0))
+        (datetime(2024, 3, 23, 16, 0), datetime(2024, 3, 24, 2, 0))
     )
     if result:
         for item in result:
