@@ -5,7 +5,7 @@ project_name = "the-beginning"; sys.path.append(os.path.abspath(__file__)[:os.pa
 from utils.wrappers import announce
 from utils.constants import ConsoleColors as Console
 from database.connection import Database
-from database.functions.common import error, comparison_query, InvalidLocationException
+from database.functions.common import db_error, comparison_query, InvalidLocationException
 
 from datetime import datetime
 
@@ -19,7 +19,7 @@ def get_state_id(database: Database, state_acronym: str):
             return state_id[0]
 
     except Exception as e:
-        error(database, e)
+        db_error(database, e)
 
 @announce
 def get_or_insert_city(database: Database, city_name, state_id):
@@ -37,7 +37,7 @@ def get_or_insert_city(database: Database, city_name, state_id):
             print("Record added to the database succesfully")
             return city_id
     except Exception as e:
-        error(database, e)
+        db_error(database, e)
 
 @announce
 def get_or_insert_neighborhood(database: Database, neighborhood_name, city_id):
@@ -60,7 +60,7 @@ def get_or_insert_neighborhood(database: Database, neighborhood_name, city_id):
             print("Record added to the database succesfully")
             return neighborhood_id
     except Exception as e:
-        error(database, e)
+        db_error(database, e)
 
 @announce
 def check_street_exists(database: Database, street_name, neighborhood_id):
@@ -72,7 +72,7 @@ def check_street_exists(database: Database, street_name, neighborhood_id):
 
         return street_id is not None
     except Exception as e:
-        error(database, e)
+        db_error(database, e)
     try:
         database.execute(
             'INSERT INTO public.streets (street_name, street_neighborhood) VALUES (%s, %s)',
@@ -80,7 +80,7 @@ def check_street_exists(database: Database, street_name, neighborhood_id):
         )
         database.commit()
     except Exception as e:
-        error(database, e)
+        db_error(database, e)
 
 @announce
 def check_neighborhood_exists(database: Database, neighborhood_name, city_id):
@@ -92,7 +92,7 @@ def check_neighborhood_exists(database: Database, neighborhood_name, city_id):
 
         return neighborhood_id is not None
     except Exception as e:
-        error(database, e)
+        db_error(database, e)
     try:
         database.execute(
             'INSERT INTO public.neighborhoods (neighborhood_name, neighborhood_city) VALUES (%s, %s)',
@@ -100,7 +100,7 @@ def check_neighborhood_exists(database: Database, neighborhood_name, city_id):
         )
         database.commit()
     except Exception as e:
-        error(database, e)
+        db_error(database, e)
 
 @announce
 def insert_street(database: Database, street_name: str, neighborhood_id: int):
@@ -115,7 +115,7 @@ def insert_street(database: Database, street_name: str, neighborhood_id: int):
         else:
             print("Record already exists")
     except Exception as e:
-        error(database, e)
+        db_error(database, e)
 
 @announce
 def insert_street_neighborhood_city(database: Database, location: dict):
@@ -139,7 +139,7 @@ def insert_street_neighborhood_city(database: Database, location: dict):
                 database.commit()
                 print('Record added to the database successfully')
     except Exception as e:
-        error(database, e)
+        db_error(database, e)
 
 @announce
 def insert_neighborhood_city(database: Database, location: dict):
@@ -160,7 +160,7 @@ def insert_neighborhood_city(database: Database, location: dict):
                 database.commit()
                 print('Record added to the database successfully')
     except Exception as e:
-        error(database, e)
+        db_error(database, e)
 
 @announce
 def set_streets_neighborhoods_cities(json_streets):
@@ -169,7 +169,7 @@ def set_streets_neighborhoods_cities(json_streets):
             for street in json_streets['addresses']:
                 insert_street_neighborhood_city(database, street)
     except Exception as e:
-        error(database, e)
+        db_error(database, e)
 
 @announce
 def get_street_id(database: Database, street_name: str, neighborhood_id):
@@ -184,7 +184,7 @@ def get_street_id(database: Database, street_name: str, neighborhood_id):
         else:
             pass
     except Exception as e:
-        error(database, e)
+        db_error(database, e)
 
 @announce
 def get_neighborhood_id(database: Database, neighborhood_name: str, city_id):
@@ -197,7 +197,7 @@ def get_neighborhood_id(database: Database, neighborhood_name: str, city_id):
         if neighborhood_id:
             return neighborhood_id[0]
     except Exception as e:
-        error(database, e)
+        db_error(database, e)
 
 @announce
 def get_city_id(database: Database, city_name: str, state_id):
@@ -210,7 +210,7 @@ def get_city_id(database: Database, city_name: str, state_id):
         if city_id:
             return city_id[0]
     except Exception as e:
-        error(database, e)
+        db_error(database, e)
 
 def get_realty_street(database: Database, location):
     # returns the foreign key for street
@@ -240,7 +240,7 @@ def get_realty_advertiser(database: Database, advertiser: str):
         if advertiser_id:
             return advertiser_id[0]
     except Exception as e:       
-        error(database, e)
+        db_error(database, e)
 
 @announce
 def insert_advertiser(database: Database, advertiser: str):
@@ -269,7 +269,7 @@ def get_realty_type(database: Database, type: str):
         if type_id:
             return type_id[0]
     except Exception as e:  
-        error(database, e)
+        db_error(database, e)
 
 @announce
 def insert_type(database: Database, type: str):
@@ -454,7 +454,7 @@ def check_realty_exists(database: Database, realty: dict):
             )
         )
     except Exception as e:
-        error(database, e)
+        db_error(database, e)
 
 @announce
 def insert_realty(database: Database, realty: dict):
@@ -475,7 +475,7 @@ def insert_realty(database: Database, realty: dict):
             else:
                 print("Record already exists")
     except Exception as e:
-        error(database, e)
+        db_error(database, e)
 
 # @announce
 # def update_realty_by_url(database: Database, realty: dict):
@@ -512,7 +512,7 @@ def insert_realty(database: Database, realty: dict):
 #             print("Record not found")
 #     except Exception as e:
 #         database.connection.rollback()
-#         error(database, e)
+#         db_error(database, e)
 
 @announce
 def get_neighborhood_name(database: Database, neighborhood_id):
@@ -523,7 +523,7 @@ def get_neighborhood_name(database: Database, neighborhood_id):
         )
         return data[1]
     except Exception as e:
-        error(database, e)
+        db_error(database, e)
 
 @announce
 def get_locations_from_city(database: Database, city: str, state: str):
@@ -557,7 +557,7 @@ def get_locations_from_city(database: Database, city: str, state: str):
             locations.append(location)
         return locations
     except Exception as e:
-        error(database, e)
+        db_error(database, e)
 
 @announce
 def get_realty_urls(database: Database):
@@ -568,7 +568,7 @@ def get_realty_urls(database: Database):
             url_list.append(item[0])
         return url_list
     except Exception as e:
-        error(database, e)
+        db_error(database, e)
 
 @announce
 def check_realty_exists_by_url(database: Database, url: str):
@@ -578,4 +578,4 @@ def check_realty_exists_by_url(database: Database, url: str):
             (url,)
         )
     except Exception as e:
-        error(database, e)
+        db_error(database, e)
