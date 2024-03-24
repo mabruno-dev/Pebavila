@@ -6,42 +6,55 @@ import numpy as np
 
 import database
 from database.db_connection import Database
-from dabase_df import database_df
+from dabase_df import database_df, df
 
 from tensorflow.keras import layers, models
 import tensorflow as tf
 from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau
 from sklearn.preprocessing import StandardScaler
 
-def neural_network(data = database_df()):
-
+def neural_network(data = df()):
+    pd.set_option('display.max_seq_items', None)
     shuffled_df = data.sample(frac=1, random_state=42)
     df_format = shuffled_df.shape
     df_lenght = df_format[1]
     df_col = df_format[0]
 
     # Divisão dos dados IMPORTANTE GENERALIZAR A DIVISAO USANDO O SHAPE
-    X_train = shuffled_df.iloc[1:int(df_lenght*0.7), :].drop(columns=15)
-    y_train = shuffled_df.iloc[1:int(df_lenght*0.7), 15]
-    X_val = shuffled_df.iloc[int(df_lenght*0.7):int(df_lenght*0.85), :].drop(columns=15)
-    y_val = shuffled_df.iloc[int(df_lenght*0.7):int(df_lenght*0.85), 15]
-    X_test = shuffled_df.iloc[int(df_lenght*0.85):df_lenght, :].drop(columns=15)
-    y_test = shuffled_df.iloc[int(df_lenght*0.85):df_lenght, 15]
+    X_train = shuffled_df.iloc[1:int(df_lenght*0.7), :].drop(columns=16)
+    y_train = shuffled_df.iloc[1:int(df_lenght*0.7), 16]
+    X_val = shuffled_df.iloc[int(df_lenght*0.7):int(df_lenght*0.85), :].drop(columns=16)
+    y_val = shuffled_df.iloc[int(df_lenght*0.7):int(df_lenght*0.85), 16]
+    X_test = shuffled_df.iloc[int(df_lenght*0.85):df_lenght, :].drop(columns=16)
+    y_test = shuffled_df.iloc[int(df_lenght*0.85):df_lenght, 16]
 
+    X_train = X_train.to_numpy()
+    y_train = y_train.to_numpy()
+    X_val = X_val.to_numpy()
+    y_val = y_val.to_numpy()
+    X_test = X_test.to_numpy()
+    y_test = y_test.to_numpy()
+
+    X_train = X_train.astype(np.float32)
+    y_train = y_train.astype(np.float32)
+    X_val = X_val.astype(np.float32)
+    y_val = y_val.astype(np.float32)
+    X_test = X_test.astype(np.float32)
+    y_test = y_test.astype(np.float32)
     # Normalização dos dados
-    '''scaler = StandardScaler()
-    X_train_scaled = scaler.fit_transform(X_train)
-    X_val_scaled = scaler.transform(X_val)
-    X_test_scaled = scaler.transform(X_test)'''
+    scaler = StandardScaler()
+    X_train = scaler.fit_transform(X_train)
+    X_val = scaler.transform(X_val)
+    X_test = scaler.transform(X_test)
 
-    '''num_features = X_train_scaled.shape[1]'''
+    num_features = X_train.shape[1]
 
-    num_features = 315
+    #num_features = 316
     # Construção do modelo
     model = models.Sequential([
-        layers.Dense(128, activation='relu', input_shape=(num_features,), kernel_regularizer=tf.keras.regularizers.l2(0.001)),
+        layers.Dense(4096, activation='elu', input_shape=(num_features,), kernel_regularizer=tf.keras.regularizers.l2(0.001)),
         layers.Dropout(0.5),
-        layers.Dense(256, activation='relu', kernel_regularizer=tf.keras.regularizers.l2(0.001)),
+        layers.Dense(16384, activation='relu', kernel_regularizer=tf.keras.regularizers.l2(0.001)),
         layers.Dropout(0.5),
         layers.Dense(1)
     ])
