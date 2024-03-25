@@ -6,3 +6,6 @@ __pycache__/
 
 # Ignore all files and directories named logs
 logs/
+
+# Ignore all files and directories named output
+output/

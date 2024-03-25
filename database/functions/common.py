@@ -10,10 +10,14 @@ from database.connection import Database
 from datetime import datetime
 
 class QueryFormatingException(Exception):
-    pass
+    def __init__(self, message):
+        self.message = message
+        super().__init__(self.message)
 
 class InvalidLocationException(Exception):
-    pass
+    def __init__(self, message):
+        self.message = message
+        super().__init__(self.message)
 
 def db_error(database: Database, e: Exception):
     database.connection.rollback() # Allow the connection to continue operating
