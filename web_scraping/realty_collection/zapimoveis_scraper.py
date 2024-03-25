@@ -74,7 +74,7 @@ def create_json():
     }
     create_dirs(JSON_PATH)
     with open(JSON_PATH, "a") as json_file:
-        json.dump(default_dict, indent=4, ensure_ascii=False)
+        json.dump(default_dict, json_file, indent=4, ensure_ascii=False)
 
 def set_status(**kwargs):
     with open(JSON_PATH, "a") as json_file:
@@ -84,7 +84,7 @@ def set_status(**kwargs):
                 status[key, value]
             else:
                 raise InvalidStatusKeyException(f'"{key}" is not a valid status.')
-        json.dump(status, indent=4, ensure_ascii=False)
+        json.dump(status, json_file, indent=4, ensure_ascii=False)
 
 
 def load_realties(driver: webdriver.Chrome, realty_list_div: WebElement):
