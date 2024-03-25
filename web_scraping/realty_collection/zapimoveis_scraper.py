@@ -73,17 +73,19 @@ def create_json():
         }
     }
     create_dirs(JSON_PATH)
-    with open(JSON_PATH, "r+") as json_file:
+    with open(JSON_PATH, "w") as json_file:
         json.dump(default_dict, json_file, indent=4, ensure_ascii=False)
 
 def set_status(**kwargs):
-    with open(JSON_PATH, "r+") as json_file:
+    with open(JSON_PATH, "r") as json_file:
         status = json.load(json_file)
         for key, value in kwargs.items():
             if key in status:
                 status[key] = value
             else:
                 raise InvalidStatusKeyException(f'"{key}" is not a valid status.')
+            
+    with open(JSON_PATH, "w") as json_file:
         json.dump(status, json_file, indent=4, ensure_ascii=False)
 
 
