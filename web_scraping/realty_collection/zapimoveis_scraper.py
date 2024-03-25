@@ -81,7 +81,7 @@ def set_status(**kwargs):
         status = json.load(json_file)
         for key, value in kwargs.items():
             if key in status:
-                status[key, value]
+                status[key] = value
             else:
                 raise InvalidStatusKeyException(f'"{key}" is not a valid status.')
         json.dump(status, json_file, indent=4, ensure_ascii=False)
