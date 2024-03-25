@@ -185,7 +185,7 @@ def scrape_realty(url):
         "realty_url": str(url)
     }
 
-    formatted_dict = realty_dict
+    formatted_dict = realty_dict.copy()
     if len(realty_dict["realty_description"]) > 70:
         formatted_dict["realty_description"] = realty_dict["realty_description"][:70].strip() + "..."
     print("Data: ", end="")
