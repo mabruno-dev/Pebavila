@@ -73,11 +73,11 @@ def create_json():
         }
     }
     create_dirs(JSON_PATH)
-    with open(JSON_PATH, "a") as json_file:
+    with open(JSON_PATH, "r+") as json_file:
         json.dump(default_dict, json_file, indent=4, ensure_ascii=False)
 
 def set_status(**kwargs):
-    with open(JSON_PATH, "a") as json_file:
+    with open(JSON_PATH, "r+") as json_file:
         status = json.load(json_file)
         for key, value in kwargs:
             if key in status:
