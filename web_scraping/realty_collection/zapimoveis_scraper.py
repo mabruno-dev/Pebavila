@@ -99,6 +99,8 @@ def set_status(**kwargs):
 def count_scraping_speed():
     global end_script
 
+    speeds = list()
+
     while not end_script:
         sleep_secs = 60
 
@@ -107,8 +109,14 @@ def count_scraping_speed():
         sleep(sleep_secs)
 
         total_realties_2 = database.queryone("SELECT COUNT(*) FROM public.realties_new")[0]
-        realties_per_hour = (total_realties_2 - total_realties_1) * 3600 / sleep_secs
-        set_status(realties_per_hour=realties_per_hour)
+        realties_per_minute = (total_realties_2 - total_realties_1) * 3600 / sleep_secs
+        speeds.append(realties_per_minute)
+        if len(speeds) >= 2048:
+            del speeds[0]
+
+        average = sum(speeds) / len(speeds)
+
+        set_status(realties_per_hour=average)
 
 
 def load_realties(driver: webdriver.Chrome, realty_list_div: WebElement):
