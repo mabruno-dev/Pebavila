@@ -97,17 +97,19 @@ def set_status(**kwargs):
         json.dump(status, json_file, indent=4, ensure_ascii=False)
 
 def count_scraping_speed():
-    sleep_secs = 60
+    global end_script
 
-    total_realties_1 = database.queryone("SELECT COUNT(*) FROM public.realties_new")[0]
+    while not end_script:
+        sleep_secs = 60
 
-    sleep(sleep_secs)
+        total_realties_1 = database.queryone("SELECT COUNT(*) FROM public.realties_new")[0]
 
-    total_realties_2 = database.queryone("SELECT COUNT(*) FROM public.realties_new")[0]
-    realties_per_hour = (total_realties_2 - total_realties_1) * 3600 / sleep_secs
-    set_status(realties_per_hour=realties_per_hour)
+        sleep(sleep_secs)
 
-speedometer = threading.Thread(target=count_scraping_speed)
+        total_realties_2 = database.queryone("SELECT COUNT(*) FROM public.realties_new")[0]
+        realties_per_hour = (total_realties_2 - total_realties_1) * 3600 / sleep_secs
+        set_status(realties_per_hour=realties_per_hour)
+
 
 def load_realties(driver: webdriver.Chrome, realty_list_div: WebElement):
 
@@ -191,8 +193,6 @@ def scrape_url(address_url: dict):
             loading_time = 0
             while data_position <= REALTIES_PER_PAGE and scraped_realties < total_realties:
                 start_time = time()
-                if not speedometer.is_alive():
-                    speedometer.start()
                 try:
                     realty_div = driver.find_element(By.CSS_SELECTOR, f'div[data-position="{data_position}"]')
                     realty_div_size = realty_div.size["height"]
@@ -269,9 +269,13 @@ def reset_control_variables():
 def __main__():
 
     global database
+    global end_script
 
     create_json()
     set_status(script_start_time=time(), running=True)
+
+    speedometer = threading.Thread(target=count_scraping_speed)
+    speedometer.start()
 
     address_url_list = get_address_urls(database)
     random.shuffle(address_url_list) # This is done so that multiple instances of the scraper have less chance of scraping the same url at the same time
@@ -287,6 +291,9 @@ def __main__():
                 scrape_url(address_url)
             else:
                 print(Console.BLUE + "Skipped" + Console.RESET + f" address: {address_url['address']}")
+
+    end_script = True
+    speedometer.join()
 
 if __name__ == "__main__":
     __main__()
