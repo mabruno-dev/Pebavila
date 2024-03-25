@@ -5,11 +5,15 @@ project_name = "the-beginning"; sys.path.append(os.path.abspath(__file__)[:os.pa
 from database.connection import Database
 from utils.functions import print_log
 
+import time
+
 def __main__():
     database = Database(ensure_connection=True)
 
+    timer_start = time.time()
+
     result = database.queryone(
-        "SELECT COUNT(*) FROM public.realties"
+        "SELECT COUNT(*) FROM public.realties_new"
     )
     total_realties = result[0]
 
@@ -32,7 +36,7 @@ def __main__():
             c.city_name,
             s2.state_acronym
         FROM
-            public.realties AS r
+            public.realties_new AS r
         INNER JOIN public.neighborhoods n ON r.realty_neighborhood = n.neighborhood_id
         INNER JOIN public.streets s1 ON r.realty_street = s1.street_id
         INNER JOIN public.cities c ON n.neighborhood_city = c.city_id
@@ -47,6 +51,15 @@ def __main__():
 
     print_log(f"SCRAPED URLS: {scraped_urls} | NOT SCRAPED URLS: {not_scraped_urls}")
     print_log(f"LAST URL STORED: {last_address_url}", showDt=True, section=True)
+
+    time.sleep(60 - (time.time() - timer_start))
+
+    result = database.queryone(
+        "SELECT COUNT(*) FROM public.realties_new"
+    )
+    total_realties_after_1_min = result[0]
+
+    print(f"The scrapper is collecting roughly {total_realties_after_1_min - total_realties} realties perminute")
 
 
 if __name__ == "__main__":

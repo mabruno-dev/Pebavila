@@ -35,6 +35,8 @@ total_realties = 1
 pause_loading = False
 stop_loading = False
 
+end_script = False
+
 database = Database(ensure_connection=True)
 
 class InvalidStatusKeyException(Exception):
@@ -47,7 +49,13 @@ def create_json():
         "running": False,
         "script_start_time": "",
         "current_realty_start_time": "",
+        "realties_per_hour": 0,
         "current_address": "",
+        "error": {
+            "message": "",
+            "date": "",
+            "url": ""
+        },
         "last_realty": {
             "realty_location": {
                 "state": "",
@@ -88,6 +96,18 @@ def set_status(**kwargs):
     with open(JSON_PATH, "w") as json_file:
         json.dump(status, json_file, indent=4, ensure_ascii=False)
 
+def count_scraping_speed():
+    sleep_secs = 60
+
+    total_realties_1 = database.queryone("SELECT COUNT(*) FROM public.realties_new")[0]
+
+    sleep(sleep_secs)
+
+    total_realties_2 = database.queryone("SELECT COUNT(*) FROM public.realties_new")[0]
+    realties_per_hour = (total_realties_2 - total_realties_1) * 3600 / sleep_secs
+    set_status(realties_per_hour=realties_per_hour)
+
+speedometer = threading.Thread(target=count_scraping_speed)
 
 def load_realties(driver: webdriver.Chrome, realty_list_div: WebElement):
 
@@ -127,6 +147,7 @@ def scrape_url(address_url: dict):
     global total_realties
     global pause_loading
     global stop_loading
+    global speedometer
     
     current_page = 1
     while scraped_realties < total_realties:
@@ -170,6 +191,8 @@ def scrape_url(address_url: dict):
             loading_time = 0
             while data_position <= REALTIES_PER_PAGE and scraped_realties < total_realties:
                 start_time = time()
+                if not speedometer.is_alive():
+                    speedometer.start()
                 try:
                     realty_div = driver.find_element(By.CSS_SELECTOR, f'div[data-position="{data_position}"]')
                     realty_div_size = realty_div.size["height"]
@@ -219,6 +242,7 @@ def scrape_url(address_url: dict):
                     print(f"Loading...", end="\r")
                 except Exception as e:
                     error(e)
+
             stop_loading = True
             loader.join()
             driver.quit()
