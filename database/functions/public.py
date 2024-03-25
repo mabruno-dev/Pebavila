@@ -441,7 +441,7 @@ def check_realty_exists(database: Database, realty: dict):
         return database.queryone(
             comparison_query('''
                 SELECT realty_id 
-                FROM public.realties 
+                FROM public.realties_new 
                 WHERE realty_neighborhood %s %s
                 AND realty_street %s %s
                 AND realty_number %s %s
@@ -466,7 +466,7 @@ def insert_realty(database: Database, realty: dict):
                 values = list(realty.values())
                 placeholders = ', '.join(['%s'] * len(columns))
                 database.execute(
-                    f"INSERT INTO public.realties ({', '.join(columns)}) VALUES ({placeholders})",
+                    f"INSERT INTO public.realties_new ({', '.join(columns)}) VALUES ({placeholders})",
                     values
                 )
                 database.commit()
@@ -481,7 +481,7 @@ def insert_realty(database: Database, realty: dict):
 #     try:
 #         realty = normalize_realty_dict(database, realty)
 #         result = database.queryone(
-#             "SELECT realty_id, up_to_date FROM public.realties WHERE realty_url = %s",
+#             "SELECT realty_id, up_to_date FROM public.realties_new WHERE realty_url = %s",
 #             (realty["realty_url"],)
 #         )
 #         print(result)
@@ -500,7 +500,7 @@ def insert_realty(database: Database, realty: dict):
 #                         assignments.append(f"{key} = {value}")
 #                 updates = ", ".join(assignments)
 #                 database.execute(
-#                     f"UPDATE public.realties SET {updates}, up_to_date = 1, updated_at = %s WHERE realty_id = %s",
+#                     f"UPDATE public.realties_new SET {updates}, up_to_date = 1, updated_at = %s WHERE realty_id = %s",
 #                     (datetime.now(), realty_id)
 #                 )
 #                 database.commit()
@@ -562,7 +562,7 @@ def get_locations_from_city(database: Database, city: str, state: str):
 def get_realty_urls(database: Database):
     try:
         url_list = list()
-        temp = database.query("SELECT realty_url FROM public.realties")
+        temp = database.query("SELECT realty_url FROM public.realties_new")
         for item in temp:
             url_list.append(item[0])
         return url_list
@@ -573,7 +573,7 @@ def get_realty_urls(database: Database):
 def check_realty_exists_by_url(database: Database, url: str):
     try:
         return database.query(
-            "SELECT realty_id FROM public.realties WHERE realty_url = %s",
+            "SELECT realty_id FROM public.realties_new WHERE realty_url = %s",
             (url,)
         )
     except Exception as e:
