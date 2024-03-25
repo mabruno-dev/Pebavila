@@ -79,7 +79,7 @@ def create_json():
 def set_status(**kwargs):
     with open(JSON_PATH, "r+") as json_file:
         status = json.load(json_file)
-        for key, value in kwargs:
+        for key, value in kwargs.items():
             if key in status:
                 status[key, value]
             else:
