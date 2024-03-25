@@ -15,6 +15,7 @@ import random
 from datetime import datetime
 
 from utils.wrappers import timed
+from utils.functions import error
 from database.connection import Database
 from database.functions.zapimoveis import *
 from database.functions.public import *
@@ -52,71 +53,64 @@ def get_address_url(driver: webdriver.Chrome, location: dict, update = False) ->
     
     address = location_to_address(location)
 
-    if not check_address_url_exists(database, {"address": address, "url": None}) or update:
+    try:
 
-        print(Console.BOLD_WHITE + f"Getting url from address: {address}" + Console.RESET)
+        if not check_address_url_exists(database, {"address": address, "url": None}) or update:
 
-        # finds the search bar
-        while True:
-            try:
-                text_input = Wait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'input[placeholder="Digite o nome da rua, bairro ou cidade"]')))
-                text_input.click()
-                break
-            except:
-                continue
+            print(Console.BOLD_WHITE + f"Getting url from address: {address}" + Console.RESET)
 
-        def clear_inputs():
-            text_input.click()
-            if sys.platform.startswith('darwin'):
-                text_input.send_keys(Keys.COMMAND, "a")
-            else:
-                text_input.send_keys(Keys.CONTROL, "a")
-            text_input.send_keys("-" * 10)
+            # finds the search bar
             while True:
                 try:
-                    driver.find_element(By.CSS_SELECTOR, '[data-cy="locations-item-input"]')
-                except:
+                    text_input = Wait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'input[placeholder="Digite o nome da rua, bairro ou cidade"]')))
+                    text_input.click()
                     break
-            text_input.send_keys(Keys.BACKSPACE * 10)
+                except:
+                    continue
 
-        # types the address
-        while True:
-            try:
-                driver.execute_script(f"arguments[0].value = '{address}';", text_input)
-                text_input.send_keys(Keys.SPACE)
-                break
-            except Exception as e:
-                print(f"Error: {e}\nTrying again...")
+            def clear_inputs():
+                text_input.click()
+                if sys.platform.startswith('darwin'):
+                    text_input.send_keys(Keys.COMMAND, "a")
+                else:
+                    text_input.send_keys(Keys.CONTROL, "a")
+                text_input.send_keys("-" * 10)
+                while True:
+                    try:
+                        driver.find_element(By.CSS_SELECTOR, '[data-cy="locations-item-input"]')
+                    except:
+                        break
+                text_input.send_keys(Keys.BACKSPACE * 10)
 
-        # handles the result
-        while True:
-            try:
-                location_div = Wait(driver, 1).until(EC.presence_of_element_located((By.CSS_SELECTOR, '[data-cy="locations-item-input"]'))) # Tries to find the address selection element
-                if not check_address_similarity(address, unidecode(location_div.text.upper())):
-                    print(Console.RED + "No results  " + Console.RESET)
-                    clear_inputs()
-                    while True:
-                        try:
-                            driver.find(By.CSS_SELECTOR, '[data-cy="locations-item-input"]')
-                        except:
-                            break
-                    return {
-                        "address": address,
-                        "url": None
-                    }
-                break
-            except:
+            # types the address
+            while True:
                 try:
-                    driver.find_element(By.CLASS_NAME, "locations-feedback") # Tries to find the "not found" element
-                    print(Console.RED + "No results  " + Console.RESET)
-                    clear_inputs()
-                    return {
-                        "address": address,
-                        "url": None
-                    }
+                    driver.execute_script(f"arguments[0].value = '{address}';", text_input)
+                    text_input.send_keys(Keys.SPACE)
+                    break
+                except Exception as e:
+                    print(f"Error: {e}\nTrying again...")
+
+            # handles the result
+            while True:
+                try:
+                    location_div = Wait(driver, 1).until(EC.presence_of_element_located((By.CSS_SELECTOR, '[data-cy="locations-item-input"]'))) # Tries to find the address selection element
+                    if not check_address_similarity(address, unidecode(location_div.text.upper())):
+                        print(Console.RED + "No results  " + Console.RESET)
+                        clear_inputs()
+                        while True:
+                            try:
+                                driver.find(By.CSS_SELECTOR, '[data-cy="locations-item-input"]')
+                            except:
+                                break
+                        return {
+                            "address": address,
+                            "url": None
+                        }
+                    break
                 except:
                     try:
-                        driver.find_element(By.CSS_SELECTOR, 'a[class="multiselect__redirect"]') # Tries to find the first element of "Imobiliárias"
+                        driver.find_element(By.CLASS_NAME, "locations-feedback") # Tries to find the "not found" element
                         print(Console.RED + "No results  " + Console.RESET)
                         clear_inputs()
                         return {
@@ -124,29 +118,40 @@ def get_address_url(driver: webdriver.Chrome, location: dict, update = False) ->
                             "url": None
                         }
                     except:
-                        print("Searching...", end="\r")
-        
-        location_div.click()
+                        try:
+                            driver.find_element(By.CSS_SELECTOR, 'a[class="multiselect__redirect"]') # Tries to find the first element of "Imobiliárias"
+                            print(Console.RED + "No results  " + Console.RESET)
+                            clear_inputs()
+                            return {
+                                "address": address,
+                                "url": None
+                            }
+                        except:
+                            print("Searching...", end="\r")
+            
+            location_div.click()
 
-        while driver.current_url == main_url:
-            sleep(0.1)
+            while driver.current_url == main_url:
+                sleep(0.1)
 
-        street_url = driver.current_url
-        last_gathered_url = street_url
+            street_url = driver.current_url
+            last_gathered_url = street_url
 
-        clear_button = Wait(driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, "search-multiselect__clean-button")))
-        clear_button.click()
+            clear_button = Wait(driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, "search-multiselect__clean-button")))
+            clear_button.click()
 
-        clear_inputs()
+            clear_inputs()
 
-        print(Console.GREEN + "Success: " + Console.RESET + f"{street_url}")
+            print(Console.GREEN + "Success: " + Console.RESET + f"{street_url}")
 
-        return {
-            "address": address,
-            "url": street_url
-        }
-    else:
-        print(Console.BLUE + "Skipped " + Console.RESET + f"{address}")
+            return {
+                "address": address,
+                "url": street_url
+            }
+        else:
+            print(Console.BLUE + "Skipped " + Console.RESET + f"{address}")
+    except Exception as e:
+        error(e)
 
 def fix_mistakes(driver: webdriver):
     print("Fixing nulls")

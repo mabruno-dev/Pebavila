@@ -20,9 +20,34 @@ def __main__():
     ''')
     scraped_urls = result[0]
     not_scraped_urls = result[1]
+
+    last_address_url = database.queryone(
+        "SELECT address FROM zapimoveis.address_urls ORDER BY id DESC LIMIT 1"
+    )[0]
+
+    result = database.queryone('''
+        SELECT 
+            s1.street_name,
+            n.neighborhood_name,
+            c.city_name,
+            s2.state_acronym
+        FROM
+            public.realties AS r
+        INNER JOIN public.neighborhoods n ON r.realty_neighborhood = n.neighborhood_id
+        INNER JOIN public.streets s1 ON r.realty_street = s1.street_id
+        INNER JOIN public.cities c ON n.neighborhood_city = c.city_id
+        INNER JOIN public.states s2 ON c.city_state = state_id
+        ORDER BY realty_id DESC LIMIT 1
+        '''
+    )
+    last_realty_address = f"{result[0]}, {result[1]} - {result[2]} ({result[3]})"
     
-    print_log(f"TOTAL REALTIES: {total_realties}", showDt=True)
-    print_log(f"SCRAPED URLS: {scraped_urls} | NOT SCRAPED URLS: {not_scraped_urls}", showDt=True, section=True)
+    print_log(f"TOTAL REALTIES: {total_realties}")
+    print_log(f"LAST STORED REALTY ADDRESS: {last_realty_address}")
+
+    print_log(f"SCRAPED URLS: {scraped_urls} | NOT SCRAPED URLS: {not_scraped_urls}")
+    print_log(f"LAST URL STORED: {last_address_url}", showDt=True, section=True)
+
 
 if __name__ == "__main__":
     __main__()

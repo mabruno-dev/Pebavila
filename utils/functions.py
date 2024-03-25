@@ -51,9 +51,9 @@ def print_log(text: str, showDt: bool = False, onConsole: bool = True, section: 
 
     with open(LOG_FILE_PATH, 'a') as file:
         new_line = "\n"
-        file.write(f'{text}{f"{new_line}Date: {formatted_date}" if showDt else ""}{new_line * 2}')
+        file.write(f'{text}{f"{new_line * 2}Date: {formatted_date}" if showDt else ""}{new_line}')
         if section:
-            file.write("---//---\n\n")
+            file.write("\n---//---\n\n")
         if onConsole:
             print(text)
 
