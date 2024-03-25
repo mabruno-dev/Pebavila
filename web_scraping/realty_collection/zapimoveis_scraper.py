@@ -245,7 +245,7 @@ def __main__():
     global database
 
     create_json()
-    set_status(start_time=time(), running=True)
+    set_status(script_start_time=time(), running=True)
 
     address_url_list = get_address_urls(database)
     random.shuffle(address_url_list) # This is done so that multiple instances of the scraper have less chance of scraping the same url at the same time
