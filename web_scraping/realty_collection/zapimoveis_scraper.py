@@ -78,22 +78,19 @@ def create_json():
         }
     }
     create_dirs(JSON_PATH)
-    with open(JSON_PATH, "w") as json_file:
+    with open(JSON_PATH, "w", encoding="utf-8") as json_file:
         json.dump(default_dict, json_file, indent=4, ensure_ascii=False)
 
 def set_status(**kwargs):
-    with open(JSON_PATH, "r") as json_file:
+    with open(JSON_PATH, "r", encoding="utf-8") as json_file:
         status = json.load(json_file)
         for key, value in kwargs.items():
             if key in status:
-                if isinstance(value, str):
-                    status[key] = value.encode("utf-8")
-                else:
-                    status[key] = value
+                status[key] = value
             else:
                 raise InvalidStatusKeyException(f'"{key}" is not a valid status.')
             
-    with open(JSON_PATH, "w") as json_file:
+    with open(JSON_PATH, "w", encoding="utf-8") as json_file:
         json.dump(status, json_file, indent=4, ensure_ascii=False)
 
 def load_realties(driver: webdriver.Chrome, realty_list_div: WebElement):
