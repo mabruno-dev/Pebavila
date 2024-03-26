@@ -6,6 +6,7 @@ from database.connection import Database
 from utils.functions import print_log
 
 import time
+from datetime import datetime, timedelta
 
 def __main__():
     database = Database(ensure_connection=True)
@@ -52,14 +53,12 @@ def __main__():
     print_log(f"SCRAPED URLS: {scraped_urls} | NOT SCRAPED URLS: {not_scraped_urls}")
     print_log(f"LAST URL STORED: {last_address_url}", showDt=True, section=True)
 
-    time.sleep(60 - (time.time() - timer_start))
-
     result = database.queryone(
-        "SELECT COUNT(*) FROM public.realties_new"
+        "SELECT COUNT(*) FROM public.realties_new WHERE created_at > %s",
+        (datetime.now() - timedelta(hours=1),)
     )
-    total_realties_after_1_min = result[0]
-
-    print(f"The scrapper is collecting roughly {total_realties_after_1_min - total_realties} realties perminute")
+    realties_in_last_hr = result[0]
+    print(f"{realties_in_last_hr} realties were scraped in the last hour")
 
 
 if __name__ == "__main__":

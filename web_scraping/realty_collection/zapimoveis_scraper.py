@@ -35,8 +35,6 @@ total_realties = 1
 pause_loading = False
 stop_loading = False
 
-end_script = False
-
 database = Database(ensure_connection=True)
 
 class InvalidStatusKeyException(Exception):
@@ -49,7 +47,6 @@ def create_json():
         "running": False,
         "script_start_time": "",
         "current_realty_start_time": "",
-        "realties_per_hour": 0,
         "current_address": "",
         "error": {
             "message": "",
@@ -95,29 +92,6 @@ def set_status(**kwargs):
             
     with open(JSON_PATH, "w") as json_file:
         json.dump(status, json_file, indent=4, ensure_ascii=False)
-
-def count_scraping_speed():
-    global end_script
-
-    speeds = list()
-
-    while not end_script:
-        sleep_secs = 60
-
-        total_realties_1 = database.queryone("SELECT COUNT(*) FROM public.realties_new")[0]
-
-        sleep(sleep_secs)
-
-        total_realties_2 = database.queryone("SELECT COUNT(*) FROM public.realties_new")[0]
-        realties_per_minute = (total_realties_2 - total_realties_1) * 3600 / sleep_secs
-        speeds.append(realties_per_minute)
-        if len(speeds) >= 2048:
-            del speeds[0]
-
-        average = sum(speeds) / len(speeds)
-
-        set_status(realties_per_hour=average)
-
 
 def load_realties(driver: webdriver.Chrome, realty_list_div: WebElement):
 
@@ -282,9 +256,6 @@ def __main__():
     create_json()
     set_status(script_start_time=time(), running=True)
 
-    speedometer = threading.Thread(target=count_scraping_speed)
-    speedometer.start()
-
     address_url_list = get_address_urls(database)
     random.shuffle(address_url_list) # This is done so that multiple instances of the scraper have less chance of scraping the same url at the same time
 
@@ -299,9 +270,6 @@ def __main__():
                 scrape_url(address_url)
             else:
                 print(Console.BLUE + "Skipped" + Console.RESET + f" address: {address_url['address']}")
-
-    end_script = True
-    speedometer.join()
 
 if __name__ == "__main__":
     __main__()
