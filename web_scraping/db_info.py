@@ -18,6 +18,12 @@ def __main__():
     )
     total_realties = result[0]
 
+    result = database.queryone(
+        "SELECT COUNT(*) FROM public.realties_new WHERE created_at > %s",
+        (datetime.now() - timedelta(hours=1),)
+    )
+    realties_in_last_hr = result[0]
+
     result = database.queryone('''
         SELECT
             (SELECT COUNT(*) FROM zapimoveis.address_urls WHERE scraped = 1),
@@ -49,17 +55,10 @@ def __main__():
     
     print_log(f"TOTAL REALTIES: {total_realties}")
     print_log(f"LAST STORED REALTY ADDRESS: {last_realty_address}")
+    print_log(f"{realties_in_last_hr} REALTIES WERE SCRAPED IN THE LAST HOUR\n")
 
     print_log(f"SCRAPED URLS: {scraped_urls} | NOT SCRAPED URLS: {not_scraped_urls}")
     print_log(f"LAST URL STORED: {last_address_url}", showDt=True, section=True)
-
-    result = database.queryone(
-        "SELECT COUNT(*) FROM public.realties_new WHERE created_at > %s",
-        (datetime.now() - timedelta(hours=1),)
-    )
-    realties_in_last_hr = result[0]
-    print(f"{realties_in_last_hr} realties were scraped in the last hour")
-
 
 if __name__ == "__main__":
     __main__()
