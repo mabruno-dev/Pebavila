@@ -86,7 +86,10 @@ def set_status(**kwargs):
         status = json.load(json_file)
         for key, value in kwargs.items():
             if key in status:
-                status[key] = value
+                if isinstance(value, str):
+                    status[key] = value.encode("utf-8")
+                else:
+                    status[key] = value
             else:
                 raise InvalidStatusKeyException(f'"{key}" is not a valid status.')
             
