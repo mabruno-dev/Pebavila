@@ -60,5 +60,3 @@ def print_log(text: str, showDt: bool = False, onConsole: bool = True, section: 
 def error(e):
     print(f"{Console.RED} {e}{Console.RESET}")
     print_log(e, showDt=True, onConsole=False, section=True)
-
-print(os.path.abspath(__file__))

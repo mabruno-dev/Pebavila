@@ -48,11 +48,6 @@ def create_json():
         "script_start_time": "",
         "current_realty_start_time": "",
         "current_address": "",
-        "error": {
-            "message": "",
-            "date": "",
-            "url": ""
-        },
         "last_realty": {
             "realty_location": {
                 "state": "",

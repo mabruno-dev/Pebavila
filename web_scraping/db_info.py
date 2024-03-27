@@ -5,13 +5,14 @@ project_name = "the-beginning"; sys.path.append(os.path.abspath(__file__)[:os.pa
 from database.connection import Database
 from utils.functions import print_log
 
-import time
 from datetime import datetime, timedelta
+import threading
+from time import sleep
+
 
 def __main__():
-    database = Database(ensure_connection=True)
 
-    timer_start = time.time()
+    database = Database(ensure_connection=True)
 
     result = database.queryone(
         "SELECT COUNT(*) FROM public.realties_new"
@@ -23,6 +24,12 @@ def __main__():
         (datetime.now() - timedelta(hours=1),)
     )
     realties_in_last_hr = result[0]
+
+    result = database.queryone(
+        "SELECT COUNT(*) FROM public.realties_new WHERE created_at > %s",
+        (datetime.now() - timedelta(seconds=60),)
+    )
+    realties_per_hour = result[0] * 60
 
     result = database.queryone('''
         SELECT
@@ -52,10 +59,11 @@ def __main__():
         '''
     )
     last_realty_address = f"{result[0]}, {result[1]} - {result[2]} ({result[3]})"
-    
+
     print_log(f"TOTAL REALTIES: {total_realties}")
     print_log(f"LAST STORED REALTY ADDRESS: {last_realty_address}")
-    print_log(f"{realties_in_last_hr} REALTIES WERE SCRAPED IN THE LAST HOUR\n")
+    print_log(f"REALTIES SCRAPED IN THE LAST HOUR: {realties_in_last_hr}")
+    print_log(f"CURRENT SCRAPING SPEED: {realties_per_hour} realties/hour\n")
 
     print_log(f"SCRAPED URLS: {scraped_urls} | NOT SCRAPED URLS: {not_scraped_urls}")
     print_log(f"LAST URL STORED: {last_address_url}", showDt=True, section=True)
