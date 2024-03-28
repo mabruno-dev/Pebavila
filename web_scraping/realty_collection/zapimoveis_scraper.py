@@ -256,7 +256,7 @@ def __main__():
 
     for address_url in address_url_list:
         if address_url["url"] != None:
-            if not check_address_url_is_scraped(database, address_url["address"]) and "NITEROI" in address_url["address"]:
+            if not check_address_url_is_scraped(database, address_url["address"]):
                 print(Console.YELLOW + "Scraping" + Console.RESET + f" realties from: {address_url['address']}")
 
                 set_status(current_address=address_url["address"])
