@@ -67,8 +67,8 @@ def get_address_urls(database: Database):
 def set_address_url_scraped(database: Database, address_url: dict):
     try:
         database.execute(
-            "UPDATE zapimoveis.address_urls SET scraped = 1 WHERE address = %s",
-            (address_url["address"],)
+            "UPDATE zapimoveis.address_urls SET scraped = 1, updated_at = %s WHERE address = %s",
+            (datetime.now(), address_url["address"])
         )
         database.commit()
     except Exception as e:
