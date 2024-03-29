@@ -15,18 +15,18 @@ def __main__():
     database = Database(ensure_connection=True)
 
     result = database.queryone(
-        "SELECT COUNT(*) FROM public.realties_new"
+        "SELECT COUNT(*) FROM public.realties"
     )
     total_realties = result[0]
 
     result = database.queryone(
-        "SELECT COUNT(*) FROM public.realties_new WHERE created_at > %s",
+        "SELECT COUNT(*) FROM public.realties WHERE created_at > %s",
         (datetime.now() - timedelta(hours=1),)
     )
     realties_in_last_hr = result[0]
 
     result = database.queryone(
-        "SELECT COUNT(*) FROM public.realties_new WHERE created_at > %s",
+        "SELECT COUNT(*) FROM public.realties WHERE created_at > %s",
         (datetime.now() - timedelta(seconds=60),)
     )
     realties_per_hour = result[0] * 60
@@ -50,7 +50,7 @@ def __main__():
             c.city_name,
             s2.state_acronym
         FROM
-            public.realties_new AS r
+            public.realties AS r
         INNER JOIN public.neighborhoods n ON r.realty_neighborhood = n.neighborhood_id
         INNER JOIN public.streets s1 ON r.realty_street = s1.street_id
         INNER JOIN public.cities c ON n.neighborhood_city = c.city_id
