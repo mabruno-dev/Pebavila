@@ -29,22 +29,16 @@ def format_time(seconds):
 def create_dirs(file_path):
     os.makedirs(os.path.dirname(file_path), exist_ok=True)
 
-def get_caller_path():
+def get_caller_dir_path():
     caller_frame = inspect.stack()[-1]
-    calling_script_path = caller_frame.filename
-    if sys.platform.startswith('darwin'):
-        path_list = calling_script_path.split("/")
-    else:
-        path_list = calling_script_path.split("\\")
-    return "/".join(path_list[(path_list.index("the-beginning") + 1):])
+    calling_script_path = caller_frame.filename.replace("\\", "/")
+    path_list = calling_script_path.split("/")
+    return "/".join(path_list[:-1])
 
 def get_caller_name():
     caller_frame = inspect.stack()[-1]
-    calling_script_path = caller_frame.filename
-    if sys.platform.startswith('darwin'):
-        path_list = calling_script_path.split("/")
-    else:
-        path_list = calling_script_path.split("\\")
+    calling_script_path = caller_frame.filename.replace("\\", "/")
+    path_list = calling_script_path.split("/")
     return path_list[-1]
 
 def print_log(text: str, showDt: bool = False, onConsole: bool = True, section: bool = False):
@@ -52,14 +46,10 @@ def print_log(text: str, showDt: bool = False, onConsole: bool = True, section: 
     current_date = datetime.today().strftime('%d%m%Y')
     formatted_date = datetime.today().strftime('%d/%m/%Y %H:%M:%S')
 
-    try:
-        caller_path = get_caller_path().replace(".py", "")
-        LOG_FILE_PATH = os.path.join(os.getcwd(), f"logs/{caller_path}/log_{current_date}.txt")
-        print(LOG_FILE_PATH)
-    except:
-        caller_name = get_caller_name().replace(".py", "")
-        LOG_FILE_PATH = os.path.join(os.getcwd(), f"logs/{caller_name}/log_{current_date}.txt")
-        print(LOG_FILE_PATH)
+    caller_dir_path = get_caller_dir_path().replace(".py", "")
+    caller_name = get_caller_name().replace(".py", "")
+    LOG_FILE_PATH = f"{caller_dir_path}/logs/{caller_name}/log_{current_date}.txt"
+    print(LOG_FILE_PATH)
 
     create_dirs(LOG_FILE_PATH)
 
