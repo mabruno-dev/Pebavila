@@ -6,6 +6,7 @@ import random
 import threading
 import json
 from time import sleep, time
+import inspect
 
 from selenium import webdriver
 # from selenium_stealth import stealth
@@ -23,7 +24,15 @@ from database.functions.public import *
 from database.functions.zapimoveis import *
 from utils.constants import ConsoleColors as Console
 
-JSON_PATH = "output/zapimoveis_scraper/status.json"
+frame = inspect.stack()[-1]
+dir_path = "/".join(frame.filename.replace("\\", "/").split("/")[:-1]).replace("/_internal", "")
+print(dir_path)
+
+
+JSON_PATH = os.path.join(dir_path, "output/zapimoveis_scraper/status.json")
+print(JSON_PATH)
+
+sleep(100)
 
 realty_div_size = 300 # Usually 300 but may vary
 REALTIES_PER_PAGE = 100

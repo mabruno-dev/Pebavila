@@ -54,10 +54,12 @@ def print_log(text: str, showDt: bool = False, onConsole: bool = True, section: 
 
     try:
         caller_path = get_caller_path().replace(".py", "")
-        LOG_FILE_PATH = f"logs/{caller_path}/log_{current_date}.txt"
+        LOG_FILE_PATH = os.path.join(os.getcwd(), f"logs/{caller_path}/log_{current_date}.txt")
+        print(LOG_FILE_PATH)
     except:
         caller_name = get_caller_name().replace(".py", "")
-        LOG_FILE_PATH = f"logs/{caller_name}/log_{current_date}.txt"
+        LOG_FILE_PATH = os.path.join(os.getcwd(), f"logs/{caller_name}/log_{current_date}.txt")
+        print(LOG_FILE_PATH)
 
     create_dirs(LOG_FILE_PATH)
 
