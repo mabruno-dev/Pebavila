@@ -38,14 +38,26 @@ def get_caller_path():
         path_list = calling_script_path.split("\\")
     return "/".join(path_list[(path_list.index("the-beginning") + 1):])
 
-def print_log(text: str, showDt: bool = False, onConsole: bool = True, section: bool = False):
+def get_caller_name():
+    caller_frame = inspect.stack()[-1]
+    calling_script_path = caller_frame.filename
+    if sys.platform.startswith('darwin'):
+        path_list = calling_script_path.split("/")
+    else:
+        path_list = calling_script_path.split("\\")
+    return path_list[-1]
 
-    caller_path = get_caller_path().replace(".py", "")
+def print_log(text: str, showDt: bool = False, onConsole: bool = True, section: bool = False):
 
     current_date = datetime.today().strftime('%d%m%Y')
     formatted_date = datetime.today().strftime('%d/%m/%Y %H:%M:%S')
 
-    LOG_FILE_PATH = f"logs/{caller_path}/log_{current_date}.txt"
+    try:
+        caller_path = get_caller_path().replace(".py", "")
+        LOG_FILE_PATH = f"logs/{caller_path}/log_{current_date}.txt"
+    except:
+        caller_name = get_caller_name().replace(".py", "")
+        LOG_FILE_PATH = f"logs/{caller_name}/log_{current_date}.txt"
 
     create_dirs(LOG_FILE_PATH)
 
