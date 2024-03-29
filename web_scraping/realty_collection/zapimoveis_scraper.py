@@ -4,7 +4,6 @@ project_name = "the-beginning"; sys.path.append(os.path.abspath(__file__)[:os.pa
 
 import random
 import threading
-import signal
 import json
 from time import sleep, time
 
@@ -45,7 +44,6 @@ class InvalidStatusKeyException(Exception):
 def create_json():
     default_dict = {
         "running": False,
-        "scraping _realty": False,
         "script_start_time": "",
         "current_realty_start_time": "",
         "current_address": "",
@@ -117,14 +115,6 @@ def load_realties(driver: webdriver.Chrome, realty_list_div: WebElement):
 
     stop_loading = False
 
-def create_sigterm_handler(driver: webdriver):
-    def sigterm_handler():
-        print("Terminating...")
-        driver.close()
-        sys.exit(0)
-
-    return sigterm_handler
-
 @timed
 def scrape_url(address_url: dict):
     url = address_url["url"][:-1] # Remove the page index
@@ -145,8 +135,6 @@ def scrape_url(address_url: dict):
             options.add_argument('--log-level=3')
 
             driver = webdriver.Chrome(options=options)
-
-            signal.signal(signal.SIGTERM, create_sigterm_handler(driver))
 
             # stealth(driver,
             #     languages=["en-US", "en"],
@@ -201,7 +189,6 @@ def scrape_url(address_url: dict):
                         pause_loading = False
                     finally:
                         if not check_realty_exists_by_url(database, realty_url):
-                            set_status(scraping_realty=True)
                             print(Console.YELLOW + "Scraping" + Console.RESET + f" realty number {data_position}")
                             try:
                                 set_status(current_realty_start_time=time())
@@ -214,7 +201,6 @@ def scrape_url(address_url: dict):
                             if realty_info != None:
                                 insert_realty(database, realty_info)
                                 set_status(last_realty=realty_info)
-                            set_status(scraping_realty=False)
                         else:
                             print(Console.BLUE + "Skipped"  + Console.RESET + f" realty number {data_position}")
                         data_position += 1
