@@ -17,8 +17,8 @@ def neural_network(data = df()):
     pd.set_option('display.max_seq_items', None)
     shuffled_df = data.sample(frac=1, random_state=42)
     df_format = shuffled_df.shape
-    df_lenght = df_format[1]
-    df_col = df_format[0]
+    df_lenght = df_format[0]
+    df_col = df_format[1]
 
     # Divisão dos dados IMPORTANTE GENERALIZAR A DIVISAO USANDO O SHAPE
     X_train = shuffled_df.iloc[1:int(df_lenght*0.7), :].drop(columns=16)
@@ -49,13 +49,21 @@ def neural_network(data = df()):
 
     num_features = X_train.shape[1]
 
+    print(f"------Training began with data.shape = {X_train.shape}------".center(100))
     #num_features = 316
-    # Construção do modelo
+    
     model = models.Sequential([
-        layers.Dense(4096, activation='elu', input_shape=(num_features,), kernel_regularizer=tf.keras.regularizers.l2(0.001)),
+        layers.Input((num_features,)),
+        layers.Dense(4096, activation='elu', kernel_regularizer=tf.keras.regularizers.l2(0.001)),
         layers.Dropout(0.5),
         layers.Dense(16384, activation='relu', kernel_regularizer=tf.keras.regularizers.l2(0.001)),
-        layers.Dropout(0.5),
+        layers.Dropout(0.4),
+        layers.Dense(16384, activation='elu', kernel_regularizer=tf.keras.regularizers.l2(0.001)),
+        layers.Dropout(0.3),
+        layers.Dense(8192, activation='relu', kernel_regularizer=tf.keras.regularizers.l2(0.001)),
+        layers.Dropout(0.2),
+        layers.Dense(4096, activation='elu', kernel_regularizer=tf.keras.regularizers.l2(0.001)),
+        layers.Dropout(0.1),
         layers.Dense(1)
     ])
 
@@ -81,5 +89,4 @@ def neural_network(data = df()):
     print(f'Predicted Price: {predicted_price}')'''
 
 
-print('comeco')
 neural_network()
