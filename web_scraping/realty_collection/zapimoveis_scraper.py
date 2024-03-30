@@ -221,6 +221,7 @@ def scrape_url(address_url: dict):
                     print(f"Loading...", end="\r")
                 except Exception as e:
                     error(e)
+                    return
 
             stop_loading = True
             loader.join()
@@ -231,7 +232,7 @@ def scrape_url(address_url: dict):
                 break
         except Exception as e:
             error(e)
-            break
+            return
     set_address_url_scraped(database, address_url)
 
 def reset_control_variables():

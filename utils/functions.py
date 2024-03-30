@@ -46,10 +46,9 @@ def print_log(text: str, showDt: bool = False, onConsole: bool = True, section: 
     current_date = datetime.today().strftime('%d%m%Y')
     formatted_date = datetime.today().strftime('%d/%m/%Y %H:%M:%S')
 
-    caller_dir_path = get_caller_dir_path().replace(".py", "")
+    caller_dir_path = get_caller_dir_path().replace(".py", "").replace("/_internal", "")
     caller_name = get_caller_name().replace(".py", "")
     LOG_FILE_PATH = f"{caller_dir_path}/logs/{caller_name}/log_{current_date}.txt"
-    print(LOG_FILE_PATH)
 
     create_dirs(LOG_FILE_PATH)
 
