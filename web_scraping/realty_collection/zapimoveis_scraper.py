@@ -221,8 +221,6 @@ def scrape_url(address_url: dict):
                     print(f"Loading...", end="\r")
                 except Exception as e:
                     error(e)
-                    driver.quit()
-                    return
 
             stop_loading = True
             loader.join()
