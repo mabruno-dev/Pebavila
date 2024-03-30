@@ -221,6 +221,7 @@ def scrape_url(address_url: dict):
                     print(f"Loading...", end="\r")
                 except Exception as e:
                     error(e)
+                    driver.quit()
                     return
 
             stop_loading = True
@@ -232,6 +233,7 @@ def scrape_url(address_url: dict):
                 break
         except Exception as e:
             error(e)
+            driver.quit()
             return
     set_address_url_scraped(database, address_url)
 
