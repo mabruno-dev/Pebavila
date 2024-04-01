@@ -9,7 +9,7 @@ from time import sleep, time
 import inspect
 
 from selenium import webdriver
-# from selenium_stealth import stealth
+from selenium_stealth import stealth
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.remote.webelement import WebElement
@@ -140,14 +140,14 @@ def scrape_url(address_url: dict):
 
             driver = webdriver.Chrome(options=options)
 
-            # stealth(driver,
-            #     languages=["en-US", "en"],
-            #     vendor="Google Inc.",
-            #     platform="Win32",
-            #     webgl_vendor="Intel Inc.",
-            #     renderer="Intel Iris OpenGL Engine",
-            #     fix_hairline=True,
-            # )
+            stealth(driver,
+                languages=["en-US", "en"],
+                vendor="Google Inc.",
+                platform="Win32",
+                webgl_vendor="Intel Inc.",
+                renderer="Intel Iris OpenGL Engine",
+                fix_hairline=True,
+            )
             
             page_url = url + f"{current_page}"
             driver.get(page_url)
