@@ -50,30 +50,7 @@ def create_json():
         "running": False,
         "script_start_time": "",
         "current_realty_start_time": "",
-        "current_address": "",
-        "last_realty": {
-            "realty_location": {
-                "state": "",
-                "city": "",
-                "neighborhood": "",
-                "street": ""
-            },
-            "realty_number": "",
-            "realty_square_footage": 0,
-            "realty_price": 0.00,
-            "realty_property_tax": 0.00,
-            "realty_condo_price": 0.00,
-            "realty_description": "",
-            "realty_parking_spaces": 0,
-            "realty_bathrooms": 0,
-            "realty_bedrooms": 0,
-            "realty_advertiser": "",
-            "realty_status": 0,
-            "realty_furnished": False,
-            "realty_floor": 0,
-            "realty_type": "",
-            "realty_url": ""
-        }
+        "current_address": ""
     }
     create_dirs(JSON_PATH)
     with open(JSON_PATH, "w", encoding="utf-8") as json_file:
@@ -204,7 +181,6 @@ def scrape_url(address_url: dict):
                                 print(Console.RED + f"Error at webpage: {realty_url}" + Console.RESET)
                             if realty_info != None:
                                 insert_realty(database, realty_info)
-                                set_status(last_realty=realty_info)
                         else:
                             print(Console.BLUE + "Skipped"  + Console.RESET + f" realty number {data_position}")
                         data_position += 1
