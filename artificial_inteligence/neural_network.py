@@ -28,8 +28,8 @@ def neural_network(data = df()):
     X_test = shuffled_df.iloc[int(df_lenght*0.85):df_lenght, :].drop(columns=16)
     y_test = shuffled_df.iloc[int(df_lenght*0.85):df_lenght, 16]'''
 
-    X_train = shuffled_df.iloc[1:int(df_lenght*0.7), :]
-    y_train = shuffled_df.iloc[1:int(df_lenght*0.7), 15].drop(columns=15)
+    X_train = shuffled_df.iloc[1:int(df_lenght*0.7), :].drop(columns=15)
+    y_train = shuffled_df.iloc[1:int(df_lenght*0.7), 15]
     X_val = shuffled_df.iloc[int(df_lenght*0.7):int(df_lenght*0.85), :].drop(columns=15)
     y_val = shuffled_df.iloc[int(df_lenght*0.7):int(df_lenght*0.85), 15]
     X_test = shuffled_df.iloc[int(df_lenght*0.85):df_lenght, :].drop(columns=15)
@@ -54,7 +54,7 @@ def neural_network(data = df()):
     X_val = scaler.transform(X_val)
     X_test = scaler.transform(X_test)
 
-    num_features = X_train.shape[1]-1
+    num_features = X_train.shape[1]
 
     print(f"------Training began with data.shape = {X_train.shape}------".center(100))
     #num_features = 316
@@ -63,7 +63,7 @@ def neural_network(data = df()):
         layers.Input((num_features,)),
         layers.Dense(4096, activation='elu', kernel_regularizer=tf.keras.regularizers.l2(0.001)),
         layers.Dropout(0.5),
-        layers.Dense(16384, activation='relu', kernel_regularizer=tf.keras.regularizers.l2(0.001)),
+        layers.Dense(4096, activation='relu', kernel_regularizer=tf.keras.regularizers.l2(0.001)),
         layers.Dropout(0.4),
         layers.Dense(16384, activation='elu', kernel_regularizer=tf.keras.regularizers.l2(0.001)),
         layers.Dropout(0.3),
