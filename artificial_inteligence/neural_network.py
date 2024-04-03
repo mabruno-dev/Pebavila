@@ -21,12 +21,19 @@ def neural_network(data = df()):
     df_col = df_format[1]
 
     # Divisão dos dados IMPORTANTE GENERALIZAR A DIVISAO USANDO O SHAPE
-    X_train = shuffled_df.iloc[1:int(df_lenght*0.7), :].drop(columns=16)
+    '''X_train = shuffled_df.iloc[1:int(df_lenght*0.7), :].drop(columns=16)
     y_train = shuffled_df.iloc[1:int(df_lenght*0.7), 16]
     X_val = shuffled_df.iloc[int(df_lenght*0.7):int(df_lenght*0.85), :].drop(columns=16)
     y_val = shuffled_df.iloc[int(df_lenght*0.7):int(df_lenght*0.85), 16]
     X_test = shuffled_df.iloc[int(df_lenght*0.85):df_lenght, :].drop(columns=16)
-    y_test = shuffled_df.iloc[int(df_lenght*0.85):df_lenght, 16]
+    y_test = shuffled_df.iloc[int(df_lenght*0.85):df_lenght, 16]'''
+
+    X_train = shuffled_df.iloc[1:int(df_lenght*0.7), :]
+    y_train = shuffled_df.iloc[1:int(df_lenght*0.7), 15].drop(columns=15)
+    X_val = shuffled_df.iloc[int(df_lenght*0.7):int(df_lenght*0.85), :].drop(columns=15)
+    y_val = shuffled_df.iloc[int(df_lenght*0.7):int(df_lenght*0.85), 15]
+    X_test = shuffled_df.iloc[int(df_lenght*0.85):df_lenght, :].drop(columns=15)
+    y_test = shuffled_df.iloc[int(df_lenght*0.85):df_lenght, 15]
 
     X_train = X_train.to_numpy()
     y_train = y_train.to_numpy()
@@ -47,7 +54,7 @@ def neural_network(data = df()):
     X_val = scaler.transform(X_val)
     X_test = scaler.transform(X_test)
 
-    num_features = X_train.shape[1]
+    num_features = X_train.shape[1]-1
 
     print(f"------Training began with data.shape = {X_train.shape}------".center(100))
     #num_features = 316
