@@ -28,7 +28,7 @@ main_url = "https://www.zapimoveis.com.br/venda/?__ab=exp-aa-test:control,rec-ct
 def check_address_similarity(local_address: str, web_address: str) -> bool:
     # format: STREET, CITY - STATE
 
-    # heandling edgecase
+    # handling edgecase
     web_address = web_address.replace(", S/No", "")
 
     local_street, local_city_state = local_address.split(", ")

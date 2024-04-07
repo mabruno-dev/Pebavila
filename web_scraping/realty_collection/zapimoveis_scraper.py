@@ -27,7 +27,7 @@ from utils.constants import ConsoleColors as Console
 frame = inspect.stack()[-1]
 dir_path = "/".join(frame.filename.replace("\\", "/").split("/")[:-1]).replace("/_internal", "")
 
-JSON_PATH = os.path.join(dir_path, "output/zapimoveis_scraper/status.json")
+JSON_PATH = os.path.join(dir_path, "output/status.json")
 
 realty_div_size = 300 # Usually 300 but may vary
 REALTIES_PER_PAGE = 100
@@ -50,7 +50,9 @@ def create_json():
         "running": False,
         "script_start_time": "",
         "current_realty_start_time": "",
-        "current_address": ""
+        "current_address": "",
+        "current_realty_image": "",
+        "current_error": ""
     }
     create_dirs(JSON_PATH)
     with open(JSON_PATH, "w", encoding="utf-8") as json_file:
@@ -185,6 +187,7 @@ def scrape_url(address_url: dict):
                             print(Console.BLUE + "Skipped"  + Console.RESET + f" realty number {data_position}")
                         data_position += 1
                         scraped_realties += 1
+                    set_status(current_error="All good.")
                 except NoSuchElementException:
                     pause_loading = False
 
@@ -197,6 +200,7 @@ def scrape_url(address_url: dict):
                     print(f"Loading...", end="\r")
                 except Exception as e:
                     error(e)
+                    set_status(current_error=e)
 
             stop_loading = True
             loader.join()

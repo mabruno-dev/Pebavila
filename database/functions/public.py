@@ -340,14 +340,14 @@ def validate_location(database: Database, location: dict):
     if state_id:
         valid_location["state"] = location["state"]
     else:
-        raise InvalidLocationException("State does not exist")
+        raise InvalidLocationException(f'State "{location['state']}" does not exist')
 
     # Validate city
     city_id = get_city_id(database, location["city"], state_id)
     if city_id:
         valid_location["city"] = location["city"]
     else:
-        raise InvalidLocationException("City does not exist")
+        raise InvalidLocationException(f'City "{location['city']}" does not exist')
     
     # Validate neighborhood
     neighborhood_id = get_neighborhood_id(database, location["neighborhood"], city_id)
@@ -401,7 +401,7 @@ def normalize_realty_dict(database: Database, realty: dict):
     # get neighborhood FK
     neighborhood = get_realty_neighborhood(database, realty["realty_location"])
     if not neighborhood:
-        raise InvalidLocationException("Neighborhood does not exist")
+        raise InvalidLocationException(f'Neighborhood "{realty['realty_location']['neighborhood']}" does not exist')
     else:
         normalized_realty["realty_neighborhood"] = neighborhood
 
@@ -409,7 +409,7 @@ def normalize_realty_dict(database: Database, realty: dict):
     if realty["realty_location"]["street"] is not None:
         street = get_realty_street(database, realty["realty_location"])
         if not street:
-            raise InvalidLocationException("Street does not exist")
+            raise InvalidLocationException(f'Street "{realty['realty_location']['street']}" does not exist')
         else:
             normalized_realty["realty_street"] = street
     else:
