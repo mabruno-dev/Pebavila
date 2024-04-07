@@ -82,9 +82,7 @@ def scrape_realty(url):
     gallery_section = driver.find_element(By.CLASS_NAME, "gallery__container")
     image = gallery_section.find_element(By.TAG_NAME, "img")
     image_url = image.get_attribute("srcset").split("1x")[0]
-    image_data = requests.get(image_url).content
-    encoded_image_data = base64.b64encode(image_data).decode("utf-8")
-    set_status(current_realty_image=encoded_image_data)
+    set_status(current_realty_image=image_url)
 
     if "Em construção" in status_span.text:
         status = RC.UNDER_CONSTRUCTION
