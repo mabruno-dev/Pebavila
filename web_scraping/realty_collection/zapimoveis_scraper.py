@@ -184,7 +184,7 @@ def scrape_url(address_url: dict):
                             if realty_info != None:
                                 try:
                                     insert_realty(database, realty_info)
-                                    set_status(current_error="All good.")
+                                    set_status(current_error="")
                                 except Exception as e:
                                     set_status(current_error=str(e))
                         else:
