@@ -182,12 +182,15 @@ def scrape_url(address_url: dict):
                                 realty_info = None
                                 print(Console.RED + f"Error at webpage: {realty_url}" + Console.RESET)
                             if realty_info != None:
-                                insert_realty(database, realty_info)
+                                try:
+                                    insert_realty(database, realty_info)
+                                    set_status(current_error="All good.")
+                                except Exception as e:
+                                    set_status(current_error=str(e))
                         else:
                             print(Console.BLUE + "Skipped"  + Console.RESET + f" realty number {data_position}")
                         data_position += 1
                         scraped_realties += 1
-                    set_status(current_error="All good.")
                 except NoSuchElementException:
                     pause_loading = False
 
@@ -200,7 +203,6 @@ def scrape_url(address_url: dict):
                     print(f"Loading...", end="\r")
                 except Exception as e:
                     error(e)
-                    set_status(current_error=e)
 
             stop_loading = True
             loader.join()
