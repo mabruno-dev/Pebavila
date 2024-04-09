@@ -22,24 +22,24 @@ from utils.wrappers import timed
 frame = inspect.stack()[-1]
 dir_path = "/".join(frame.filename.replace("\\", "/").split("/")[:-1]).replace("/_internal", "")
 
-JSON_PATH = os.path.join(dir_path, "output/status.json")
+# JSON_PATH = os.path.join(dir_path, "output/status.json")
 
 class InvalidStatusKeyException(Exception):
     def __init__(self, message):
         self.message = message
         super().__init__(self.message)
 
-def set_status(**kwargs):
-    with open(JSON_PATH, "r", encoding="utf-8") as json_file:
-        status = json.load(json_file)
-        for key, value in kwargs.items():
-            if key in status:
-                status[key] = value
-            else:
-                raise InvalidStatusKeyException(f'"{key}" is not a valid status.')
+# def set_status(**kwargs):
+#     with open(JSON_PATH, "r", encoding="utf-8") as json_file:
+#         status = json.load(json_file)
+#         for key, value in kwargs.items():
+#             if key in status:
+#                 status[key] = value
+#             else:
+#                 raise InvalidStatusKeyException(f'"{key}" is not a valid status.')
             
-    with open(JSON_PATH, "w", encoding="utf-8") as json_file:
-        json.dump(status, json_file, indent=4, ensure_ascii=False)
+#     with open(JSON_PATH, "w", encoding="utf-8") as json_file:
+#         json.dump(status, json_file, indent=4, ensure_ascii=False)
 
 def find_numbers(s: str):
     result = findall(r"\d+\.*\d*", s)
@@ -79,10 +79,10 @@ def scrape_realty(url):
         driver.quit()
         return scrape_realty(url)
     
-    gallery_section = driver.find_element(By.CLASS_NAME, "gallery__container")
-    image = gallery_section.find_element(By.TAG_NAME, "img")
-    image_url = image.get_attribute("srcset").split("1x")[0]
-    set_status(current_realty_image=image_url)
+    # gallery_section = driver.find_element(By.CLASS_NAME, "gallery__container")
+    # image = gallery_section.find_element(By.TAG_NAME, "img")
+    # image_url = image.get_attribute("srcset").split("1x")[0].strip()
+    # set_status(current_realty_image=image_url)
 
     if "Em construção" in status_span.text:
         status = RC.UNDER_CONSTRUCTION

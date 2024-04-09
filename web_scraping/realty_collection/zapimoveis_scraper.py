@@ -154,6 +154,10 @@ def scrape_url(address_url: dict):
                 try:
                     realty_div = driver.find_element(By.CSS_SELECTOR, f'div[data-position="{data_position}"]')
                     realty_div_size = realty_div.size["height"]
+
+                    image = realty_div.find_element(By.TAG_NAME, "img")
+                    image_url = image.get_attribute("src")
+
                     try:
                         # Extract the URL of the realty
                         realty_a = realty_div.find_element(By.TAG_NAME, "a")
@@ -174,7 +178,7 @@ def scrape_url(address_url: dict):
                         if not check_realty_exists_by_url(database, realty_url):
                             print(Console.YELLOW + "Scraping" + Console.RESET + f" realty number {data_position}")
                             try:
-                                set_status(current_realty_start_time=time())
+                                set_status(current_realty_start_time=time(), current_realty_image=image_url)
                                 # Scrape realty info
                                 realty_info = scrape_realty(realty_url)
                             except Exception as e:
