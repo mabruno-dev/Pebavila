@@ -22,6 +22,7 @@ from web_scraping.realty_collection.realty_scraper import scrape_realty
 from database.connection import Database
 from database.functions.public import *
 from database.functions.zapimoveis import *
+from database.functions.sctracker import *
 from utils.constants import ConsoleColors as Console
 
 frame = inspect.stack()[-1]
@@ -44,31 +45,6 @@ class InvalidStatusKeyException(Exception):
     def __init__(self, message):
         self.message = message
         super().__init__(self.message)
-
-def create_json():
-    default_dict = {
-        "running": False,
-        "script_start_time": "",
-        "current_realty_start_time": "",
-        "current_address": "",
-        "current_realty_image": "",
-        "current_error": ""
-    }
-    create_dirs(JSON_PATH)
-    with open(JSON_PATH, "w", encoding="utf-8") as json_file:
-        json.dump(default_dict, json_file, indent=4, ensure_ascii=False)
-
-def set_status(**kwargs):
-    with open(JSON_PATH, "r", encoding="utf-8") as json_file:
-        status = json.load(json_file)
-        for key, value in kwargs.items():
-            if key in status:
-                status[key] = value
-            else:
-                raise InvalidStatusKeyException(f'"{key}" is not a valid status.')
-            
-    with open(JSON_PATH, "w", encoding="utf-8") as json_file:
-        json.dump(status, json_file, indent=4, ensure_ascii=False)
 
 def load_realties(driver: webdriver.Chrome, realty_list_div: WebElement):
 
@@ -178,7 +154,7 @@ def scrape_url(address_url: dict):
                         if not check_realty_exists_by_url(database, realty_url):
                             print(Console.YELLOW + "Scraping" + Console.RESET + f" realty number {data_position}")
                             try:
-                                set_status(current_realty_start_time=time(), current_realty_image=image_url)
+                                set_status(database, current_realty_start=time(), current_realty_image=image_url)
                                 # Scrape realty info
                                 realty_info = scrape_realty(realty_url)
                             except Exception as e:
@@ -186,13 +162,11 @@ def scrape_url(address_url: dict):
                                 realty_info = None
                                 print(Console.RED + f"Error at webpage: {realty_url}" + Console.RESET)
                             if realty_info != None:
-                                try:
-                                    insert_realty(database, realty_info)
-                                    set_status(current_error="")
-                                except Exception as e:
-                                    set_status(current_error=str(e))
+                                insert_realty(database, realty_info)
+
                         else:
                             print(Console.BLUE + "Skipped"  + Console.RESET + f" realty number {data_position}")
+                        set_status(database, error="")
                         data_position += 1
                         scraped_realties += 1
                 except NoSuchElementException:
@@ -206,6 +180,7 @@ def scrape_url(address_url: dict):
 
                     print(f"Loading...", end="\r")
                 except Exception as e:
+                    set_status(database, error=str(e))
                     error(e)
 
             stop_loading = True
@@ -237,8 +212,7 @@ def __main__():
     global database
     global end_script
 
-    create_json()
-    set_status(script_start_time=time(), running=True)
+    set_status(database, scraper_start=time(), running=True)
 
     address_url_list = get_address_urls(database)
     random.shuffle(address_url_list) # This is done so that multiple instances of the scraper have less chance of scraping the same url at the same time
@@ -248,7 +222,7 @@ def __main__():
             if not check_address_url_is_scraped(database, address_url["address"]):
                 print(Console.YELLOW + "Scraping" + Console.RESET + f" realties from: {address_url['address']}")
 
-                set_status(current_address=address_url["address"])
+                set_status(database, address=address_url["address"])
 
                 reset_control_variables()
                 scrape_url(address_url)

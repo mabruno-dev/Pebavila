@@ -1,0 +1,18 @@
+import os, sys
+project_name = "the-beginning"; sys.path.append(os.path.abspath(__file__)[:os.path.abspath(__file__).find(project_name) + len(project_name)] if project_name in os.path.abspath(__file__) else os.path.abspath(__file__))
+# Resolve module imports
+
+from utils.wrappers import announce
+from database.connection import Database
+from database.functions.common import db_error
+
+def set_status(database: Database, **kwargs):
+    for key, value in kwargs.items():
+        try:
+            database.execute(
+                f"UPDATE sctracker.scraper_status SET {key} = %s",
+                (value,)
+            )
+            database.commit()
+        except Exception as e:
+            db_error(database, e)
