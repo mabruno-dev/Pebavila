@@ -25,11 +25,6 @@ from database.functions.zapimoveis import *
 from database.functions.sctracker import *
 from utils.constants import ConsoleColors as Console
 
-frame = inspect.stack()[-1]
-dir_path = "/".join(frame.filename.replace("\\", "/").split("/")[:-1]).replace("/_internal", "")
-
-JSON_PATH = os.path.join(dir_path, "output/status.json")
-
 realty_div_size = 300 # Usually 300 but may vary
 REALTIES_PER_PAGE = 100
 
