@@ -74,16 +74,16 @@ def scrape_realties(realty_list: list, address_url: dict):
     global database
     driver = uc.Chrome()
     for index, item in enumerate(realty_list):
-        if not check_realty_exists_by_url(database, item["url"]):
+        if not check_realty_exists_by_url(database, item["realty"]):
             print(Console.YELLOW + "Scraping" + Console.RESET + f" realty number {index + 1}")
             try:
                 set_status(database, current_realty_start=time(), current_realty_image=item["image"])
                 # Scrape realty info
-                realty_info = scrape_realty(driver, item["url"])
+                realty_info = scrape_realty(driver, item["realty"])
             except Exception as e:
                 # Handle scraping errors
                 realty_info = None
-                print(Console.RED + f"Error at webpage: {item["url"]}" + Console.RESET)
+                print(Console.RED + f"Error at webpage: {item["realty"]}" + Console.RESET)
             if realty_info != None:
                 insert_realty(database, realty_info)
         else:
