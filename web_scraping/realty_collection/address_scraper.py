@@ -121,7 +121,12 @@ def scrape_url(driver: webdriver, address_url: dict):
             except:
                 print(Console.RED + "Connection error" + Console.RESET)
                 break
-            total_realties = int(total_realties_h1.text.split(" ")[0].replace(".", ""))
+            try:
+                total_realties = int(total_realties_h1.text.split(" ")[0].replace(".", ""))
+            except:
+                print("No realties in this url")
+                current_page += 1
+                continue
 
             realty_list_div = driver.find_element(By.CLASS_NAME, "listing-wrapper")
 
