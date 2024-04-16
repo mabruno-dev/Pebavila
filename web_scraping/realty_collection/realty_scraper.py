@@ -78,7 +78,7 @@ def scrape_realty(driver: webdriver, url: str):
     driver.get(url)
 
     try:
-        verify_human(driver, wait)
+        # verify_human(driver, wait)
         status_span = wait.until(
             EC.presence_of_element_located((By.CLASS_NAME, "main__labels"))
         )

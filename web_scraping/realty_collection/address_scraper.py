@@ -131,7 +131,7 @@ def scrape_url(driver: webdriver, address_url: dict):
             driver.get(page_url)
 
             try:
-                verify_human(driver)
+                # verify_human(driver)
                 total_realties_h1 = wait.until(
                     EC.presence_of_element_located((By.CSS_SELECTOR, "h1.l-text.l-u-color-neutral-12.l-text--variant-heading-small.l-text--weight-semibold.undefined"))
                 )
