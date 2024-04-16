@@ -61,9 +61,7 @@ def print_log(text: str, showDt: bool = False, onConsole: bool = True, section: 
             print(text)
 
 def error(e):
-    if "\n" in e:
-        shortened_error = e.split("\n")[0]
-    else:
-        shortened_error = e
+    error = str(e)
+    shortened_error = error.split("\n")[0]
     print(f"{Console.RED} {shortened_error}{Console.RESET}")
     print_log(shortened_error, showDt=True, onConsole=False, section=True)
