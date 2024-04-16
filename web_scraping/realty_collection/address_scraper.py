@@ -106,7 +106,7 @@ def scrape_url(driver: webdriver, address_url: dict):
     realty_list = []
     current_page = 1
 
-    while len(realty_list) <= total_realties and current_page <= 100:
+    while len(realty_list) < total_realties and current_page <= 100:
         start_time = time()
         try:
             page_url = url + f"{current_page}"
@@ -221,5 +221,4 @@ def __main__():
                 print(Console.BLUE + "Skipped" + Console.RESET + f" address: {address_url['address']}")
 
 if __name__ == "__main__":
-    for i in range(4):
-        threading.Thread(target=__main__).start()
+    __main__()
