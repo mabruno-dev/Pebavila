@@ -150,21 +150,23 @@ def scrape_url(driver: webdriver, address_url: dict):
                         realty_url = realty_a.get_attribute("href")
                     except NoSuchElementException:
                         # Handle special case when link is not directly available
-                        pause_loading = True
-                        show_all_button = realty_div.find_element(By.XPATH, ".//*[contains(text(), 'Exibir Anúncios')]")
-                        show_all_button.click()
-                        sleep(1.5)
-                        duplicate_list_div = driver.find_element(By.CLASS_NAME, "deduplication-listings__listings")
-                        duplicate_a_tags = duplicate_list_div.find_elements(By.TAG_NAME, "a")
-                        realty_url = duplicate_a_tags[0].get_attribute("href")
-                        close_span = driver.find_element(By.CSS_SELECTOR, f'span[aria-label="Fechar modal lateral"]')
-                        close_span.click()
-                        pause_loading = False
+                        # pause_loading = True
+                        # show_all_button = realty_div.find_element(By.XPATH, ".//*[contains(text(), 'Exibir Anúncios')]")
+                        # show_all_button.click()
+                        # sleep(1.5)
+                        # duplicate_list_div = driver.find_element(By.CLASS_NAME, "deduplication-listings__listings")
+                        # duplicate_a_tags = duplicate_list_div.find_elements(By.TAG_NAME, "a")
+                        # realty_url = duplicate_a_tags[0].get_attribute("href")
+                        # close_span = driver.find_element(By.CSS_SELECTOR, f'span[aria-label="Fechar modal lateral"]')
+                        # close_span.click()
+                        # pause_loading = False
+                        pass # for now
                     finally:
-                        realty_list.append({
-                            "realty": realty_url,
-                            "image": image_url
-                        })
+                        if realty_url:
+                            realty_list.append({
+                                "realty": realty_url,
+                                "image": image_url
+                            })
                         data_position += 1
                 except NoSuchElementException:
                     pause_loading = False
