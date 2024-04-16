@@ -70,6 +70,24 @@ def find_numbers(s: str):
 def is_number(s: str):
     return s.isdigit()
 
+def set_driver_options():
+    options = webdriver.ChromeOptions()
+    
+    # # Set up a temporary directory for user data
+    # options.add_argument('--user-data-dir=/tmp/chrome_user_data')
+
+    # # Disable cache
+    # options.add_argument('--disable-application-cache')
+    # options.add_argument('--disk-cache-dir=/dev/null')
+
+    # Set log level to mininum
+    options.add_argument('--log-level=3')
+
+    # Enable incognito mode
+    options.add_argument('--incognito')
+
+    return options
+
 @timed
 def scrape_realty(driver: webdriver, url: str):
     
@@ -84,6 +102,9 @@ def scrape_realty(driver: webdriver, url: str):
         )
     except:
         print("Connection error")
+        driver.quit()
+        sleep(15)
+        driver = uc.Chrome(service=Service(ChromeDriverManager().install()), options=set_driver_options())
         return scrape_realty(driver, url)
 
     if "Em construção" in status_span.text:

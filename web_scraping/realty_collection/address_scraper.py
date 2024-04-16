@@ -85,6 +85,24 @@ def verify_human(driver: webdriver, wait: WebDriverWait):
     except:
         print("no verification needed")
 
+def set_driver_options():
+    options = webdriver.ChromeOptions()
+    
+    # # Set up a temporary directory for user data
+    # options.add_argument('--user-data-dir=/tmp/chrome_user_data')
+
+    # # Disable cache
+    # options.add_argument('--disable-application-cache')
+    # options.add_argument('--disk-cache-dir=/dev/null')
+
+    # Set log level to mininum
+    options.add_argument('--log-level=3')
+
+    # Enable incognito mode
+    options.add_argument('--incognito')
+
+    return options
+
 def scrape_realties(driver: webdriver, realty_list: list, address_url: dict):
     global database
     try:
@@ -137,6 +155,9 @@ def scrape_url(driver: webdriver, address_url: dict):
                 )
             except:
                 print(Console.RED + "Connection error" + Console.RESET)
+                driver.quit()
+                sleep(15)
+                driver = uc.Chrome(service=Service(ChromeDriverManager().install()), options=set_driver_options())
                 break
             try:
                 total_realties = int(total_realties_h1.text.split(" ")[0].replace(".", ""))
@@ -228,22 +249,7 @@ def __main__():
     global database
     global end_script
 
-    options = webdriver.ChromeOptions()
-    
-    # # Set up a temporary directory for user data
-    # options.add_argument('--user-data-dir=/tmp/chrome_user_data')
-
-    # # Disable cache
-    # options.add_argument('--disable-application-cache')
-    # options.add_argument('--disk-cache-dir=/dev/null')
-
-    # Set log level to mininum
-    options.add_argument('--log-level=3')
-
-    # Enable incognito mode
-    options.add_argument('--incognito')
-
-    driver = uc.Chrome(service=Service(ChromeDriverManager().install()), options=options)
+    driver = uc.Chrome(service=Service(ChromeDriverManager().install()), options=set_driver_options())
 
     set_status(database, scraper_start=time(), running=True)
 
