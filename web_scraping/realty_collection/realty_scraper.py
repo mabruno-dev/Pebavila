@@ -10,11 +10,16 @@ import base64
 from time import sleep
 
 from unidecode import unidecode
+import undetected_chromedriver as uc
 from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 from selenium_stealth import stealth
+from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.remote.webelement import WebElement
+from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver.support import expected_conditions as EC
+from webdriver_manager.chrome import ChromeDriverManager
 
 from utils.constants import RealtyConstants as RC
 from utils.functions import print_log
@@ -222,6 +227,23 @@ def scrape_realty(driver: webdriver, url: str):
 
 # Main function for testing purposes
 def __main__():
+    options = webdriver.ChromeOptions()
+    
+    # # Set up a temporary directory for user data
+    # options.add_argument('--user-data-dir=/tmp/chrome_user_data')
+
+    # # Disable cache
+    # options.add_argument('--disable-application-cache')
+    # options.add_argument('--disk-cache-dir=/dev/null')
+
+    # Set log level to mininum
+    options.add_argument('--log-level=3')
+
+    # Enable incognito mode
+    options.add_argument('--incognito')
+
+    driver = uc.Chrome(service=Service(ChromeDriverManager().install()), options=options)
+
     scrape_realty("https://www.zapimoveis.com.br/lancamento/venda-apartamento-2-quartos-sao-lourenco-niteroi-rj-279m2-id-2646116981/")
 
 if __name__ == "__main__":
