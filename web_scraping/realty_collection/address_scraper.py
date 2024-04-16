@@ -70,9 +70,8 @@ def load_realties(driver: webdriver.Chrome, realty_list_div: WebElement):
 
     stop_loading = False
 
-def scrape_realties(realty_list: list, address_url: dict):
+def scrape_realties(driver: webdriver, realty_list: list, address_url: dict):
     global database
-    driver = uc.Chrome()
     for index, item in enumerate(realty_list):
         if not check_realty_exists_by_url(database, item["realty"]):
             print(Console.YELLOW + "Scraping" + Console.RESET + f" realty number {index + 1}")
@@ -178,9 +177,7 @@ def scrape_url(address_url: dict):
         except Exception as e:
             error(e)
         finally:
-
-            realty_scraper = threading.Thread(target=scrape_realties, args=(realty_list, address_url))
-            realty_scraper.start()
+            scrape_realties(driver, realty_list, address_url)
 
             driver.quit()
 
