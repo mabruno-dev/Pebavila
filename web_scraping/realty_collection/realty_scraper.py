@@ -7,6 +7,7 @@ from re import findall
 import inspect
 import requests
 import base64
+from time import sleep
 
 from unidecode import unidecode
 from selenium import webdriver
@@ -28,6 +29,19 @@ class InvalidStatusKeyException(Exception):
     def __init__(self, message):
         self.message = message
         super().__init__(self.message)
+
+def verify_human(driver: webdriver, wait: WebDriverWait):
+    try:
+        title = driver.find_element(By.CLASS_NAME, "zone-name-title h1")
+        if "zapimoveis" in title.text:
+            print("verificando")
+            checkbox = wait.until(
+                EC.presence_of_element_located((By.TAG_NAME, "input"))
+            )
+            checkbox.click()
+            sleep(10)
+    except:
+        print("no verification needed")
 
 # def set_status(**kwargs):
 #     with open(JSON_PATH, "r", encoding="utf-8") as json_file:
@@ -54,10 +68,13 @@ def is_number(s: str):
 @timed
 def scrape_realty(driver: webdriver, url: str):
     
+    wait = WebDriverWait(driver, 10)
+
     driver.get(url)
 
     try:
-        status_span = WebDriverWait(driver, 10).until(
+        verify_human(driver, wait)
+        status_span = wait.until(
             EC.presence_of_element_located((By.CLASS_NAME, "main__labels"))
         )
     except:

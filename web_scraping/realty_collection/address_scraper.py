@@ -73,14 +73,17 @@ def load_realties(driver: webdriver.Chrome, realty_list_div: WebElement):
     stop_loading = False
 
 def verify_human(driver: webdriver, wait: WebDriverWait):
-    title = driver.find_element(By.CLASS_NAME, "zone-name-title h1")
-    if "zapimoveis" in title.text:
-        print("verificando")
-        checkbox = wait.until(
-            EC.presence_of_element_located((By.TAG_NAME, "input"))
-        )
-        checkbox.click()
-        sleep(10)
+    try:
+        title = driver.find_element(By.CLASS_NAME, "zone-name-title h1")
+        if "zapimoveis" in title.text:
+            print("verificando")
+            checkbox = wait.until(
+                EC.presence_of_element_located((By.TAG_NAME, "input"))
+            )
+            checkbox.click()
+            sleep(10)
+    except:
+        print("no verification needed")
 
 def scrape_realties(driver: webdriver, realty_list: list, address_url: dict):
     global database
@@ -128,13 +131,10 @@ def scrape_url(driver: webdriver, address_url: dict):
             driver.get(page_url)
 
             try:
-                try:
-                    verify_human(driver)
-                except:
-                    print("no verification needed")
-                    total_realties_h1 = wait.until(
-                        EC.presence_of_element_located((By.CSS_SELECTOR, "h1.l-text.l-u-color-neutral-12.l-text--variant-heading-small.l-text--weight-semibold.undefined"))
-                    )
+                verify_human(driver)
+                total_realties_h1 = wait.until(
+                    EC.presence_of_element_located((By.CSS_SELECTOR, "h1.l-text.l-u-color-neutral-12.l-text--variant-heading-small.l-text--weight-semibold.undefined"))
+                )
             except:
                 print(Console.RED + "Connection error" + Console.RESET)
                 break
