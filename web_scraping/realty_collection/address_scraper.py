@@ -165,7 +165,7 @@ def scrape_url(driver: webdriver, address_url: dict):
                 except NoSuchElementException:
                     pause_loading = False
 
-                    loading_time += time() - start_time
+                    loading_time = time() - start_time
                     if loading_time > 120:
                         print("Loading took too long, reloading page")
                         current_page -= 1
@@ -182,8 +182,8 @@ def scrape_url(driver: webdriver, address_url: dict):
         except Exception as e:
             set_status(database, error=str(e))
             error(e)
-        finally:
-            scrape_realties(driver, realty_list, address_url)
+            
+    scrape_realties(driver, realty_list, address_url)
 
 def reset_control_variables():
 
@@ -221,4 +221,5 @@ def __main__():
                 print(Console.BLUE + "Skipped" + Console.RESET + f" address: {address_url['address']}")
 
 if __name__ == "__main__":
-    __main__()
+    for i in range(4):
+        threading.Thread(target=__main__).start()
