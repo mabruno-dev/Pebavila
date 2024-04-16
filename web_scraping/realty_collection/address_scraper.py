@@ -123,6 +123,7 @@ def scrape_url(driver: webdriver, address_url: dict):
 
             loader = threading.Thread(target=load_realties, args=(driver, realty_list_div))
             loader.start()
+            loading_time = 0
 
             data_position = 1
 
