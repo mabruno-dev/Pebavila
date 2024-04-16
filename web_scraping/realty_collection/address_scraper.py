@@ -66,17 +66,21 @@ def load_realties(driver: webdriver.Chrome, realty_list_div: WebElement):
         current_scroll_y = driver.execute_script("return window.scrollY;")
         if current_scroll_y >= max_y:
             driver.execute_script(f"window.scrollTo(0, {max_y * 0.15});")
-
+        sleep(0.001)
         while pause_loading and not stop_loading:
             sleep(0.3)
 
     stop_loading = False
 
+def verify_human(driver: webdriver, wait: WebDriverWait):
+    checkbox = driver.find_element(By.TAG_NAME, "input")
+    checkbox.click()
+
 def scrape_realties(driver: webdriver, realty_list: list, address_url: dict):
     global database
     try:
         for index, item in enumerate(realty_list):
-            if item:
+            if item["realty"]:
                 if not check_realty_exists_by_url(database, item["realty"]):
                     print(Console.YELLOW + "Scraping" + Console.RESET + f" realty number {index + 1}")
                     try:
@@ -128,7 +132,7 @@ def scrape_url(driver: webdriver, address_url: dict):
                 total_realties = int(total_realties_h1.text.split(" ")[0].replace(".", ""))
             except:
                 print("No realties in this url")
-                current_page += 1
+                current_page = 101
                 continue
 
             realty_list_div = driver.find_element(By.CLASS_NAME, "listing-wrapper")
@@ -165,11 +169,10 @@ def scrape_url(driver: webdriver, address_url: dict):
                         # pause_loading = False
                         realty_url = None # for now
                     finally:
-                        if realty_url:
-                            realty_list.append({
-                                "realty": realty_url,
-                                "image": image_url
-                            })
+                        realty_list.append({
+                            "realty": realty_url,
+                            "image": image_url
+                        })
                         data_position += 1
                 except NoSuchElementException:
                     pause_loading = False
@@ -216,12 +219,12 @@ def __main__():
 
     options = webdriver.ChromeOptions()
     
-    # Set up a temporary directory for user data
-    options.add_argument('--user-data-dir=/tmp/chrome_user_data')
+    # # Set up a temporary directory for user data
+    # options.add_argument('--user-data-dir=/tmp/chrome_user_data')
 
-    # Disable cache
-    options.add_argument('--disable-application-cache')
-    options.add_argument('--disk-cache-dir=/dev/null')
+    # # Disable cache
+    # options.add_argument('--disable-application-cache')
+    # options.add_argument('--disk-cache-dir=/dev/null')
 
     # Set log level to mininum
     options.add_argument('--log-level=3')
