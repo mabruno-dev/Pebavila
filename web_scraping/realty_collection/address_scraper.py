@@ -50,10 +50,11 @@ def load_realties(driver: webdriver.Chrome, realty_list_div: WebElement):
     global total_realties
     global scraped_realties
 
+    loaded_realties = 0
     stop_loading = False
     STEP = 100
 
-    while not stop_loading:
+    while not stop_loading and loaded_realties < total_realties:
         loaded_realties = len(realty_list_div.find_elements(By.CLASS_NAME, "l-card__wrapper"))
 
         driver.execute_script(f"window.scrollBy(0, {STEP});")
