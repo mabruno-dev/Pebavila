@@ -52,18 +52,13 @@ def load_realties(driver: webdriver.Chrome, realty_list_div: WebElement):
 
     loaded_realties = 0
     stop_loading = False
-    STEP = 100
+    # STEP = 100
 
     while not stop_loading and loaded_realties < total_realties:
         loaded_realties = len(realty_list_div.find_elements(By.CLASS_NAME, "l-card__wrapper"))
 
-        driver.execute_script(f"window.scrollBy(0, {STEP});")
+        driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
 
-        # Reset scrolling if needed
-        max_y = loaded_realties * realty_div_size
-        current_scroll_y = driver.execute_script("return window.scrollY;")
-        if current_scroll_y >= max_y:
-            driver.execute_script(f"window.scrollTo(0, {max_y * 0.15});")
         sleep(0.001)
 
         while pause_loading and not stop_loading:
@@ -172,7 +167,7 @@ def scrape_url(driver: webdriver, address_url: dict):
                         break
 
                     print(f"Loading...", end="\r")
-                    
+
                     if not loader.is_alive():
                         loader = threading.Thread(target=load_realties, args=(driver, realty_list_div))
                         loader.start()
