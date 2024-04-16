@@ -177,9 +177,6 @@ def scrape_url(driver: webdriver, address_url: dict):
         finally:
             scrape_realties(driver, realty_list, address_url)
 
-            driver.quit()
-
-
 def reset_control_variables():
 
     global pause_loading
