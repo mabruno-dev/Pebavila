@@ -178,7 +178,7 @@ def scrape_url(driver: webdriver, address_url: dict):
                     pause_loading = False
 
                     loading_time = time() - start_time
-                    if loading_time > 120:
+                    if loading_time > 300:
                         print("Loading took too long, reloading page")
                         current_page -= 1
                         break
@@ -189,8 +189,9 @@ def scrape_url(driver: webdriver, address_url: dict):
                         loader = threading.Thread(target=load_realties, args=(driver, realty_list_div))
                         loader.start()
                 except Exception as e:
-                    set_status(database, error=str(e))
-                    error(e)
+                    # set_status(database, error=str(e))
+                    # error(e)
+                    pass
 
             stop_loading = True
             loader.join()
