@@ -172,6 +172,10 @@ def scrape_url(driver: webdriver, address_url: dict):
                         break
 
                     print(f"Loading...", end="\r")
+                    
+                    if not loader.is_alive():
+                        loader = threading.Thread(target=load_realties, args=(driver, realty_list_div))
+                        loader.start()
                 except Exception as e:
                     set_status(database, error=str(e))
                     error(e)
