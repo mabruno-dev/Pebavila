@@ -75,6 +75,7 @@ def load_realties(driver: webdriver.Chrome, realty_list_div: WebElement):
 def verify_human(driver: webdriver, wait: WebDriverWait):
     checkbox = driver.find_element(By.TAG_NAME, "input")
     checkbox.click()
+    sleep(10)
 
 def scrape_realties(driver: webdriver, realty_list: list, address_url: dict):
     global database
@@ -122,9 +123,13 @@ def scrape_url(driver: webdriver, address_url: dict):
             driver.get(page_url)
 
             try:
-                total_realties_h1 = wait.until(
-                    EC.presence_of_element_located((By.CSS_SELECTOR, "h1.l-text.l-u-color-neutral-12.l-text--variant-heading-small.l-text--weight-semibold.undefined"))
-                )
+                try:
+                    verify_human(driver)
+                except:
+                    print("no verification needed")
+                    total_realties_h1 = wait.until(
+                        EC.presence_of_element_located((By.CSS_SELECTOR, "h1.l-text.l-u-color-neutral-12.l-text--variant-heading-small.l-text--weight-semibold.undefined"))
+                    )
             except:
                 print(Console.RED + "Connection error" + Console.RESET)
                 break
