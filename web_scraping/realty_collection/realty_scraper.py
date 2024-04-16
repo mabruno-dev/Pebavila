@@ -52,21 +52,7 @@ def is_number(s: str):
     return s.isdigit()
 
 @timed
-def scrape_realty(url):
-
-    options = webdriver.ChromeOptions()
-    options.add_argument('--log-level=3')
-
-    driver = webdriver.Chrome(options=options)
-
-    stealth(driver,
-        languages=["en-US", "en"],
-        vendor="Google Inc.",
-        platform="Win32",
-        webgl_vendor="Intel Inc.",
-        renderer="Intel Iris OpenGL Engine",
-        fix_hairline=True,
-    )
+def scrape_realty(driver: webdriver, url: str):
     
     driver.get(url)
 
@@ -76,13 +62,7 @@ def scrape_realty(url):
         )
     except:
         print("Connection error")
-        driver.quit()
-        return scrape_realty(url)
-    
-    # gallery_section = driver.find_element(By.CLASS_NAME, "gallery__container")
-    # image = gallery_section.find_element(By.TAG_NAME, "img")
-    # image_url = image.get_attribute("srcset").split("1x")[0].strip()
-    # set_status(current_realty_image=image_url)
+        return scrape_realty(driver, url)
 
     if "Em construção" in status_span.text:
         status = RC.UNDER_CONSTRUCTION
