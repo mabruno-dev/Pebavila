@@ -96,6 +96,8 @@ def scrape_url(driver: webdriver, address_url: dict):
     
     global database
     global realty_div_size
+    global pause_loading
+    global stop_loading
 
     total_realties = 1
     realty_list = []
@@ -175,6 +177,7 @@ def scrape_url(driver: webdriver, address_url: dict):
             loader.join()
             current_page += 1
         except Exception as e:
+            set_status(database, error=str(e))
             error(e)
         finally:
             scrape_realties(driver, realty_list, address_url)
