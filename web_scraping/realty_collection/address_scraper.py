@@ -132,7 +132,7 @@ def scrape_url(driver: webdriver, address_url: dict):
 
             data_position = 1
 
-            while data_position <= REALTIES_PER_PAGE and len(realty_list) <= total_realties:
+            while data_position <= REALTIES_PER_PAGE and len(realty_list) < total_realties:
                 try:
                     realty_div = driver.find_element(By.CSS_SELECTOR, f'div[data-position="{data_position}"]')
                     realty_div_size = realty_div.size["height"]
@@ -182,7 +182,7 @@ def scrape_url(driver: webdriver, address_url: dict):
         except Exception as e:
             set_status(database, error=str(e))
             error(e)
-            
+
     scrape_realties(driver, realty_list, address_url)
 
 def reset_control_variables():
