@@ -155,9 +155,9 @@ def scrape_url(driver: webdriver, address_url: dict):
                 )
             except:
                 print(Console.RED + "Connection error" + Console.RESET)
-                driver.quit()
-                sleep(15)
-                driver = uc.Chrome(service=Service(ChromeDriverManager().install()), options=set_driver_options())
+                # driver.quit()
+                # sleep(15)
+                # driver = uc.Chrome(service=Service(ChromeDriverManager().install()), options=set_driver_options())
                 break
             try:
                 total_realties = int(total_realties_h1.text.split(" ")[0].replace(".", ""))
@@ -211,7 +211,7 @@ def scrape_url(driver: webdriver, address_url: dict):
                     loading_time = time() - start_time
                     if loading_time > 300:
                         print("Loading took too long, reloading page")
-                        current_page -= 1
+                        current_page = 101
                         break
 
                     print(f"Loading...", end="\r")
