@@ -76,20 +76,21 @@ def scrape_realties(driver: webdriver, realty_list: list, address_url: dict):
     global database
     try:
         for index, item in enumerate(realty_list):
-            if not check_realty_exists_by_url(database, item["realty"]):
-                print(Console.YELLOW + "Scraping" + Console.RESET + f" realty number {index + 1}")
-                try:
-                    set_status(database, current_realty_start=time(), current_realty_image=item["image"])
-                    # Scrape realty info
-                    realty_info = scrape_realty(driver, item["realty"])
-                except Exception as e:
-                    # Handle scraping errors
-                    realty_info = None
-                    print(Console.RED + f"Error at webpage: {item["realty"]}" + Console.RESET)
-                if realty_info != None:
-                    insert_realty(database, realty_info)
-            else:
-                print(Console.BLUE + "Skipped"  + Console.RESET + f" realty number {index + 1}")
+            if item:
+                if not check_realty_exists_by_url(database, item["realty"]):
+                    print(Console.YELLOW + "Scraping" + Console.RESET + f" realty number {index + 1}")
+                    try:
+                        set_status(database, current_realty_start=time(), current_realty_image=item["image"])
+                        # Scrape realty info
+                        realty_info = scrape_realty(driver, item["realty"])
+                    except Exception as e:
+                        # Handle scraping errors
+                        realty_info = None
+                        print(Console.RED + f"Error at webpage: {item["realty"]}" + Console.RESET)
+                    if realty_info != None:
+                        insert_realty(database, realty_info)
+                else:
+                    print(Console.BLUE + "Skipped"  + Console.RESET + f" realty number {index + 1}")
         set_address_url_scraped(database, address_url)
     except Exception as e:
         error(e)
@@ -162,7 +163,7 @@ def scrape_url(driver: webdriver, address_url: dict):
                         # close_span = driver.find_element(By.CSS_SELECTOR, f'span[aria-label="Fechar modal lateral"]')
                         # close_span.click()
                         # pause_loading = False
-                        pass # for now
+                        realty_url = None # for now
                     finally:
                         if realty_url:
                             realty_list.append({
@@ -221,6 +222,9 @@ def __main__():
     # Disable cache
     options.add_argument('--disable-application-cache')
     options.add_argument('--disk-cache-dir=/dev/null')
+
+    # Set log level to mininum
+    options.add_argument('--log-level=3')
 
     # Enable incognito mode
     options.add_argument('--incognito')
