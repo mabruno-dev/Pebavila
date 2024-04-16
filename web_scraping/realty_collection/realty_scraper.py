@@ -102,9 +102,15 @@ def scrape_realty(driver: webdriver, url: str):
         )
     except:
         print("Connection error")
-        driver.get("https://www.google.com/imgres?q=scary%20cursed%20shitpost&imgurl=https%3A%2F%2Fi.pinimg.com%2F736x%2F51%2F67%2Ff0%2F5167f01b215b715074252c62c5129e4c.jpg&imgrefurl=https%3A%2F%2Fwww.pinterest.com%2Fpin%2F418342252894630885%2F&docid=kwrd2EsG83r3rM&tbnid=qbf88-Oxr5YYYM&vet=12ahUKEwie49rC3seFAxUyqJUCHUltB5oQM3oECA8QAA..i&w=639&h=626&hcb=2&ved=2ahUKEwie49rC3seFAxUyqJUCHUltB5oQM3oECA8QAA")
+        driver.quit()
+        while True:
+            try:
+                driver = uc.Chrome(service=Service(ChromeDriverManager().install()), options=set_driver_options())
+                driver.get("https://br.pinterest.com/pin/800655639991834489/")
+                break
+            except:
+                print("retrying")
         sleep(15)
-        # driver = uc.Chrome(service=Service(ChromeDriverManager().install()), options=set_driver_options())
         return scrape_realty(driver, url)
 
     if "Em construção" in status_span.text:
