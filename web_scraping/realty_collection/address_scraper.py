@@ -73,9 +73,14 @@ def load_realties(driver: webdriver.Chrome, realty_list_div: WebElement):
     stop_loading = False
 
 def verify_human(driver: webdriver, wait: WebDriverWait):
-    checkbox = driver.find_element(By.TAG_NAME, "input")
-    checkbox.click()
-    sleep(10)
+    title = driver.find_element(By.CLASS_NAME, "zone-name-title h1")
+    if "zapimoveis" in title.text:
+        print("verificando")
+        checkbox = wait.until(
+            EC.presence_of_element_located((By.TAG_NAME, "input"))
+        )
+        checkbox.click()
+        sleep(10)
 
 def scrape_realties(driver: webdriver, realty_list: list, address_url: dict):
     global database
