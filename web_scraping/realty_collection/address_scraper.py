@@ -67,12 +67,11 @@ def load_realties(driver: webdriver.Chrome, realty_list_div: WebElement):
 
     loaded_realties = 0
     stop_loading = False
-    STEP = 100
 
     while not stop_loading and loaded_realties < total_realties:
         loaded_realties = len(realty_list_div.find_elements(By.CLASS_NAME, "l-card__wrapper"))
 
-        driver.execute_script(f"window.scrollBy(0, {STEP});")
+        driver.execute_script(f"window.scrollBy(0, {realty_div_size / 3});")
 
         # Reset scrolling if needed
         max_y = loaded_realties * realty_div_size
@@ -128,8 +127,7 @@ def scrape_realties():
             item = realty_list[0]
             if "end" in item.keys():
                 index = 0
-                address_url = item["end"]
-                # set_address_url_scraped(database, item["end"])
+                set_address_url_scraped(database, item["end"])
             else:
                 if item["realty"]:
                     if not check_realty_exists_by_url(database, item["realty"]):
