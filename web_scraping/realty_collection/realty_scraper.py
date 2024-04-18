@@ -102,6 +102,7 @@ def scrape_realty(driver: webdriver, url: str):
         )
     except:
         print("Connection error")
+        sleep(60)
         return scrape_realty(driver, url)
 
     if "Em construção" in status_span.text:

@@ -97,13 +97,10 @@ def verify_human(driver: webdriver, wait: WebDriverWait):
 
 def set_driver_options():
     options = webdriver.ChromeOptions()
-    
-    # # Set up a temporary directory for user data
-    # options.add_argument('--user-data-dir=/tmp/chrome_user_data')
 
-    # # Disable cache
-    # options.add_argument('--disable-application-cache')
-    # options.add_argument('--disk-cache-dir=/dev/null')
+    # Disable cache
+    options.add_argument('--disable-application-cache')
+    options.add_argument('--disk-cache-dir=/dev/null')
 
     # Set log level to mininum
     options.add_argument('--log-level=3')
@@ -153,11 +150,9 @@ def scrape_realties():
             sleep(3)
 
 @timed
-def scrape_address(driver: webdriver, address_url: dict):
+def scrape_address(database: Database, driver: webdriver, address_url: dict):
     url = address_url["url"][:-1] # Remove the page index
     
-    database = Database()
-
     global realty_list
     global realty_div_size
     global pause_loading
@@ -267,13 +262,8 @@ def reset_control_variables():
     scraped_realties = 0
     total_realties = 1
 
-@timed
-def __main__():
-
+def scrape_addresses():
     database = Database()
-    
-    global scraper_running
-    global realty_list
 
     driver = uc.Chrome(options=set_driver_options())
 
@@ -281,9 +271,6 @@ def __main__():
 
     address_url_list = get_address_urls(database)
     random.shuffle(address_url_list) # This is done so that multiple instances of the scraper have less chance of scraping the same url at the same time
-
-    realty_scraper = threading.Thread(target=scrape_realties)
-    realty_scraper.start()
 
     for address_url in address_url_list:
         if address_url["url"] != None:
@@ -293,13 +280,29 @@ def __main__():
                 set_status(database, address=address_url["address"])
 
                 reset_control_variables()
-                scrape_address(driver, address_url)
+                scrape_address(database, driver, address_url)
             else:
                 thread_print(Console.BLUE + "Skipped" + Console.RESET + f" address: {address_url['address']}")
+
+@timed
+def __main__():
+
+    global scraper_running
+    global realty_list
+
+    address_scraper = threading.Thread(target=scrape_addresses)
+    address_scraper.start()
+
+    realty_scraper = threading.Thread(target=scrape_realties)
+    realty_scraper.start()
     
+    address_scraper.join()
+
     while len(realty_list) > 0:
         sleep(15)
     scraper_running = False
+
+    realty_scraper.join()
 
 if __name__ == "__main__":
     __main__()
