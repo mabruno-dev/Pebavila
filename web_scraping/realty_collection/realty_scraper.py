@@ -39,7 +39,7 @@ def verify_human(driver: webdriver):
     wait = WebDriverWait(driver, 10)
 
     iframe = WebDriverWait(driver, 10).until(
-        EC.presence_of_element_located((By.ID, "cf-chl-widget-66ffy"))
+        EC.presence_of_element_located((By.CSS_SELECTOR, 'iframe[title="Widget containing a Cloudflare security challenge"]'))
     )
     driver.switch_to.frame(iframe)
 
@@ -47,7 +47,7 @@ def verify_human(driver: webdriver):
         EC.presence_of_element_located((By.CSS_SELECTOR, "input[type='checkbox']"))
     )
     checkbox.click()
-    
+
     driver.switch_to.default_content()
     sleep(15)
 
