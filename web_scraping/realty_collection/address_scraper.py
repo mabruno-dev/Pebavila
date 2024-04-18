@@ -126,6 +126,7 @@ def scrape_realties():
                 index = 0
                 print(f"ITEM END: {item["end"]}")
                 set_address_url_scraped(database, item["end"])
+                realty_list.pop(0)
             else:
                 if item["realty"]:
                     print(f"ITEM REALTY: {item["realty"]}")
@@ -135,6 +136,7 @@ def scrape_realties():
                             set_status(database, current_realty_start=time(), current_realty_image=item["image"])
                             # Scrape realty info
                             realty_info = scrape_realty(driver, item["realty"])
+                            realty_list.pop(0)
                         except Exception as e:
                             # Handle scraping errors
                             realty_info = None
@@ -145,7 +147,6 @@ def scrape_realties():
                     else:
                         thread_print(Console.BLUE + "Skipped"  + Console.RESET + f" realty number {index + 1}")
                     index += 1
-            realty_list.pop(0)
         else:
             sleep(3)
 
