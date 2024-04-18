@@ -127,6 +127,9 @@ def scrape_realties():
                         except TypeError as e:
                             realty_info = None
                             print(Console.RED + f"{e}" + Console.RESET)
+                        except NoSuchElementException as e:
+                            realty_info = None
+                            print(Console.RED + f"{e}" + Console.RESET)
                         except Exception as e:
                             realty_info = None
                             print(Console.RED + f"Error at webpage: {item["realty"]}" + Console.RESET)
