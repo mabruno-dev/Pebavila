@@ -48,13 +48,13 @@ class InvalidStatusKeyException(Exception):
         super().__init__(self.message)
 
 print_lock = False
-def thread_print(s: str):
+def thread_print(*args, **kwargs):
     global print_lock
     while print_lock:
         sleep(0.1)
     if not print_lock:
         print_lock = True
-        print(s)
+        print(*args, **kwargs)
         print_lock = False
 
 def load_realties(driver: webdriver.Chrome, realty_list_div: WebElement):
