@@ -88,6 +88,7 @@ def scrape_realty(driver: webdriver.Chrome, url: str):
         # verify_human(driver)
         driver.close()
         driver.quit()
+        driver = None
         sleep(5)
         driver = uc.Chrome(options=set_driver_options())
         return scrape_realty(driver, url)
