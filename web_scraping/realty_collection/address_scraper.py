@@ -40,8 +40,6 @@ stop_loading = False
 scraper_running = True
 realty_list = []
 
-database = Database(ensure_connection=True)
-
 class InvalidStatusKeyException(Exception):
     def __init__(self, message):
         self.message = message
@@ -118,7 +116,9 @@ def set_driver_options():
 def scrape_realties():
     global scraper_running
     global realty_list
-    global database
+    
+    database = Database()
+
     driver = uc.Chrome(options=set_driver_options())
     index = 0
 
@@ -128,7 +128,7 @@ def scrape_realties():
             if "end" in item.keys():
                 index = 0
                 print(f"ITEM END: {item["end"]}")
-                # set_address_url_scraped(database, item["end"])
+                set_address_url_scraped(database, item["end"])
             else:
                 if item["realty"]:
                     print(f"ITEM REALTY: {item["realty"]}")
@@ -144,7 +144,7 @@ def scrape_realties():
                             thread_print(Console.RED + f"Error at webpage: {item["realty"]}" + Console.RESET)
                         if realty_info != None:
                             print(f"REALTY INFO: {realty_info}")
-                            # insert_realty(database, realty_info)
+                            insert_realty(database, realty_info)
                     else:
                         thread_print(Console.BLUE + "Skipped"  + Console.RESET + f" realty number {index + 1}")
                     index += 1
@@ -154,7 +154,8 @@ def scrape_realties():
 def scrape_address(driver: webdriver, address_url: dict):
     url = address_url["url"][:-1] # Remove the page index
     
-    global database
+    database = Database()
+
     global realty_list
     global realty_div_size
     global pause_loading
@@ -267,7 +268,8 @@ def reset_control_variables():
 @timed
 def __main__():
 
-    global database
+    database = Database()
+    
     global scraper_running
 
     driver = uc.Chrome(options=set_driver_options())
