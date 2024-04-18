@@ -132,6 +132,9 @@ def scrape_realties():
                         try:
                             set_status(database, current_realty_start=time(), current_realty_image=item["image"])
                             realty_info = scrape_realty(driver, item["realty"])
+                        except TypeError as e:
+                            realty_info = None
+                            thread_print(Console.RED + f"{e}" + Console.RESET)
                         except Exception as e:
                             realty_info = None
                             thread_print(Console.RED + f"Error at webpage: {item["realty"]}" + Console.RESET)
