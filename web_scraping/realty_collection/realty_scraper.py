@@ -38,7 +38,7 @@ class InvalidStatusKeyException(Exception):
 def verify_human(driver: webdriver):
     wait = WebDriverWait(driver, 10)
     checkbox = wait.until(
-        EC.element_to_be_clickable((By.CSS_SELECTOR, "input[type='checkbox']"))
+        EC.presence_of_element_located((By.CSS_SELECTOR, "input[type='checkbox']"))
     )
     checkbox.click()
     sleep(15)
