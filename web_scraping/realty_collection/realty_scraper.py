@@ -87,7 +87,7 @@ def scrape_realty(driver: webdriver.Chrome, url: str):
     if "Performance & security by Cloudflare" in body.text:
         # verify_human(driver)
         driver.close()
-        # driver.quit()
+        driver.quit()
         sleep(5)
         driver = uc.Chrome(options=set_driver_options())
         return scrape_realty(driver, url)
