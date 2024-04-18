@@ -102,15 +102,6 @@ def scrape_realty(driver: webdriver, url: str):
         )
     except:
         print("Connection error")
-        driver.quit()
-        while True:
-            try:
-                driver = uc.Chrome(service=Service(ChromeDriverManager().install()), options=set_driver_options())
-                driver.get("https://br.pinterest.com/pin/800655639991834489/")
-                break
-            except:
-                print("retrying")
-        sleep(15)
         return scrape_realty(driver, url)
 
     if "Em construção" in status_span.text:

@@ -37,6 +37,8 @@ total_realties = 1
 pause_loading = False
 stop_loading = False
 
+scraper_running = True
+
 database = Database(ensure_connection=True)
 
 class InvalidStatusKeyException(Exception):
@@ -103,28 +105,36 @@ def set_driver_options():
 
     return options
 
-def scrape_realties(driver: webdriver, realty_list: list, address_url: dict):
+def scrape_realties(realty_list: list):
+    global scraper_running
     global database
-    try:
-        for index, item in enumerate(realty_list):
-            if item["realty"]:
-                if not check_realty_exists_by_url(database, item["realty"]):
-                    print(Console.YELLOW + "Scraping" + Console.RESET + f" realty number {index + 1}")
-                    try:
-                        set_status(database, current_realty_start=time(), current_realty_image=item["image"])
-                        # Scrape realty info
-                        realty_info = scrape_realty(driver, item["realty"])
-                    except Exception as e:
-                        # Handle scraping errors
-                        realty_info = None
-                        print(Console.RED + f"Error at webpage: {item["realty"]}" + Console.RESET)
-                    if realty_info != None:
-                        insert_realty(database, realty_info)
-                else:
-                    print(Console.BLUE + "Skipped"  + Console.RESET + f" realty number {index + 1}")
-        set_address_url_scraped(database, address_url)
-    except Exception as e:
-        error(e)
+    driver = uc.Chrome(options=set_driver_options())
+    index = 0
+
+    while scraper_running:
+        if len(realty_list) > 0:
+            item = realty_list[0]
+            if "end" in item.keys():
+                index = 0
+                set_address_url_scraped(database, item["end"])
+            else:
+                if item["realty"]:
+                    if not check_realty_exists_by_url(database, item["realty"]):
+                        print(Console.YELLOW + "Scraping" + Console.RESET + f" realty number {index + 1}")
+                        try:
+                            set_status(database, current_realty_start=time(), current_realty_image=item["image"])
+                            # Scrape realty info
+                            realty_info = scrape_realty(driver, item["realty"])
+                        except Exception as e:
+                            # Handle scraping errors
+                            realty_info = None
+                            print(Console.RED + f"Error at webpage: {item["realty"]}" + Console.RESET)
+                        if realty_info != None:
+                            insert_realty(database, realty_info)
+                    else:
+                        print(Console.BLUE + "Skipped"  + Console.RESET + f" realty number {index + 1}")
+                    index += 1
+            realty_list.pop(0)
 
 @timed
 def scrape_url(driver: webdriver, address_url: dict):
@@ -155,16 +165,7 @@ def scrape_url(driver: webdriver, address_url: dict):
                 )
             except:
                 print(Console.RED + "Connection error" + Console.RESET)
-                driver.quit()
-                while True:
-                    try:
-                        driver = uc.Chrome(service=Service(ChromeDriverManager().install()), options=set_driver_options())
-                        driver.get("https://br.pinterest.com/pin/800655639991834489/")
-                        break
-                    except:
-                        print("retrying")
-                    sleep(15)
-                    break
+                continue
             try:
                 total_realties = int(total_realties_h1.text.split(" ")[0].replace(".", ""))
             except:
@@ -177,6 +178,9 @@ def scrape_url(driver: webdriver, address_url: dict):
             loader = threading.Thread(target=load_realties, args=(driver, realty_list_div))
             loader.start()
             loading_time = 0
+
+            realty_scraper = threading.Thread(target=scrape_realties, args=(realty_list,))
+            realty_scraper.start()
 
             data_position = 1
 
@@ -222,9 +226,6 @@ def scrape_url(driver: webdriver, address_url: dict):
 
                     print(f"Loading...", end="\r")
                     
-                    if not loader.is_alive():
-                        loader = threading.Thread(target=load_realties, args=(driver, realty_list_div))
-                        loader.start()
                 except Exception as e:
                     # set_status(database, error=str(e))
                     # error(e)
@@ -237,7 +238,7 @@ def scrape_url(driver: webdriver, address_url: dict):
             set_status(database, error=str(e))
             error(e)
 
-    scrape_realties(driver, realty_list, address_url)
+    realty_list.append({"end": address_url})
 
 def reset_control_variables():
 
@@ -253,9 +254,9 @@ def reset_control_variables():
 def __main__():
 
     global database
-    global end_script
+    global scraper_running
 
-    driver = uc.Chrome(service=Service(ChromeDriverManager().install()), options=set_driver_options())
+    driver = uc.Chrome(options=set_driver_options())
 
     set_status(database, scraper_start=time(), running=True)
 
@@ -273,6 +274,8 @@ def __main__():
                 scrape_url(driver, address_url)
             else:
                 print(Console.BLUE + "Skipped" + Console.RESET + f" address: {address_url['address']}")
+    
+    scraper_running = False
 
 if __name__ == "__main__":
     __main__()
