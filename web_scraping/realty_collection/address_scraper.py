@@ -125,7 +125,6 @@ def scrape_realties():
             if "end" in item.keys():
                 index = 0
                 set_address_url_scraped(database, item["end"])
-                realty_list.pop(0)
             else:
                 if item["realty"]:
                     if not check_realty_exists_by_url(database, item["realty"]):
@@ -133,17 +132,16 @@ def scrape_realties():
                         try:
                             set_status(database, current_realty_start=time(), current_realty_image=item["image"])
                             realty_info = scrape_realty(driver, item["realty"])
-                            realty_list.pop(0)
                         except Exception as e:
                             realty_info = None
                             thread_print(Console.RED + f"Error at webpage: {item["realty"]}" + Console.RESET)
+                            continue
                         if realty_info != None:
                             insert_realty(database, realty_info)
                     else:
                         thread_print(Console.BLUE + "Skipped"  + Console.RESET + f" realty number {index + 1}")
                     index += 1
-                else:
-                    realty_list.pop(0)
+            realty_list.pop(0)
         else:
             sleep(3)
 
