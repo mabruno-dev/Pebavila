@@ -45,16 +45,6 @@ class InvalidStatusKeyException(Exception):
         self.message = message
         super().__init__(self.message)
 
-print_lock = False
-def thread_print(*args, **kwargs):
-    global print_lock
-    while print_lock:
-        sleep(0.1)
-    if not print_lock:
-        print_lock = True
-        print(*args, **kwargs)
-        print_lock = False
-
 def load_realties(driver: webdriver.Chrome, realty_list_div: WebElement):
 
     global realty_div_size
@@ -86,14 +76,14 @@ def verify_human(driver: webdriver, wait: WebDriverWait):
     try:
         title = driver.find_element(By.CLASS_NAME, "zone-name-title h1")
         if "zapimoveis" in title.text:
-            thread_print("verificando")
+            print("verificando")
             checkbox = wait.until(
                 EC.presence_of_element_located((By.TAG_NAME, "input"))
             )
             checkbox.click()
             sleep(10)
     except:
-        thread_print("no verification needed")
+        print("no verification needed")
 
 def set_driver_options():
     options = webdriver.ChromeOptions()
@@ -128,21 +118,21 @@ def scrape_realties():
             else:
                 if item["realty"]:
                     if not check_realty_exists_by_url(database, item["realty"]):
-                        thread_print(Console.YELLOW + "Scraping" + Console.RESET + f" realty number {index + 1}")
+                        print(Console.YELLOW + "Scraping" + Console.RESET + f" realty {index + 1} from {item["address"]}")
                         try:
                             set_status(database, current_realty_start=time(), current_realty_image=item["image"])
                             realty_info = scrape_realty(driver, item["realty"])
                         except TypeError as e:
                             realty_info = None
-                            thread_print(Console.RED + f"{e}" + Console.RESET)
+                            print(Console.RED + f"{e}" + Console.RESET)
                         except Exception as e:
                             realty_info = None
-                            thread_print(Console.RED + f"Error at webpage: {item["realty"]}" + Console.RESET)
+                            print(Console.RED + f"Error at webpage: {item["realty"]}" + Console.RESET)
                             continue
                         if realty_info != None:
                             insert_realty(database, realty_info)
                     else:
-                        thread_print(Console.BLUE + "Skipped"  + Console.RESET + f" realty number {index + 1}")
+                        print(Console.BLUE + "Skipped"  + Console.RESET + f" realty {index + 1} from {item["address"]}")
                     index += 1
             realty_list.pop(0)
         else:
@@ -177,12 +167,12 @@ def scrape_address(database: Database, driver: webdriver, address_url: dict):
                     EC.presence_of_element_located((By.CSS_SELECTOR, "h1.l-text.l-u-color-neutral-12.l-text--variant-heading-small.l-text--weight-semibold.undefined"))
                 )
             except:
-                thread_print(Console.RED + "Connection error" + Console.RESET)
+                print(Console.RED + "Connection error" + Console.RESET)
                 break
             try:
                 total_realties = int(total_realties_h1.text.split(" ")[0].replace(".", ""))
             except:
-                thread_print("No realties in this url")
+                print("No realties in this url")
                 current_page = 101
                 continue
 
@@ -222,7 +212,8 @@ def scrape_address(database: Database, driver: webdriver, address_url: dict):
                     finally:
                         realty_list.append({
                             "realty": realty_url,
-                            "image": image_url
+                            "image": image_url,
+                            "address": address_url["address"]
                         })
                         data_position += 1
                         collected_realty_urls += 1
@@ -230,12 +221,10 @@ def scrape_address(database: Database, driver: webdriver, address_url: dict):
                     pause_loading = False
 
                     loading_time = time() - start_time
-                    if loading_time > 300:
-                        thread_print("Loading took too long, reloading page")
+                    if loading_time > 180:
+                        print("Loading took too long, reloading page")
                         current_page = 101
                         break
-
-                    thread_print(f"Loading...", end="\r")
                     
                 except Exception as e:
                     # set_status(database, error=str(e))
@@ -283,14 +272,14 @@ def __main__():
     for address_url in address_url_list:
         if address_url["url"] != None:
             if not check_address_url_is_scraped(database, address_url["address"]):
-                thread_print(Console.YELLOW + "Scraping" + Console.RESET + f" realties from: {address_url['address']}")
+                print(Console.YELLOW + "Scraping" + Console.RESET + f" realties from: {address_url['address']}")
 
                 set_status(database, address=address_url["address"])
 
                 reset_control_variables()
                 scrape_address(database, driver, address_url)
             else:
-                thread_print(Console.BLUE + "Skipped" + Console.RESET + f" address: {address_url['address']}")
+                print(Console.BLUE + "Skipped" + Console.RESET + f" address: {address_url['address']}")
     
     while len(realty_list) > 0:
         sleep(15)

@@ -35,19 +35,13 @@ class InvalidStatusKeyException(Exception):
         self.message = message
         super().__init__(self.message)
 
-def verify_human(driver: webdriver, wait: WebDriverWait):
-    try:
-        title = driver.find_element(By.CLASS_NAME, "zone-name-title h1")
-        if "zapimoveis" in title.text:
-            print("verificando")
-            checkbox = wait.until(
-                EC.presence_of_element_located((By.TAG_NAME, "input"))
-            )
-            checkbox.click()
-            sleep(10)
-    except:
-        print("no verification needed")
-
+def verify_human(driver: webdriver):
+    wait = WebDriverWait(driver, 10)
+    checkbox = wait.until(
+        EC.element_to_be_clickable((By.CSS_SELECTOR, "input[type='checkbox']"))
+    )
+    checkbox.click()
+    sleep(15)
 
 def find_numbers(s: str):
     result = findall(r"\d+\.*\d*", s)
@@ -84,6 +78,9 @@ def scrape_realty(driver: webdriver, url: str):
     body = driver.find_element(By.TAG_NAME, "body")
     print(body.text)
 
+    if "Performance & security by Cloudflare" in body.text:
+        verify_human(driver)
+
     try:
         # verify_human(driver, wait)
         status_span = wait.until(
@@ -91,7 +88,6 @@ def scrape_realty(driver: webdriver, url: str):
         )
     except:
         print("Connection error")
-        driver.get("https://picsum.photos/960/1080")
         sleep(60)
         return scrape_realty(driver, url)
 
@@ -226,34 +222,12 @@ def scrape_realty(driver: webdriver, url: str):
         "realty_url": str(url)
     }
 
-    formatted_dict = realty_dict.copy()
-    if len(realty_dict["realty_description"]) > 70:
-        formatted_dict["realty_description"] = realty_dict["realty_description"][:70].strip() + "..."
-    print("Data: ", end="")
-    print(json.dumps(formatted_dict, indent=4, ensure_ascii=False))
-
     return realty_dict
 
 # Main function for testing purposes
 def __main__():
-    options = webdriver.ChromeOptions()
-    
-    # # Set up a temporary directory for user data
-    # options.add_argument('--user-data-dir=/tmp/chrome_user_data')
-
-    # # Disable cache
-    # options.add_argument('--disable-application-cache')
-    # options.add_argument('--disk-cache-dir=/dev/null')
-
-    # Set log level to mininum
-    options.add_argument('--log-level=3')
-
-    # Enable incognito mode
-    options.add_argument('--incognito')
-
-    driver = uc.Chrome(service=Service(ChromeDriverManager().install()), options=options)
-
-    scrape_realty("https://www.zapimoveis.com.br/lancamento/venda-apartamento-2-quartos-sao-lourenco-niteroi-rj-279m2-id-2646116981/")
+    driver = uc.Chrome(options=set_driver_options)
+    scrape_realty(driver, "https://www.zapimoveis.com.br/lancamento/venda-apartamento-2-quartos-sao-lourenco-niteroi-rj-279m2-id-2646116981/")
 
 if __name__ == "__main__":
     __main__()
