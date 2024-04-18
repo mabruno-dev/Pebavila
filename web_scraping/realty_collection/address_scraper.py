@@ -20,7 +20,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 
 from utils.functions import error, create_dirs
-from utils.wrappers import timed
+from utils.wrappers import timed, announce_off
 from web_scraping.realty_collection.realty_scraper import scrape_realty
 from database.connection import Database
 from database.functions.public import *
@@ -39,6 +39,8 @@ stop_loading = False
 
 scraper_running = True
 realty_list = []
+
+announce_off()
 
 class InvalidStatusKeyException(Exception):
     def __init__(self, message):

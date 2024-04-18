@@ -22,37 +22,48 @@ def timed(func):
 
 # Capture the original built-in print function
 original_print = print
-
+mute_announce = False
 def announce(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
-        # Define a custom print function that prepends the message
-        def custom_print(*pargs, **pkwargs):
-            original_print(Console.BLACK + f"From {func.__name__}: " + Console.RESET, end="")
-            original_print(*pargs, **pkwargs)
-        
-        # Check if __builtins__ is a dictionary or a module and adjust accordingly
-        if isinstance(__builtins__, dict):
-            # If __builtins__ is a dictionary, use dictionary methods to replace 'print'
-            original_builtins_print = __builtins__['print']
-            __builtins__['print'] = custom_print
-        else:
-            # If __builtins__ is a module, use attribute assignment
-            original_builtins_print = getattr(__builtins__, 'print')
-            setattr(__builtins__, 'print', custom_print)
-        
-        try:
-            # Execute the function
+        if mute_announce:
             result = func(*args, **kwargs)
-        finally:
-            # Restore the original print function
+        else:
+            # Define a custom print function that prepends the message
+            def custom_print(*pargs, **pkwargs):
+                original_print(Console.BLACK + f"From {func.__name__}: " + Console.RESET, end="")
+                original_print(*pargs, **pkwargs)
+            
+            # Check if __builtins__ is a dictionary or a module and adjust accordingly
             if isinstance(__builtins__, dict):
-                __builtins__['print'] = original_builtins_print
+                # If __builtins__ is a dictionary, use dictionary methods to replace 'print'
+                original_builtins_print = __builtins__['print']
+                __builtins__['print'] = custom_print
             else:
-                setattr(__builtins__, 'print', original_builtins_print)
+                # If __builtins__ is a module, use attribute assignment
+                original_builtins_print = getattr(__builtins__, 'print')
+                setattr(__builtins__, 'print', custom_print)
+            
+            try:
+                # Execute the function
+                result = func(*args, **kwargs)
+            finally:
+                # Restore the original print function
+                if isinstance(__builtins__, dict):
+                    __builtins__['print'] = original_builtins_print
+                else:
+                    setattr(__builtins__, 'print', original_builtins_print)
         return result
 
     return wrapper
+
+def announce_off():
+    global mute_announce
+    mute_announce = True
+
+def announce_on():
+    global mute_announce
+    mute_announce = False
 
 # WARNING: This will also mute running threads while the function executes
 def mute(func):

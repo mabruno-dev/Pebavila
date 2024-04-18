@@ -77,7 +77,7 @@ def set_driver_options():
     return options
 
 @timed
-def scrape_realty(driver: webdriver, url: str):
+def scrape_realty(driver: webdriver.Chrome, url: str):
     
     wait = WebDriverWait(driver, 10)
 
@@ -86,7 +86,8 @@ def scrape_realty(driver: webdriver, url: str):
     body = driver.find_element(By.TAG_NAME, "body")
     if "Performance & security by Cloudflare" in body.text:
         # verify_human(driver)
-        driver.quit()
+        driver.close()
+        # driver.quit()
         sleep(5)
         driver = uc.Chrome(options=set_driver_options())
         return scrape_realty(driver, url)
