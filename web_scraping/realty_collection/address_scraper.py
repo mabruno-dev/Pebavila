@@ -149,10 +149,10 @@ def scrape_url(driver: webdriver, address_url: dict):
     global stop_loading
 
     total_realties = 1
-    realty_list = []
+    collected_realty_urls = 0
     current_page = 1
 
-    while len(realty_list) < total_realties and current_page <= 100:
+    while collected_realty_urls < total_realties and current_page <= 100:
         start_time = time()
         try:
             page_url = url + f"{current_page}"
@@ -184,7 +184,7 @@ def scrape_url(driver: webdriver, address_url: dict):
 
             data_position = 1
 
-            while data_position <= REALTIES_PER_PAGE and len(realty_list) < total_realties:
+            while data_position <= REALTIES_PER_PAGE and collected_realty_urls < total_realties:
                 try:
                     realty_div = driver.find_element(By.CSS_SELECTOR, f'div[data-position="{data_position}"]')
                     realty_div_size = realty_div.size["height"]
@@ -215,6 +215,7 @@ def scrape_url(driver: webdriver, address_url: dict):
                             "image": image_url
                         })
                         data_position += 1
+                        collected_realty_urls += 1
                 except NoSuchElementException:
                     pause_loading = False
 
