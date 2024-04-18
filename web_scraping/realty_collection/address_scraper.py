@@ -149,6 +149,8 @@ def scrape_realties():
                         thread_print(Console.BLUE + "Skipped"  + Console.RESET + f" realty number {index + 1}")
                     index += 1
             realty_list.pop(0)
+        else:
+            sleep(3)
 
 @timed
 def scrape_address(driver: webdriver, address_url: dict):
