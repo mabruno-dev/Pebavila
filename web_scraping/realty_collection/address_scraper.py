@@ -273,6 +273,7 @@ def __main__():
     database = Database()
     
     global scraper_running
+    global realty_list
 
     driver = uc.Chrome(options=set_driver_options())
 
@@ -296,6 +297,8 @@ def __main__():
             else:
                 thread_print(Console.BLUE + "Skipped" + Console.RESET + f" address: {address_url['address']}")
     
+    while len(realty_list) > 0:
+        sleep(15)
     scraper_running = False
 
 if __name__ == "__main__":
