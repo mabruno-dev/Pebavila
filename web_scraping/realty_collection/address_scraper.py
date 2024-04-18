@@ -127,9 +127,11 @@ def scrape_realties():
             item = realty_list[0]
             if "end" in item.keys():
                 index = 0
-                set_address_url_scraped(database, item["end"])
+                print(f"ITEM END: {item["end"]}")
+                # set_address_url_scraped(database, item["end"])
             else:
                 if item["realty"]:
+                    print(f"ITEM REALTY: {item["realty"]}")
                     if not check_realty_exists_by_url(database, item["realty"]):
                         thread_print(Console.YELLOW + "Scraping" + Console.RESET + f" realty number {index + 1}")
                         try:
@@ -141,7 +143,8 @@ def scrape_realties():
                             realty_info = None
                             thread_print(Console.RED + f"Error at webpage: {item["realty"]}" + Console.RESET)
                         if realty_info != None:
-                            insert_realty(database, realty_info)
+                            print(f"REALTY INFO: {realty_info}")
+                            # insert_realty(database, realty_info)
                     else:
                         thread_print(Console.BLUE + "Skipped"  + Console.RESET + f" realty number {index + 1}")
                     index += 1
