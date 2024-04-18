@@ -118,7 +118,8 @@ def scrape_realties():
             item = realty_list[0]
             if "end" in item.keys():
                 index = 0
-                set_address_url_scraped(database, item["end"])
+                address_url = item["end"]
+                # set_address_url_scraped(database, item["end"])
             else:
                 if item["realty"]:
                     if not check_realty_exists_by_url(database, item["realty"]):
