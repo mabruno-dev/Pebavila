@@ -48,17 +48,6 @@ def verify_human(driver: webdriver, wait: WebDriverWait):
     except:
         print("no verification needed")
 
-# def set_status(**kwargs):
-#     with open(JSON_PATH, "r", encoding="utf-8") as json_file:
-#         status = json.load(json_file)
-#         for key, value in kwargs.items():
-#             if key in status:
-#                 status[key] = value
-#             else:
-#                 raise InvalidStatusKeyException(f'"{key}" is not a valid status.')
-            
-#     with open(JSON_PATH, "w", encoding="utf-8") as json_file:
-#         json.dump(status, json_file, indent=4, ensure_ascii=False)
 
 def find_numbers(s: str):
     result = findall(r"\d+\.*\d*", s)
@@ -72,13 +61,10 @@ def is_number(s: str):
 
 def set_driver_options():
     options = webdriver.ChromeOptions()
-    
-    # # Set up a temporary directory for user data
-    # options.add_argument('--user-data-dir=/tmp/chrome_user_data')
 
-    # # Disable cache
-    # options.add_argument('--disable-application-cache')
-    # options.add_argument('--disk-cache-dir=/dev/null')
+    # Disable cache
+    options.add_argument('--disable-application-cache')
+    options.add_argument('--disk-cache-dir=/dev/null')
 
     # Set log level to mininum
     options.add_argument('--log-level=3')
@@ -94,6 +80,9 @@ def scrape_realty(driver: webdriver, url: str):
     wait = WebDriverWait(driver, 10)
 
     driver.get(url)
+
+    body = driver.find_element(By.TAG_NAME, "body")
+    print(body.text)
 
     try:
         # verify_human(driver, wait)
