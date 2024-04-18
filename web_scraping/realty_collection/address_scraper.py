@@ -38,6 +38,7 @@ pause_loading = False
 stop_loading = False
 
 scraper_running = True
+realty_list = []
 
 database = Database(ensure_connection=True)
 
@@ -105,8 +106,9 @@ def set_driver_options():
 
     return options
 
-def scrape_realties(realty_list: list):
+def scrape_realties():
     global scraper_running
+    global realty_list
     global database
     driver = uc.Chrome(options=set_driver_options())
     index = 0
@@ -141,6 +143,7 @@ def scrape_url(driver: webdriver, address_url: dict):
     url = address_url["url"][:-1] # Remove the page index
     
     global database
+    global realty_list
     global realty_div_size
     global pause_loading
     global stop_loading
@@ -178,9 +181,6 @@ def scrape_url(driver: webdriver, address_url: dict):
             loader = threading.Thread(target=load_realties, args=(driver, realty_list_div))
             loader.start()
             loading_time = 0
-
-            realty_scraper = threading.Thread(target=scrape_realties, args=(realty_list,))
-            realty_scraper.start()
 
             data_position = 1
 
@@ -262,6 +262,9 @@ def __main__():
 
     address_url_list = get_address_urls(database)
     random.shuffle(address_url_list) # This is done so that multiple instances of the scraper have less chance of scraping the same url at the same time
+
+    realty_scraper = threading.Thread(target=scrape_realties)
+    realty_scraper.start()
 
     for address_url in address_url_list:
         if address_url["url"] != None:
