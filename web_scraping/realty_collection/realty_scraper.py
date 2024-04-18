@@ -37,10 +37,18 @@ class InvalidStatusKeyException(Exception):
 
 def verify_human(driver: webdriver):
     wait = WebDriverWait(driver, 10)
+
+    iframe = WebDriverWait(driver, 10).until(
+        EC.presence_of_element_located((By.ID, "cf-chl-widget-66ffy"))
+    )
+    driver.switch_to.frame(iframe)
+
     checkbox = wait.until(
         EC.presence_of_element_located((By.CSS_SELECTOR, "input[type='checkbox']"))
     )
     checkbox.click()
+    
+    driver.switch_to.default_content()
     sleep(15)
 
 def find_numbers(s: str):
@@ -76,8 +84,6 @@ def scrape_realty(driver: webdriver, url: str):
     driver.get(url)
 
     body = driver.find_element(By.TAG_NAME, "body")
-    print(body.text)
-
     if "Performance & security by Cloudflare" in body.text:
         verify_human(driver)
 
@@ -88,7 +94,6 @@ def scrape_realty(driver: webdriver, url: str):
         )
     except:
         print("Connection error")
-        sleep(60)
         return scrape_realty(driver, url)
 
     if "Em construção" in status_span.text:
