@@ -72,7 +72,7 @@ def load_realties(driver: webdriver.Chrome, realty_list_div: WebElement):
         driver.execute_script(f"window.scrollBy(0, {realty_div_size / 3});")
 
         # Reset scrolling if needed
-        max_y = loaded_realties * realty_div_size
+        max_y = (loaded_realties + 5) * realty_div_size
         current_scroll_y = driver.execute_script("return window.scrollY;")
         if current_scroll_y >= max_y:
             driver.execute_script(f"window.scrollTo(0, {max_y * 0.15});")

@@ -102,6 +102,7 @@ def scrape_realty(driver: webdriver, url: str):
         )
     except:
         print("Connection error")
+        driver.get("https://picsum.photos/960/1080")
         sleep(60)
         return scrape_realty(driver, url)
 
