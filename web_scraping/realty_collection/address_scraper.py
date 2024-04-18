@@ -140,7 +140,7 @@ def scrape_realties():
             realty_list.pop(0)
 
 @timed
-def scrape_url(driver: webdriver, address_url: dict):
+def scrape_address(driver: webdriver, address_url: dict):
     url = address_url["url"][:-1] # Remove the page index
     
     global database
@@ -148,6 +148,7 @@ def scrape_url(driver: webdriver, address_url: dict):
     global realty_div_size
     global pause_loading
     global stop_loading
+    global total_realties
 
     total_realties = 1
     collected_realty_urls = 0
@@ -276,7 +277,7 @@ def __main__():
                 set_status(database, address=address_url["address"])
 
                 reset_control_variables()
-                scrape_url(driver, address_url)
+                scrape_address(driver, address_url)
             else:
                 print(Console.BLUE + "Skipped" + Console.RESET + f" address: {address_url['address']}")
     
