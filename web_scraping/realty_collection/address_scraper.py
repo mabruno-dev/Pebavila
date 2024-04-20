@@ -257,7 +257,7 @@ def scrape_addresses(x: int, y: int):
     database = Database()
 
     driver = uc.Chrome(options=set_driver_options())
-    driver.set_window_size(600, 1020)
+    driver.set_window_size(600, 600)
     driver.set_window_position(x + 30, y + 30)
 
     set_status(database, scraper_start=time(), running=True)
@@ -292,7 +292,7 @@ def __main__():
     
     producers = []
     for i in range(2):
-        thread = threading.Thread(target=scrape_addresses, args=(0,  150 * i))
+        thread = threading.Thread(target=scrape_addresses, args=(0,  500 * i))
         thread.start()
         producers.append(thread)
         sleep(1)
