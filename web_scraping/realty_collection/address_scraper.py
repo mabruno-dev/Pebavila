@@ -109,7 +109,7 @@ def scrape_realties():
     database = Database()
 
     driver = uc.Chrome(options=set_driver_options())
-    index = 0
+    driver.set_window_size(450, 450)
 
     MIN_TIME = 5
 
@@ -233,7 +233,7 @@ def scrape_address(database: Database, driver: webdriver, address_url: dict):
                     pause_loading = False
 
                     loading_time = time() - start_time
-                    if loading_time > 180:
+                    if loading_time > 90:
                         print("Loading took too long, reloading page")
                         current_page = 101
                         break
@@ -280,6 +280,7 @@ def __main__():
     
     realty_scrapers = []
     for _ in range(3):
+
         thread = threading.Thread(target=scrape_realties)
         thread.start()
         realty_scrapers.append(thread)
