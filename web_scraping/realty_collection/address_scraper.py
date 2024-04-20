@@ -110,6 +110,7 @@ def scrape_realties(x: int, y: int):
 
     driver = uc.Chrome(options=set_driver_options())
     driver.set_window_size(450, 450)
+    driver.set_window_position(x, y)
 
     MIN_TIME = 5
 
@@ -273,6 +274,7 @@ def __main__():
 
     driver = uc.Chrome(options=set_driver_options())
     driver.set_window_size(600, 600)
+    driver.set_window_position(15, 15)
 
     set_status(database, scraper_start=time(), running=True)
 
@@ -282,7 +284,7 @@ def __main__():
     realty_scrapers = []
     for i in range(10):
 
-        thread = threading.Thread(target=scrape_realties, args=(15 * (i + i), 15 * (i + i)))
+        thread = threading.Thread(target=scrape_realties, args=(15 * (i + 2), 15 * (i + 2)))
         thread.start()
         realty_scrapers.append(thread)
 
