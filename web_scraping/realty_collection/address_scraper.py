@@ -111,7 +111,7 @@ def scrape_realties():
     driver = uc.Chrome(options=set_driver_options())
     index = 0
 
-    MIN_TIME = 2.5
+    MIN_TIME = 5
 
     while scraper_running:
         if len(realty_list) > 0:
@@ -146,7 +146,7 @@ def scrape_realties():
                     delta_time = time() - start_time
                     if delta_time < MIN_TIME:
                         sleep(MIN_TIME - delta_time)
-                        
+
             realty_list.pop(0)
         else:
             sleep(3)
