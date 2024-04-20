@@ -61,7 +61,7 @@ def load_realties(driver: webdriver.Chrome, realty_list_div: WebElement):
     while not stop_loading and loaded_realties < total_realties:
         loaded_realties = len(realty_list_div.find_elements(By.CLASS_NAME, "l-card__wrapper"))
 
-        driver.execute_script(f"window.scrollBy(0, {realty_div_size / 3});")
+        driver.execute_script(f"window.scrollBy(0, {realty_div_size / 6});")
 
         # Reset scrolling if needed
         max_y = (loaded_realties + 5) * realty_div_size
@@ -110,7 +110,7 @@ def scrape_realties(x: int, y: int):
 
     driver = uc.Chrome(options=set_driver_options())
     driver.set_window_size(450, 450)
-    driver.set_window_position(x, y)
+    driver.set_window_position(x + 30, y + 30)
 
     MIN_TIME = 5
 
@@ -253,40 +253,17 @@ def scrape_address(database: Database, driver: webdriver, address_url: dict):
 
     realty_list.append({"end": address_url})
 
-def reset_control_variables():
-
-    global pause_loading
-    global scraped_realties
-    global total_realties
-
-    pause_loading = False
-    scraped_realties = 0
-    total_realties = 1
-
-
-@timed
-def __main__():
-
+def scrape_addresses(x: int, y: int):
     database = Database()
-    
-    global scraper_running
-    global realty_list
 
     driver = uc.Chrome(options=set_driver_options())
     driver.set_window_size(600, 1020)
-    driver.set_window_position(30, 30)
+    driver.set_window_position(x + 30, y + 30)
 
     set_status(database, scraper_start=time(), running=True)
 
     address_url_list = get_address_urls(database)
     random.shuffle(address_url_list) # This is done so that multiple instances of the scraper have less chance of scraping the same url at the same time
-    
-    realty_scrapers = []
-    for i in range(10):
-        thread = threading.Thread(target=scrape_realties, args=(630 + 30 * (i + 1), 30 * (i + 1)))
-        thread.start()
-        realty_scrapers.append(thread)
-        sleep(0.5)
 
     for address_url in address_url_list:
         if address_url["url"] != None:
@@ -299,6 +276,33 @@ def __main__():
                 scrape_address(database, driver, address_url)
             else:
                 print(Console.BLUE + "Skipped" + Console.RESET + f" address: {address_url['address']}")
+
+def reset_control_variables():
+
+    global pause_loading
+    global scraped_realties
+    global total_realties
+
+    pause_loading = False
+    scraped_realties = 0
+    total_realties = 1
+
+@timed
+def __main__():
+    
+    producers = []
+    for i in range(2):
+        thread = threading.Thread(target=scrape_addresses, args=(0,  150 * i))
+        thread.start()
+        producers.append(thread)
+        sleep(1)
+
+    consumers = []
+    for i in range(10):
+        thread = threading.Thread(target=scrape_realties, args=(630 + 30 * i, 30 * i))
+        thread.start()
+        consumers.append(thread)
+        sleep(1)
     
     while len(realty_list) > 0:
         sleep(15)
