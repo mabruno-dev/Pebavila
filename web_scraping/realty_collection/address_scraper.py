@@ -234,7 +234,7 @@ def scrape_address(database: Database, driver: webdriver, address_url: dict):
                     pause_loading = False
 
                     loading_time = time() - start_time
-                    if loading_time > 90:
+                    if loading_time > (90 if total_realties > 100 else total_realties % 15 * 10):
                         print("Loading took too long, reloading page")
                         current_page = 101
                         break
@@ -273,8 +273,8 @@ def __main__():
     global realty_list
 
     driver = uc.Chrome(options=set_driver_options())
-    driver.set_window_size(600, 600)
-    driver.set_window_position(15, 15)
+    driver.set_window_size(600, 1065)
+    driver.set_window_position(30, 30)
 
     set_status(database, scraper_start=time(), running=True)
 
@@ -282,11 +282,11 @@ def __main__():
     random.shuffle(address_url_list) # This is done so that multiple instances of the scraper have less chance of scraping the same url at the same time
     
     realty_scrapers = []
-    for i in range(4):
-        thread = threading.Thread(target=scrape_realties, args=(615 + 30 * (i + 1), 30 * (i + 1)))
+    for i in range(20):
+        thread = threading.Thread(target=scrape_realties, args=(630 + 30 * (i + 1), 30 * (i + 1)))
         thread.start()
         realty_scrapers.append(thread)
-        sleep(0.5)
+        sleep(0.1)
 
     for address_url in address_url_list:
         if address_url["url"] != None:
