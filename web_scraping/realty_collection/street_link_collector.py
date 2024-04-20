@@ -153,27 +153,26 @@ def get_address_url(driver: webdriver.Chrome, location: dict, update = False) ->
     except Exception as e:
         error(e)
 
-# def fix_mistakes(driver: webdriver):
-#     print("Fixing nulls")
-#     result = database.query(
-#         "SELECT address FROM zapimoveis.address_urls WHERE created_at > %s AND updated_at IS NULL",
-#         (datetime(2024, 3, 24, 19, 30),)
-#     )
-#     if result:
-#         for index, item in enumerate(result):
-#             print(f"{index + 1}/{len(result)}", end=" ")
-#             address = item[0]
-#             street_and_city, state = address.split(" - ")
-#             street, city = street_and_city.split(", ")
-#             location = {
-#                 "state": state,
-#                 "city": city,
-#                 "neighborhood": None,
-#                 "street": street
-#             }
-#             address_url = get_address_url(driver, location, update=True)
-#             if address_url:
-#                 update_address_url(database, address_url)
+def fix_mistakes(driver: webdriver):
+    print("Fixing nulls")
+    result = database.query(
+        "SELECT address FROM zapimoveis.address_urls WHERE url NOT LIKE '%%https://www.zapimoveis.com.br/venda/imoveis/rj%%'"
+    )
+    if result:
+        for index, item in enumerate(result):
+            print(f"{index + 1}/{len(result)}", end=" ")
+            address = item[0]
+            street_and_city, state = address.split(" - ")
+            street, city = street_and_city.split(", ")
+            location = {
+                "state": state,
+                "city": city,
+                "neighborhood": None,
+                "street": street
+            }
+            address_url = get_address_url(driver, location, update=True)
+            if address_url:
+                update_address_url(database, address_url)
 
 @timed
 def __main__():
@@ -196,6 +195,8 @@ def __main__():
     # )
 
     driver.get(main_url)
+
+    fix_mistakes(driver)
 
     cities = get_all_cities(database)
     stored_addresses = [item["address"] for item in get_address_urls(database)]

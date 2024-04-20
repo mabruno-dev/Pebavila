@@ -293,18 +293,18 @@ def __main__():
     global realty_list
     
     producers = []
-    for i in range(1):
-        thread = threading.Thread(target=scrape_addresses, args=(0,  500 * i))
+    for i in range(2):
+        thread = threading.Thread(target=scrape_addresses, args=(0,  300 * i))
         thread.start()
         producers.append(thread)
-        sleep(1)
+        sleep(3)
 
     consumers = []
     for i in range(5):
         thread = threading.Thread(target=scrape_realties, args=(630 + 30 * i, 30 * i))
         thread.start()
         consumers.append(thread)
-        sleep(1)
+        sleep(3)
 
     for thread in producers:
         thread.join()
