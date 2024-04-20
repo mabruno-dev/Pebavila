@@ -116,14 +116,14 @@ def scrape_realties():
     while scraper_running:
         if len(realty_list) > 0:
             item = realty_list[0]
+            realty_list.pop(0)
             if "end" in item.keys():
-                index = 0
                 set_address_url_scraped(database, item["end"])
             else:
                 start_time = time()
                 if item["realty"]:
                     if not check_realty_exists_by_url(database, item["realty"]):
-                        print(Console.YELLOW + "Scraping" + Console.RESET + f" realty {index + 1} from {item["address"]}")
+                        print(Console.YELLOW + "Scraping" + Console.RESET + f" realty {item["index"]} from {item["address"]}")
                         try:
                             set_status(database, current_realty_start=time(), current_realty_image=item["image"])
                             realty_info = scrape_realty(driver, item["realty"])
@@ -140,14 +140,12 @@ def scrape_realties():
                         if realty_info != None:
                             insert_realty(database, realty_info)
                     else:
-                        print(Console.BLUE + "Skipped"  + Console.RESET + f" realty {index + 1} from {item["address"]}")
-                    index += 1
+                        print(Console.BLUE + "Skipped"  + Console.RESET + f" realty {item["index"]} from {item["address"]}")
 
                     delta_time = time() - start_time
                     if delta_time < MIN_TIME:
                         sleep(MIN_TIME - delta_time)
-
-            realty_list.pop(0)
+            
         else:
             sleep(3)
 
@@ -224,6 +222,7 @@ def scrape_address(database: Database, driver: webdriver, address_url: dict):
                         realty_url = None # for now
                     finally:
                         realty_list.append({
+                            "index": data_position,
                             "realty": realty_url,
                             "image": image_url,
                             "address": address_url["address"]
