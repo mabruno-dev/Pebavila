@@ -291,14 +291,14 @@ def reset_control_variables():
 def __main__():
     
     producers = []
-    for i in range(2):
+    for i in range(1):
         thread = threading.Thread(target=scrape_addresses, args=(0,  500 * i))
         thread.start()
         producers.append(thread)
         sleep(1)
 
     consumers = []
-    for i in range(10):
+    for i in range(5):
         thread = threading.Thread(target=scrape_realties, args=(630 + 30 * i, 30 * i))
         thread.start()
         consumers.append(thread)
