@@ -111,6 +111,8 @@ def scrape_realties():
     driver = uc.Chrome(options=set_driver_options())
     index = 0
 
+    MIN_TIME = 2.5
+
     while scraper_running:
         if len(realty_list) > 0:
             item = realty_list[0]
@@ -118,6 +120,7 @@ def scrape_realties():
                 index = 0
                 set_address_url_scraped(database, item["end"])
             else:
+                start_time = time()
                 if item["realty"]:
                     if not check_realty_exists_by_url(database, item["realty"]):
                         print(Console.YELLOW + "Scraping" + Console.RESET + f" realty {index + 1} from {item["address"]}")
@@ -139,6 +142,11 @@ def scrape_realties():
                     else:
                         print(Console.BLUE + "Skipped"  + Console.RESET + f" realty {index + 1} from {item["address"]}")
                     index += 1
+
+                    delta_time = time() - start_time
+                    if delta_time < MIN_TIME:
+                        sleep(MIN_TIME - delta_time)
+                        
             realty_list.pop(0)
         else:
             sleep(3)
