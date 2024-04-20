@@ -289,6 +289,8 @@ def reset_control_variables():
 
 @timed
 def __main__():
+    global scraper_running
+    global realty_list
     
     producers = []
     for i in range(1):
