@@ -102,7 +102,7 @@ def set_driver_options():
 
     return options
 
-def scrape_realties():
+def scrape_realties(x: int, y: int):
     global scraper_running
     global realty_list
     
@@ -280,9 +280,9 @@ def __main__():
     random.shuffle(address_url_list) # This is done so that multiple instances of the scraper have less chance of scraping the same url at the same time
     
     realty_scrapers = []
-    for _ in range(3):
+    for i in range(10):
 
-        thread = threading.Thread(target=scrape_realties)
+        thread = threading.Thread(target=scrape_realties, args=(15 * (i + i), 15 * (i + i)))
         thread.start()
         realty_scrapers.append(thread)
 
