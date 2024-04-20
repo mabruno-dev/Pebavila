@@ -234,7 +234,7 @@ def scrape_address(database: Database, driver: webdriver, address_url: dict):
                     pause_loading = False
 
                     loading_time = time() - start_time
-                    if loading_time > (90 if total_realties > 100 else total_realties % 15 * 10):
+                    if loading_time > (60 if total_realties > 100 else (total_realties % 15) * 5):
                         print("Loading took too long, reloading page")
                         current_page = 101
                         break
@@ -273,7 +273,7 @@ def __main__():
     global realty_list
 
     driver = uc.Chrome(options=set_driver_options())
-    driver.set_window_size(600, 1065)
+    driver.set_window_size(600, 1020)
     driver.set_window_position(30, 30)
 
     set_status(database, scraper_start=time(), running=True)
@@ -286,7 +286,7 @@ def __main__():
         thread = threading.Thread(target=scrape_realties, args=(630 + 30 * (i + 1), 30 * (i + 1)))
         thread.start()
         realty_scrapers.append(thread)
-        sleep(0.1)
+        sleep(0.3)
 
     for address_url in address_url_list:
         if address_url["url"] != None:
