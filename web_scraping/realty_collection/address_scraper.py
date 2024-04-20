@@ -278,9 +278,12 @@ def __main__():
 
     address_url_list = get_address_urls(database)
     random.shuffle(address_url_list) # This is done so that multiple instances of the scraper have less chance of scraping the same url at the same time
-
-    realty_scraper = threading.Thread(target=scrape_realties)
-    realty_scraper.start()
+    
+    realty_scrapers = []
+    for _ in range(3):
+        thread = threading.Thread(target=scrape_realties)
+        thread.start()
+        realty_scrapers.append(thread)
 
     for address_url in address_url_list:
         if address_url["url"] != None:
