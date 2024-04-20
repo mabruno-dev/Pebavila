@@ -236,7 +236,7 @@ def scrape_address(database: Database, driver: webdriver, address_url: dict):
                     loading_time = time() - start_time
                     if loading_time > (60 if total_realties > 100 else (total_realties % 15) * 5):
                         print("Loading took too long, reloading page")
-                        current_page = 101
+                        current_page -= 1
                         break
                     
                 except Exception as e:
