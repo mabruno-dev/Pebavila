@@ -272,6 +272,7 @@ def __main__():
     global realty_list
 
     driver = uc.Chrome(options=set_driver_options())
+    driver.set_window_size(600, 600)
 
     set_status(database, scraper_start=time(), running=True)
 
