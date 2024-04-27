@@ -10,6 +10,7 @@ from selenium.webdriver.support.ui import WebDriverWait as wait
 
 import json
 import os
+from time import sleep
 from threading import Thread
 from unidecode import unidecode
 
@@ -106,6 +107,7 @@ def __main__():
         thread = Thread(target=city_scraper, args=(30 * i, 30 * i))
         thread.start()
         thread_list.append(thread)
+        sleep(3)
 
     for thread in thread_list:
         thread.join()
