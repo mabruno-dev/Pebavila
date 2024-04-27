@@ -27,18 +27,20 @@ def find_table_rows(table: WebElement):
     table_body = table.find_element(By.TAG_NAME, "tbody")
     return table_body.find_elements(By.TAG_NAME, "tr")
 
-def city_scraper():
+def city_scraper(x: int, y: int):
     global all_addresses
     global city_url_list
 
     driver = webdriver.Chrome()
+    driver.set_window_size(600, 600)
+    driver.set_window_position(x + 30, y + 30)
 
     while len(city_url_list) > 0:
         url = city_url_list[0]
         city_url_list.pop(0)
         try:
             driver.get(url)
-            neighborhood_ul = wait(driver, 3).until(
+            neighborhood_ul = wait(driver, 10).until(
                 EC.presence_of_element_located((By.CLASS_NAME, "column-list"))
             )
             neighborhood_li_list = neighborhood_ul.find_elements(By.TAG_NAME, "li")
@@ -100,8 +102,8 @@ def __main__():
 
     thread_list = list()
 
-    for _ in range(5):
-        thread = Thread(target=city_scraper)
+    for i in range(10):
+        thread = Thread(target=city_scraper, args=(30 * i, 30 * i))
         thread.start()
         thread_list.append(thread)
 
