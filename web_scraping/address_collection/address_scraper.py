@@ -41,6 +41,14 @@ def city_scraper(x: int, y: int):
         city_url_list.pop(0)
         try:
             driver.get(url)
+
+            try:
+                body = driver.find_element(By.TAG_NAME, "body")
+                if "não é uma cidade codificada por logradouros" in body.text:
+                    continue
+            except:
+                pass
+
             neighborhood_ul = wait(driver, 10).until(
                 EC.presence_of_element_located((By.CLASS_NAME, "column-list"))
             )
@@ -107,7 +115,7 @@ def __main__():
         thread = Thread(target=city_scraper, args=(30 * i, 30 * i))
         thread.start()
         thread_list.append(thread)
-        sleep(3)
+        sleep(2)
 
     for thread in thread_list:
         thread.join()
