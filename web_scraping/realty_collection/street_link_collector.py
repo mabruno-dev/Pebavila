@@ -24,6 +24,10 @@ from utils.constants import ConsoleColors as Console
 database = Database(ensure_connection=True)
 
 main_url = "https://www.zapimoveis.com.br/venda/?__ab=exp-aa-test:control,rec-cta:rcta,desc-phone:pcta&transacao=venda&pagina=1"
+default_urls = [
+    main_url,
+    "https://www.zapimoveis.com.br/venda/?__ab=exp-aa-test:control,novopos:new,rp-imob:enabled,rec-cta:rcta,desc-phone:pcta&transacao=venda&pagina=1"
+]
 
 def check_address_similarity(local_address: str, web_address: str) -> bool:
     # format: STREET, CITY - STATE
@@ -50,6 +54,7 @@ def get_address_url(driver: webdriver.Chrome, location: dict, update = False) ->
 
     global database
     global main_url
+    global default_urls
     
     address = location_to_address(location)
 
@@ -130,12 +135,14 @@ def get_address_url(driver: webdriver.Chrome, location: dict, update = False) ->
                             print("Searching...", end="\r")
             
             location_div.click()
+            sleep(1)
 
-            while driver.current_url == main_url:
+            while driver.current_url in default_urls:
+                # print(driver.current_url, default_urls)
                 sleep(0.1)
 
             street_url = driver.current_url
-            last_gathered_url = street_url
+            # last_gathered_url = street_url
 
             clear_button = Wait(driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, "search-multiselect__clean-button")))
             clear_button.click()
@@ -154,7 +161,7 @@ def get_address_url(driver: webdriver.Chrome, location: dict, update = False) ->
         error(e)
 
 def fix_mistakes(driver: webdriver):
-    print("Fixing nulls")
+    print("Looking for mistakes")
     result = database.query(
         "SELECT address FROM zapimoveis.address_urls WHERE url NOT LIKE '%%https://www.zapimoveis.com.br/venda/imoveis/rj%%'"
     )

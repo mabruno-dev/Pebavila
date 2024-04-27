@@ -165,7 +165,6 @@ def scrape_address(database: Database, driver: webdriver, address_url: dict):
     current_page = 1
 
     while collected_realty_urls < total_realties and current_page <= 100:
-        start_time = time()
         try:
             page_url = url + f"{current_page}"
             driver.get(page_url)
@@ -193,6 +192,8 @@ def scrape_address(database: Database, driver: webdriver, address_url: dict):
             loader = threading.Thread(target=load_realties, args=(driver, realty_list_div))
             loader.start()
             loading_time = 0
+
+            start_time = time()
 
             data_position = 1
 

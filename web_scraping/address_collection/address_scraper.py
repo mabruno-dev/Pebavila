@@ -10,41 +10,35 @@ from selenium.webdriver.support.ui import WebDriverWait as wait
 
 import json
 import os
+from threading import Thread
 from unidecode import unidecode
 
 from utils.wrappers import timed
 from utils.functions import error
+
+running = True
+
+all_addresses = list()
+
+city_url_list = list()
 
 # Retorna as linhas de uma tabela passada por parâmetro
 def find_table_rows(table: WebElement):
     table_body = table.find_element(By.TAG_NAME, "tbody")
     return table_body.find_elements(By.TAG_NAME, "tr")
 
-@timed
-def __main__():
-    all_addresses = list()
+def city_scraper():
+    global all_addresses
+    global city_url_list
 
     driver = webdriver.Chrome()
 
-    driver.get("https://codigo-postal.org/pt-br/brasil/rio-de-janeiro/")
-
-    city_ul = wait(driver, 10).until(
-        EC.presence_of_element_located((By.CLASS_NAME, "column-list"))
-    )
-    city_li_list = city_ul.find_elements(By.TAG_NAME, "li")
-    city_a_list = list()
-    for city_li in city_li_list:
+    while len(city_url_list) > 0:
+        url = city_url_list[0]
+        city_url_list.pop(0)
         try:
-            city_a_list.append(city_li.find_element(By.TAG_NAME, "a").get_attribute("href"))
-        except Exception as e:
-            error(e)
-
-    for city_a in city_a_list:
-        
-        driver.get(city_a)
-
-        try:
-            neighborhood_ul = wait(driver, 10).until(
+            driver.get(url)
+            neighborhood_ul = wait(driver, 3).until(
                 EC.presence_of_element_located((By.CLASS_NAME, "column-list"))
             )
             neighborhood_li_list = neighborhood_ul.find_elements(By.TAG_NAME, "li")
@@ -56,7 +50,6 @@ def __main__():
                     error(e)
 
             for neighborhood_a in neighborhood_a_list:
-
                 driver.get(neighborhood_a)
 
                 street_tr_list = find_table_rows(
@@ -75,11 +68,45 @@ def __main__():
                     }
                     print(address)
                     all_addresses.append(address)
-
         except Exception as e:
             error(e)
 
     driver.quit()
+
+@timed
+def __main__():
+    global all_addresses
+    global city_url_list
+
+    driver = webdriver.Chrome()
+
+    driver.get("https://codigo-postal.org/pt-br/brasil/sao-paulo/")
+
+    city_ul = wait(driver, 10).until(
+        EC.presence_of_element_located((By.CLASS_NAME, "column-list"))
+    )
+    city_li_list = city_ul.find_elements(By.TAG_NAME, "li")
+    city_a_list = list()
+    for city_li in city_li_list:
+        try:
+            city_a_list.append(city_li.find_element(By.TAG_NAME, "a").get_attribute("href"))
+        except Exception as e:
+            error(e)
+
+    for city_a in city_a_list:
+        city_url_list.append(city_a)
+
+    driver.quit()
+
+    thread_list = list()
+
+    for _ in range(5):
+        thread = Thread(target=city_scraper)
+        thread.start()
+        thread_list.append(thread)
+
+    for thread in thread_list:
+        thread.join()
 
     # Transforma a lista de todos os endereços num JSON
     output_path = r"output"
