@@ -47,8 +47,12 @@ def get_progress(all_addresses: list):
             addresses = json.load(json_file)["addresses"]
         for item in addresses:
             all_addresses.append(item)
-            if not f"{item["city"]}/{item["neighborhood"]}" in progress:
-                progress.append(f"{item["city"]}/{item["neighborhood"]}")
+            temp = f"{item["city"]}/{item["neighborhood"]}"
+            if not temp in progress:
+                progress.append(temp)
+                if "º" in temp:
+                    progress.append(temp.replace("º", "o"))
+
     return progress
         
 def replace_degree(s: str):
@@ -98,61 +102,68 @@ def __main__():
             error(e)
 
     for city in city_list:
-        
-        driver.get(city["url"])
+        while True:
+            try:
+                driver.get(city["url"])
 
-        try:
-            body = wait(driver, 10).until(
-                EC.presence_of_element_located((By.TAG_NAME, "body"))
-            )
-            if "não é uma cidade codificada por logradouros" in body.text:
-                continue
-        except:
-            pass
-
-        try:
-            neighborhood_ul = wait(driver, 10).until(
-                EC.presence_of_element_located((By.CLASS_NAME, "column-list"))
-            )
-            neighborhood_li_list = neighborhood_ul.find_elements(By.TAG_NAME, "li")
-            neighborhood_list = list()
-            for neighborhood_li in neighborhood_li_list:
                 try:
-                    neighborhood_a = neighborhood_li.find_element(By.TAG_NAME, "a")
-                    neighborhood_list.append({
-                        "name": neighborhood_a.text,
-                        "url": neighborhood_a.get_attribute("href")
-                    })
-                except Exception as e:
-                    error(e)
-
-            for neighborhood in neighborhood_list:
-                
-                cn_str = replace_degree(unidecode(f"{city["name"]}/{neighborhood["name"]}").upper()).split("(")[0].strip()
-                if cn_str in progress_list:
-                    continue
-                
-                driver.get(neighborhood["url"])
-
-                street_tr_list = find_table_rows(
-                    wait(driver, 10).until(
-                        EC.presence_of_element_located((By.TAG_NAME, "table"))
+                    body = wait(driver, 10).until(
+                        EC.presence_of_element_located((By.TAG_NAME, "body"))
                     )
-                )
+                    if "não é uma cidade codificada por logradouros" in body.text:
+                        break
+                    elif "Página no encontrada" in body.text:
+                        break
+                except:
+                    pass
 
-                for street_tr in street_tr_list:
-                    street_td_list = street_tr.find_elements(By.TAG_NAME, "td")
-                    address = {
-                        "street": unidecode(street_td_list[1].find_element(By.TAG_NAME, "a").text).upper(),
-                        "neighborhood": replace_degree(unidecode(street_td_list[3].text.upper())).split("(")[0].strip(),
-                        "city": unidecode(street_td_list[4].text.split("/")[0].upper()),
-                        "state": unidecode(street_td_list[4].text.split("/")[1].upper())
-                    }
-                    print(address)
-                    all_addresses.append(address)
-            
-        except Exception as e:
-            error(e)
+                neighborhood_ul = wait(driver, 10).until(
+                    EC.presence_of_element_located((By.CLASS_NAME, "column-list"))
+                )
+                neighborhood_li_list = neighborhood_ul.find_elements(By.TAG_NAME, "li")
+                neighborhood_list = list()
+                for neighborhood_li in neighborhood_li_list:
+                    try:
+                        neighborhood_a = neighborhood_li.find_element(By.TAG_NAME, "a")
+                        neighborhood_list.append({
+                            "name": neighborhood_a.text,
+                            "url": neighborhood_a.get_attribute("href")
+                        })
+                    except Exception as e:
+                        error(e)
+
+                for neighborhood in neighborhood_list:
+                    
+                    cn_str = replace_degree(unidecode(f"{city["name"]}/{neighborhood["name"]}").upper()).split("(")[0].strip()
+                    if cn_str in progress_list:
+                        continue
+
+                    while True:
+                        try:
+                            driver.get(neighborhood["url"])
+
+                            street_tr_list = find_table_rows(
+                                wait(driver, 10).until(
+                                    EC.presence_of_element_located((By.TAG_NAME, "table"))
+                                )
+                            )
+
+                            for street_tr in street_tr_list:
+                                street_td_list = street_tr.find_elements(By.TAG_NAME, "td")
+                                address = {
+                                    "street": unidecode(street_td_list[1].find_element(By.TAG_NAME, "a").text).upper(),
+                                    "neighborhood": replace_degree(unidecode(street_td_list[3].text.upper())).split("(")[0].strip(),
+                                    "city": unidecode(street_td_list[4].text.split("/")[0].upper()),
+                                    "state": unidecode(street_td_list[4].text.split("/")[1].upper())
+                                }
+                                print(address)
+                                all_addresses.append(address)
+                            break
+                        except Exception as e:
+                            error(e)
+                break
+            except Exception as e:
+                error(e)
 
     write_json(all_addresses)
 
