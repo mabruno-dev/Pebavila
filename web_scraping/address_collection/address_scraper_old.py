@@ -10,10 +10,14 @@ from selenium.webdriver.support.ui import WebDriverWait as wait
 
 import json
 import os
+from time import sleep
+from threading import Thread
 from unidecode import unidecode
 
 from utils.wrappers import timed
 from utils.functions import error
+
+running = True
 
 # Retorna as linhas de uma tabela passada por parâmetro
 def find_table_rows(table: WebElement):
@@ -45,11 +49,23 @@ def replace_degree(s: str):
         return s.replace("deg", "º")
     return s
 
+def progress_saver(all_addresses: list):
+        global running
+
+        while running:
+            write_json(all_addresses)
+            sleep(15)
+
 @timed
 def __main__():
-    all_addresses = list()
+    global running
+
+    all_addresses = list() 
 
     progress_list = get_progress(all_addresses)
+
+    thread = Thread(target=progress_saver, args=(all_addresses,))
+    thread.start()
 
     driver = webdriver.Chrome()
 
@@ -125,12 +141,15 @@ def __main__():
                     print(address)
                     all_addresses.append(address)
             
-                write_json(all_addresses)
-
         except Exception as e:
             error(e)
 
+    write_json(all_addresses)
+
     driver.quit()
+
+    running = False
+    thread.join()
 
 
 if __name__ == "__main__":
