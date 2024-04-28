@@ -50,6 +50,8 @@ def get_progress(all_addresses: list):
             temp = f"{item["city"]}/{item["neighborhood"]}"
             if not temp in progress:
                 progress.append(temp)
+                if "º" in temp:
+                    progress.append(temp.replace("º", "o"))
 
     return progress
         
@@ -84,7 +86,12 @@ def get_url_dont_wait(driver: webdriver.Chrome, url: str):
     start = time.time()
     while not got_url:
         if time.time() - start > 5:
-            raise Exception("driver.get took too long")
+            driver.quit()
+            time.sleep(3)
+            driver = webdriver.Chrome()
+            print("driver.get took too long")
+            get_url_dont_wait(driver, url)
+            break
 
 @timed
 def __main__():
