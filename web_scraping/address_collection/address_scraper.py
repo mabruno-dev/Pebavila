@@ -37,50 +37,55 @@ def city_scraper(x: int, y: int):
     driver.set_window_position(x + 30, y + 30)
 
     while len(city_url_list) > 0:
+        neighborhood_addresses = list()
         url = city_url_list[0]
         city_url_list.pop(0)
-        try:
-            driver.get(url)
-
+        while True:
             try:
-                body = driver.find_element(By.TAG_NAME, "body")
-                if "não é uma cidade codificada por logradouros" in body.text:
-                    continue
-            except:
-                pass
+                driver.get(url)
 
-            neighborhood_ul = wait(driver, 10).until(
-                EC.presence_of_element_located((By.CLASS_NAME, "column-list"))
-            )
-            neighborhood_li_list = neighborhood_ul.find_elements(By.TAG_NAME, "li")
-            neighborhood_a_list = list()
-            for neighborhood_li in neighborhood_li_list:
                 try:
-                    neighborhood_a_list.append(neighborhood_li.find_element(By.TAG_NAME, "a").get_attribute("href"))
-                except Exception as e:
-                    error(e)
+                    body = driver.find_element(By.TAG_NAME, "body")
+                    if "não é uma cidade codificada por logradouros" in body.text:
+                        continue
+                except:
+                    pass
 
-            for neighborhood_a in neighborhood_a_list:
-                driver.get(neighborhood_a)
-
-                street_tr_list = find_table_rows(
-                    wait(driver, 10).until(
-                        EC.presence_of_element_located((By.TAG_NAME, "table"))
-                    )
+                neighborhood_ul = wait(driver, 10).until(
+                    EC.presence_of_element_located((By.CLASS_NAME, "column-list"))
                 )
+                neighborhood_li_list = neighborhood_ul.find_elements(By.TAG_NAME, "li")
+                neighborhood_a_list = list()
+                for neighborhood_li in neighborhood_li_list:
+                    try:
+                        neighborhood_a_list.append(neighborhood_li.find_element(By.TAG_NAME, "a").get_attribute("href"))
+                    except Exception as e:
+                        error(e)
 
-                for street_tr in street_tr_list:
-                    street_td_list = street_tr.find_elements(By.TAG_NAME, "td")
-                    address = {
-                        "street": unidecode(street_td_list[1].find_element(By.TAG_NAME, "a").text).upper(),
-                        "neighborhood": unidecode(street_td_list[3].text.upper()),
-                        "city": unidecode(street_td_list[4].text.split("/")[0].upper()),
-                        "state": unidecode(street_td_list[4].text.split("/")[1].upper())
-                    }
-                    print(address)
-                    all_addresses.append(address)
-        except Exception as e:
-            error(e)
+                for neighborhood_a in neighborhood_a_list:
+                    driver.get(neighborhood_a)
+
+                    street_tr_list = find_table_rows(
+                        wait(driver, 10).until(
+                            EC.presence_of_element_located((By.TAG_NAME, "table"))
+                        )
+                    )
+
+                    for street_tr in street_tr_list:
+                        street_td_list = street_tr.find_elements(By.TAG_NAME, "td")
+                        address = {
+                            "street": unidecode(street_td_list[1].find_element(By.TAG_NAME, "a").text).upper(),
+                            "neighborhood": unidecode(street_td_list[3].text.upper()),
+                            "city": unidecode(street_td_list[4].text.split("/")[0].upper()),
+                            "state": unidecode(street_td_list[4].text.split("/")[1].upper())
+                        }
+                        print(address)
+                        neighborhood_addresses.append(address)
+                break
+            except Exception as e:
+                error(e)
+        for item in neighborhood_addresses:
+            all_addresses.append(item)
 
     driver.quit()
 
