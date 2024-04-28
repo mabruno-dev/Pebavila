@@ -50,14 +50,15 @@ def get_progress(all_addresses: list):
             temp = f"{item["city"]}/{item["neighborhood"]}"
             if not temp in progress:
                 progress.append(temp)
-                if "º" in temp:
-                    progress.append(temp.replace("º", "o"))
 
     return progress
         
 def replace_degree(s: str):
-    if s[s.find("deg") - 1].isdigit():
-        return s.replace("deg", "º")
+    try:
+        if s[s.find("deg") - 1].isdigit():
+            return s.replace("deg", "º")
+    except:
+        pass
     return s
 
 def progress_saver(all_addresses: list):
