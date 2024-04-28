@@ -27,7 +27,10 @@ def format_time(seconds):
     return time_str
 
 def create_dirs(file_path):
-    os.makedirs(os.path.dirname(file_path), exist_ok=True)
+    try:
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
+    except:
+        pass
 
 def get_caller_dir_path():
     caller_frame = inspect.stack()[-1]
@@ -48,7 +51,7 @@ def print_log(text: str, showDt: bool = False, onConsole: bool = True, section: 
 
     caller_dir_path = get_caller_dir_path().replace(".py", "").replace("/_internal", "")
     caller_name = get_caller_name().replace(".py", "")
-    LOG_FILE_PATH = f"{caller_dir_path}/logs/{caller_name}/log_{current_date}.txt"
+    LOG_FILE_PATH = f"{caller_dir_path}/logs/{caller_name}/log_{current_date}.txt".replace(" ", "_")
 
     create_dirs(LOG_FILE_PATH)
 
