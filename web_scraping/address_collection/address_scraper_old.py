@@ -78,8 +78,11 @@ def get_url_dont_wait(driver: webdriver.Chrome, url: str):
 
     def get_url():
         nonlocal got_url
-        driver.get(url)
-        got_url = True
+        try:
+            driver.get(url)
+            got_url = True
+        except:
+            pass
 
     thread = Thread(target=get_url)
     thread.start()
