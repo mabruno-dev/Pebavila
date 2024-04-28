@@ -37,7 +37,7 @@ def write_json(all_addresses: list):
     os.makedirs(output_path, exist_ok=True)
     json_object = {"addresses": all_addresses}
     with open(file_path, "w") as json_file:
-        json.dump(json_object, json_file, indent=4)
+        json.dump(json_object, json_file, ensure_ascii=False, indent=4)
 
 def get_progress(all_addresses: list):
     file_path = r"output/addresses.json"
