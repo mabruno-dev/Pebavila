@@ -87,7 +87,7 @@ def get_url_dont_wait(driver: webdriver.Chrome, url: str):
     while not got_url:
         if time.time() - start > 5:
             driver.quit()
-            time.sleep(3)
+            time.sleep(30)
             driver = webdriver.Chrome()
             print("driver.get took too long")
             get_url_dont_wait(driver, url)
