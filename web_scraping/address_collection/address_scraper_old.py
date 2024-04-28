@@ -9,6 +9,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait as wait
 
 import json
+import shutil
 import os
 from time import sleep
 from threading import Thread
@@ -27,9 +28,15 @@ def find_table_rows(table: WebElement):
 def write_json(all_addresses: list):
     # Transforma a lista de todos os endereços num JSON
     output_path = r"output"
+    file_path = output_path + r"/addresses.json"
+    backup_file_path = output_path + r"/addresses_backup.json"
+
+    # Make a backup
+    shutil.copy(file_path, backup_file_path)
+    
     os.makedirs(output_path, exist_ok=True)
     json_object = {"addresses": all_addresses}
-    with open(output_path + r"/addresses.json", "w") as json_file:
+    with open(file_path, "w") as json_file:
         json.dump(json_object, json_file, indent=4)
 
 def get_progress(all_addresses: list):
