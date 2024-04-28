@@ -93,7 +93,7 @@ def __main__():
     os.makedirs(output_path, exist_ok=True)
     json_object = {"addresses": all_addresses}
     with open(output_path + r"/addresses.json", "w") as json_file:
-        json.dump(json_object, json_file)
+        json.dump(json_object, json_file, indent=4)
 
 
 if __name__ == "__main__":
