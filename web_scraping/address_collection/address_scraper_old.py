@@ -11,7 +11,7 @@ from selenium.webdriver.support.ui import WebDriverWait as wait
 import json
 import shutil
 import os
-from time import sleep
+import time
 from threading import Thread
 from unidecode import unidecode
 
@@ -69,7 +69,22 @@ def progress_saver(all_addresses: list):
             for _ in range(300):
                 if not running:
                     break
-                sleep(1)
+                time.sleep(1)
+
+def get_url_dont_wait(driver: webdriver.Chrome, url: str):
+    got_url = False
+
+    def get_url():
+        nonlocal got_url
+        driver.get(url)
+        got_url = True
+
+    thread = Thread(target=get_url)
+    thread.start()
+    start = time.time()
+    while not got_url:
+        if time.time() - start > 5:
+            raise Exception("driver.get took too long")
 
 @timed
 def __main__():
@@ -105,7 +120,7 @@ def __main__():
     for city in city_list:
         while True:
             try:
-                driver.get(city["url"])
+                get_url_dont_wait(driver, city["url"])
 
                 try:
                     body = wait(driver, 10).until(
@@ -141,7 +156,7 @@ def __main__():
 
                     while True:
                         try:
-                            driver.get(neighborhood["url"])
+                            get_url_dont_wait(driver, neighborhood["url"])
 
                             street_tr_list = find_table_rows(
                                 wait(driver, 10).until(
