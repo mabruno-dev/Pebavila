@@ -47,22 +47,12 @@ def get_progress(all_addresses: list):
             addresses = json.load(json_file)["addresses"]
         for item in addresses:
             if item not in all_addresses:
-                all_addresses.append(item)
-            temp = f"{item["city"]}/{item["neighborhood"]}"
+                all_addresses.append(item.replace("º", ""))
+            temp = f"{item["city"]}/{item["neighborhood"]}".replace("º", "")
             if not temp in progress:
                 progress.append(temp)
-                if "º" in temp:
-                    progress.append(temp.replace("º", "o"))
 
     return progress
-        
-def replace_degree(s: str):
-    try:
-        if s[s.find("deg") - 1].isdigit():
-            return s.replace("deg", "º")
-    except:
-        pass
-    return s
 
 def progress_saver(all_addresses: list):
         global running
@@ -168,7 +158,7 @@ def __main__():
 
                 for neighborhood in neighborhood_list:
                     
-                    cn_str = replace_degree(unidecode(f"{city["name"]}/{neighborhood["name"]}").upper()).split("(")[0].strip()
+                    cn_str = unidecode(f"{city["name"]}/{neighborhood["name"]}".replace("º", "")).upper().split("(")[0].strip()
                     if cn_str in progress_list:
                         continue
 
@@ -186,7 +176,7 @@ def __main__():
                                 street_td_list = street_tr.find_elements(By.TAG_NAME, "td")
                                 address = {
                                     "street": unidecode(street_td_list[1].find_element(By.TAG_NAME, "a").text).upper(),
-                                    "neighborhood": replace_degree(unidecode(street_td_list[3].text.upper())).split("(")[0].strip(),
+                                    "neighborhood": unidecode(street_td_list[3].text.replace("º", "").upper()).split("(")[0].strip(),
                                     "city": unidecode(street_td_list[4].text.split("/")[0].upper()),
                                     "state": unidecode(street_td_list[4].text.split("/")[1].upper())
                                 }
