@@ -51,9 +51,12 @@ def get_progress(all_addresses: list):
     file_path = r"output/addresses.json"
     progress = list()
     if os.path.exists(file_path):
+        print("Loading progress")
         with open(file_path, "r") as json_file:
             addresses = json.load(json_file)["addresses"]
         for item in addresses:
+            print(f"{len(all_addresses)}/{len(addresses)}", end="\r")
+
             temp = {}
 
             for key, value in item.items():
@@ -65,6 +68,7 @@ def get_progress(all_addresses: list):
             temp = f"{item["city"]}/{item["neighborhood"]}"
             if not temp in progress:
                 progress.append(temp)
+        print()
 
     return progress
 
