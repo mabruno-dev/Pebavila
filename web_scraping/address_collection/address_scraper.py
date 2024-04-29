@@ -179,7 +179,6 @@ def __main__():
 
                     while True:
                         try:
-                            print(city["url"] + "\\")
                             if neighborhood["url"] == city["url"] + "/":
                                 break
 
