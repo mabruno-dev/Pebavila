@@ -53,7 +53,7 @@ def get_progress(all_addresses: list):
 
             if temp not in all_addresses:
                 all_addresses.append(temp)
-                
+
             temp = f"{item["city"]}/{item["neighborhood"]}"
             if not temp in progress:
                 progress.append(temp)
@@ -111,9 +111,14 @@ def __main__():
     thread.start()
 
     driver = webdriver.Chrome()
-    driver.set_page_load_timeout(10)
+    driver.set_page_load_timeout(30)
 
-    driver.get("https://codigo-postal.org/pt-br/brasil/sao-paulo/")
+    while True:
+        try:
+            driver.get("https://codigo-postal.org/pt-br/brasil/sao-paulo/")
+            break
+        except:
+            print("Connection failed, trying again")
 
     city_ul = wait(driver, 10).until(
         EC.presence_of_element_located((By.CLASS_NAME, "column-list"))
