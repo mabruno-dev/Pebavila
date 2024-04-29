@@ -41,7 +41,7 @@ def write_json(all_addresses: list):
 
 def remove_deg(s: str):
     for i in range(10):
-        s = s.replace(f"{i}DEG", f"{i}")
+        s = s.replace(f"{i}DEG", f"{i}").replace(f"{i}deg", f"{i}")
     return s
 
 def normalize_str(s: str):
@@ -55,8 +55,6 @@ def get_progress(all_addresses: list):
         with open(file_path, "r") as json_file:
             addresses = json.load(json_file)["addresses"]
         for item in addresses:
-            print(f"{len(all_addresses)}/{len(addresses)}", end="\r")
-
             temp = {}
 
             for key, value in item.items():
@@ -68,6 +66,8 @@ def get_progress(all_addresses: list):
             temp = f"{item["city"]}/{item["neighborhood"]}"
             if not temp in progress:
                 progress.append(temp)
+            
+            print(f"{len(all_addresses)}/{len(addresses)} ({int(100 * len(all_addresses) / len(addresses))}%)", end="\r")
         print()
 
     return progress
