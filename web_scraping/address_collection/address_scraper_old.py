@@ -46,7 +46,8 @@ def get_progress(all_addresses: list):
         with open(file_path, "r") as json_file:
             addresses = json.load(json_file)["addresses"]
         for item in addresses:
-            all_addresses.append(item)
+            if item not in all_addresses:
+                all_addresses.append(item)
             temp = f"{item["city"]}/{item["neighborhood"]}"
             if not temp in progress:
                 progress.append(temp)
@@ -190,7 +191,8 @@ def __main__():
                                     "state": unidecode(street_td_list[4].text.split("/")[1].upper())
                                 }
                                 print(address)
-                                all_addresses.append(address)
+                                if address not in all_addresses:
+                                    all_addresses.append(address)
                             break
                         except Exception as e:
                             error(e)
