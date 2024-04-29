@@ -84,6 +84,9 @@ def get_url_dont_wait(driver: webdriver.Chrome, url: str):
         except:
             pass
 
+    def close_driver(driver: webdriver):
+        driver.quit()
+
     thread = Thread(target=get_url)
     thread.start()
     start = time.time()
@@ -91,10 +94,11 @@ def get_url_dont_wait(driver: webdriver.Chrome, url: str):
         current_time = time.time() - start
         print(f"Geting url {current_time}", end="\r")
         if current_time > 120:
-            driver.quit()
-            time.sleep(3)
-            driver = webdriver.Chrome()
             print("driver.get took too long")
+            temp_driver = driver
+            Thread(target=close_driver, args=(temp_driver,)).start()
+            driver = None
+            driver = webdriver.Chrome()
             get_url_dont_wait(driver, url)
             break
 
