@@ -73,34 +73,34 @@ def progress_saver(all_addresses: list):
                     break
                 time.sleep(1)
 
-def get_url_dont_wait(driver: webdriver.Chrome, url: str):
-    got_url = False
+# def get_url_dont_wait(driver: webdriver.Chrome, url: str):
+#     got_url = False
 
-    def get_url():
-        nonlocal got_url
-        try:
-            driver.get(url)
-            got_url = True
-        except:
-            pass
+#     def get_url():
+#         nonlocal got_url
+#         try:
+#             driver.get(url)
+#             got_url = True
+#         except:
+#             pass
 
-    def close_driver(driver: webdriver):
-        driver.quit()
+#     def close_driver(driver: webdriver):
+#         driver.quit()
 
-    thread = Thread(target=get_url)
-    thread.start()
-    start = time.time()
-    while not got_url:
-        current_time = time.time() - start
-        print(f"Geting url {current_time}", end="\r")
-        if current_time > 120:
-            print("driver.get took too long")
-            temp_driver = driver
-            Thread(target=close_driver, args=(temp_driver,)).start()
-            driver = None
-            driver = webdriver.Chrome()
-            get_url_dont_wait(driver, url)
-            break
+#     thread = Thread(target=get_url)
+#     thread.start()
+#     start = time.time()
+#     while not got_url:
+#         current_time = time.time() - start
+#         print(f"Geting url {current_time}", end="\r")
+#         if current_time > 120:
+#             print("driver.get took too long")
+#             temp_driver = driver
+#             Thread(target=close_driver, args=(temp_driver,)).start()
+#             driver = None
+#             driver = webdriver.Chrome()
+#             get_url_dont_wait(driver, url)
+#             break
 
 @timed
 def __main__():
@@ -114,6 +114,7 @@ def __main__():
     thread.start()
 
     driver = webdriver.Chrome()
+    driver.set_page_load_timeout(10)
 
     driver.get("https://codigo-postal.org/pt-br/brasil/sao-paulo/")
 
@@ -136,7 +137,7 @@ def __main__():
     for city in city_list:
         while True:
             try:
-                get_url_dont_wait(driver, city["url"])
+                driver.get(city["url"])
 
                 try:
                     body = wait(driver, 10).until(
@@ -172,7 +173,7 @@ def __main__():
 
                     while True:
                         try:
-                            get_url_dont_wait(driver, neighborhood["url"])
+                            driver.get(neighborhood["url"])
 
                             street_tr_list = find_table_rows(
                                 wait(driver, 10).until(
