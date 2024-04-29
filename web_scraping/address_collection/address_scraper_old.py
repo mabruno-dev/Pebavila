@@ -53,6 +53,7 @@ def remove_deg(s: str):
 def normalize_str(s: str):
     s = s.upper()
     s = s.strip()
+    s = s.split("(")[0]
     s = unidecode(s)
     s = remove_deg(s)
     return s
@@ -177,7 +178,7 @@ def __main__():
                                 street_td_list = street_tr.find_elements(By.TAG_NAME, "td")
                                 address = {
                                     "street": normalize_str(street_td_list[1].find_element(By.TAG_NAME, "a").text),
-                                    "neighborhood": normalize_str(street_td_list[3].text.split("(")[0]),
+                                    "neighborhood": normalize_str(street_td_list[3].text),
                                     "city": normalize_str(street_td_list[4].text.split("/")[0]),
                                     "state": normalize_str(street_td_list[4].text.split("/")[1])
                                 }
