@@ -179,9 +179,10 @@ def __main__():
 
                     while True:
                         try:
-                            if neighborhood["url"] == city["url"]:
+                            print(city["url"] + "\\")
+                            if neighborhood["url"] == city["url"] + "/":
                                 break
-                            
+
                             driver.get(neighborhood["url"])
 
                             street_tr_list = find_table_rows(
