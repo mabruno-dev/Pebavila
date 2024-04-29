@@ -133,7 +133,10 @@ def __main__():
     for city in city_list:
         while True:
             try:
+                current_url = driver.current_url
                 driver.get(city["url"])
+                if driver.current_url == current_url:
+                    continue
 
                 try:
                     body = wait(driver, 10).until(
@@ -169,7 +172,10 @@ def __main__():
 
                     while True:
                         try:
+                            current_url = driver.current_url
                             driver.get(neighborhood["url"])
+                            if driver.current_url == current_url:
+                                continue
 
                             street_tr_list = find_table_rows(
                                 wait(driver, 10).until(
