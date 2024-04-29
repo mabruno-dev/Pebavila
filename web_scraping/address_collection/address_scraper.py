@@ -62,7 +62,6 @@ def get_progress(all_addresses: list):
     file_path = r"output/addresses.json"
     progress = list()
     if os.path.exists(file_path):
-        print("Loading progress")
         with open(file_path, "r") as json_file:
             addresses = json.load(json_file)["addresses"]
         for item in addresses:
@@ -77,7 +76,7 @@ def get_progress(all_addresses: list):
             if not temp in progress:
                 progress.append(temp)
             
-            print(f"{len(all_addresses)}/{len(addresses)} ({int(100 * len(all_addresses) / len(addresses))}%)", end="\r")
+            print(f"Loading progress {len(all_addresses)}/{len(addresses)} ({int(100 * len(all_addresses) / len(addresses))}%)", end="\r")
         print()
 
     return progress
@@ -92,6 +91,9 @@ def progress_saver(all_addresses: list):
                 list_len = len(all_addresses)
                 write_json(all_addresses)
                 time.sleep(300)
+
+def get_next_city(all_addresses: list):
+    return all_addresses[-1]["city"]
 
 @timed
 def __main__():
@@ -130,7 +132,15 @@ def __main__():
         except Exception as e:
             error(e)
 
+    next_city = get_next_city(all_addresses)
+
     for city in city_list:
+        if next_city:
+            if normalize_str(city["name"]) == next_city:
+                next_city = None
+            else:
+                continue    
+
         last_url = driver.current_url
         while True:
             try:
