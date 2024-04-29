@@ -41,7 +41,7 @@ def write_json(all_addresses: list):
 
 def remove_deg(s: str):
     for i in range(10):
-        s = s.replace(f"{i}deg", f"{i}")
+        s = s.replace(f"{i}DEG", f"{i}")
     return s
 
 def normalize_str(s: str):
@@ -90,7 +90,7 @@ def __main__():
     thread.start()
 
     driver = webdriver.Chrome()
-    driver.set_page_load_timeout(20)
+    driver.set_page_load_timeout(10)
 
     while True:
         try:
