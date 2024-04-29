@@ -7,6 +7,7 @@ from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait as wait
+import undetected_chromedriver as uc
 
 import json
 import shutil
@@ -40,12 +41,21 @@ def write_json(all_addresses: list):
         json.dump(json_object, json_file, ensure_ascii=False, indent=4)
 
 def remove_deg(s: str):
-    for i in range(10):
-        s = s.replace(f"{i}DEG", f"{i}").replace(f"{i}deg", f"{i}")
+    for i in range(1, 10):
+        s = s.replace(f"{i}DEG", str(i))
+        s = s.replace(f"{i}ADEG", str(i))
+        s = s.replace(f"{i}deg", str(i))
+        s = s.replace(f"{i}adeg", str(i))
+        s = s.replace(f"{i}O", str(i))
+        s = s.replace(f"{i}o", str(i))
     return s
 
 def normalize_str(s: str):
-    return remove_deg(unidecode(s.upper().strip()))
+    s = s.upper()
+    s = s.strip()
+    s = unidecode(s)
+    s = remove_deg(s)
+    return s
 
 def get_progress(all_addresses: list):
     file_path = r"output/addresses.json"
@@ -93,7 +103,7 @@ def __main__():
     thread = Thread(target=progress_saver, args=(all_addresses,))
     thread.start()
 
-    driver = webdriver.Chrome()
+    driver = uc.Chrome()
     driver.set_page_load_timeout(10)
 
     while True:
