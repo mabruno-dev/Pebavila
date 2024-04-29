@@ -39,6 +39,14 @@ def write_json(all_addresses: list):
     with open(file_path, "w") as json_file:
         json.dump(json_object, json_file, ensure_ascii=False, indent=4)
 
+def remove_deg(s: str):
+    for i in range(10):
+        s = s.replace(f"{i}deg", f"{i}")
+    return s
+
+def normalize_str(s: str):
+    return remove_deg(unidecode(s.upper().strip()))
+
 def get_progress(all_addresses: list):
     file_path = r"output/addresses.json"
     progress = list()
@@ -49,7 +57,7 @@ def get_progress(all_addresses: list):
             temp = {}
 
             for key, value in item.items():
-                temp[key] = value.replace("º", "")
+                temp[key] = normalize_str(value)
 
             if temp not in all_addresses:
                 all_addresses.append(temp)
@@ -70,35 +78,6 @@ def progress_saver(all_addresses: list):
                     break
                 time.sleep(1)
 
-# def get_url_dont_wait(driver: webdriver.Chrome, url: str):
-#     got_url = False
-
-#     def get_url():
-#         nonlocal got_url
-#         try:
-#             driver.get(url)
-#             got_url = True
-#         except:
-#             pass
-
-#     def close_driver(driver: webdriver):
-#         driver.quit()
-
-#     thread = Thread(target=get_url)
-#     thread.start()
-#     start = time.time()
-#     while not got_url:
-#         current_time = time.time() - start
-#         print(f"Geting url {current_time}", end="\r")
-#         if current_time > 120:
-#             print("driver.get took too long")
-#             temp_driver = driver
-#             Thread(target=close_driver, args=(temp_driver,)).start()
-#             driver = None
-#             driver = webdriver.Chrome()
-#             get_url_dont_wait(driver, url)
-#             break
-
 @timed
 def __main__():
     global running
@@ -111,7 +90,7 @@ def __main__():
     thread.start()
 
     driver = webdriver.Chrome()
-    driver.set_page_load_timeout(30)
+    driver.set_page_load_timeout(20)
 
     while True:
         try:
@@ -169,7 +148,7 @@ def __main__():
 
                 for neighborhood in neighborhood_list:
                     
-                    cn_str = unidecode(f"{city["name"]}/{neighborhood["name"]}".replace("º", "")).upper().split("(")[0].strip()
+                    cn_str = normalize_str(f"{city["name"]}/{neighborhood["name"]}".split("(")[0])
                     if cn_str in progress_list:
                         continue
 
@@ -186,10 +165,10 @@ def __main__():
                             for street_tr in street_tr_list:
                                 street_td_list = street_tr.find_elements(By.TAG_NAME, "td")
                                 address = {
-                                    "street": unidecode(street_td_list[1].find_element(By.TAG_NAME, "a").text).upper(),
-                                    "neighborhood": unidecode(street_td_list[3].text.replace("º", "").upper()).split("(")[0].strip(),
-                                    "city": unidecode(street_td_list[4].text.split("/")[0].upper()),
-                                    "state": unidecode(street_td_list[4].text.split("/")[1].upper())
+                                    "street": normalize_str(street_td_list[1].find_element(By.TAG_NAME, "a").text),
+                                    "neighborhood": normalize_str(street_td_list[3].text.split("(")[0]),
+                                    "city": normalize_str(street_td_list[4].text.split("/")[0]),
+                                    "state": normalize_str(street_td_list[4].text.split("/")[1])
                                 }
                                 print(address)
                                 if address not in all_addresses:
