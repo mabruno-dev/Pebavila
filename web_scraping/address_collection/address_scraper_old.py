@@ -87,10 +87,7 @@ def progress_saver(all_addresses: list):
 
         while running:
             write_json(all_addresses)
-            for _ in range(300):
-                if not running:
-                    break
-                time.sleep(1)
+            time.sleep(300)
 
 @timed
 def __main__():
