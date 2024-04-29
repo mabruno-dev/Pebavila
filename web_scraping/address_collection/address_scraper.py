@@ -131,12 +131,12 @@ def __main__():
             error(e)
 
     for city in city_list:
+        last_url = driver.current_url
         while True:
             try:
-                current_url = driver.current_url
                 driver.get(city["url"])
-                if driver.current_url == current_url:
-                    continue
+                if driver.current_url == last_url:
+                    break
 
                 try:
                     body = wait(driver, 10).until(
@@ -170,12 +170,12 @@ def __main__():
                     if cn_str in progress_list:
                         continue
 
+                    last_url = driver.current_url
                     while True:
                         try:
-                            current_url = driver.current_url
                             driver.get(neighborhood["url"])
-                            if driver.current_url == current_url:
-                                continue
+                            if driver.current_url == last_url:
+                                break
 
                             street_tr_list = find_table_rows(
                                 wait(driver, 10).until(
