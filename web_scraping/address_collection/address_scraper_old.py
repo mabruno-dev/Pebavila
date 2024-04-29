@@ -46,9 +46,15 @@ def get_progress(all_addresses: list):
         with open(file_path, "r") as json_file:
             addresses = json.load(json_file)["addresses"]
         for item in addresses:
-            if item not in all_addresses:
-                all_addresses.append(item.replace("º", ""))
-            temp = f"{item["city"]}/{item["neighborhood"]}".replace("º", "")
+            temp = {}
+
+            for key, value in item.items():
+                temp[key] = value.replace("º", "")
+
+            if temp not in all_addresses:
+                all_addresses.append(temp)
+                
+            temp = f"{item["city"]}/{item["neighborhood"]}"
             if not temp in progress:
                 progress.append(temp)
 
