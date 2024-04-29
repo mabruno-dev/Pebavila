@@ -86,9 +86,12 @@ def get_progress(all_addresses: list):
 def progress_saver(all_addresses: list):
         global running
 
+        list_len = len(all_addresses)
         while running:
-            write_json(all_addresses)
-            time.sleep(300)
+            if list_len != len(all_addresses):
+                list_len = len(all_addresses)
+                write_json(all_addresses)
+                time.sleep(300)
 
 @timed
 def __main__():
