@@ -163,7 +163,7 @@ def __main__():
 
                 for neighborhood in neighborhood_list:
                     
-                    cn_str = normalize_str(f"{city["name"]}/{neighborhood["name"]}".split("(")[0])
+                    cn_str = normalize_str(f"{city["name"]}/{neighborhood["name"]}")
                     if cn_str in progress_list:
                         continue
 
