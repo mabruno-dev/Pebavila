@@ -88,7 +88,9 @@ def get_url_dont_wait(driver: webdriver.Chrome, url: str):
     thread.start()
     start = time.time()
     while not got_url:
-        if time.time() - start > 120:
+        current_time = time.time() - start
+        print(f"Geting url {current_time}", end="\r")
+        if current_time > 120:
             driver.quit()
             time.sleep(3)
             driver = webdriver.Chrome()
