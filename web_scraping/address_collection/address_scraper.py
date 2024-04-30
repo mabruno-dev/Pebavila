@@ -38,7 +38,7 @@ def write_json(all_addresses: list):
     os.makedirs(output_path, exist_ok=True)
     json_object = {"addresses": all_addresses}
     with open(file_path, "w") as json_file:
-        json.dump(json_object, json_file, ensure_ascii=False)
+        json.dump(json_object, json_file, ensure_ascii=False, indent=4)
 
 def remove_deg(s: str):
     for i in range(1, 10):
@@ -63,21 +63,12 @@ def get_progress(all_addresses: list):
     progress = list()
     if os.path.exists(file_path):
         with open(file_path, "r") as json_file:
-            addresses = json.load(json_file)["addresses"]
-        for item in addresses:
-            temp = {}
+            all_addresses = json.load(json_file)
 
-            for key, value in item.items():
-                temp[key] = normalize_str(value)
-
-            all_addresses.append(temp)
-
-            temp = f"{item["city"]}/{item["neighborhood"]}"
-            if not temp in progress:
-                progress.append(temp)
-            
-            print(f"Loading progress {len(all_addresses)}/{len(addresses)} ({int(100 * len(all_addresses) / len(addresses))}%)", end="\r")
-        print()
+        for key1 in all_addresses.keys():
+            for key2 in all_addresses[key1].keys():
+                for key3 in all_addresses[key1][key2].keys():
+                        progress.append(f"{key2}/{key3}")
 
     return progress
 
@@ -90,7 +81,7 @@ def progress_saver(all_addresses: list):
             if list_len != len(all_addresses):
                 list_len = len(all_addresses)
                 write_json(all_addresses)
-                time.sleep(900)
+                time.sleep(300)
 
 def get_next_city(all_addresses: list):
     return all_addresses[-1]["city"]
@@ -199,8 +190,14 @@ def __main__():
                                     "state": normalize_str(street_td_list[4].text.split("/")[1])
                                 }
                                 print(address)
-                                if address not in all_addresses:
-                                    all_addresses.append(address)
+                                if address["state"] not in all_addresses.keys():
+                                    all_addresses[address["state"]] = {}
+                                if address["city"] not in all_addresses[address["state"]].keys():
+                                    all_addresses[address["state"]][address["city"]] = {}
+                                if address["neighborhood"] not in all_addresses[address["state"]][address["city"]].keys():
+                                    all_addresses[address["state"]][address["city"]][address["neighborhood"]] = []
+                                if address["street"] not in all_addresses[address["state"]][address["city"]][address["neighborhood"]]:
+                                    all_addresses[address["state"]][address["city"]][address["neighborhood"]].append(address["street"])
                             break
                         except Exception as e:
                             error(e)
