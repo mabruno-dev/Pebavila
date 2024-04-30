@@ -121,7 +121,7 @@ def __main__():
 
     while True:
         try:
-            driver.get("https://codigo-postal.org/brasil/espirito-santo/")
+            driver.get("https://codigo-postal.org/pt-br/brasil/espirito-santo/")
             break
         except:
             print("Connection failed, trying again")
