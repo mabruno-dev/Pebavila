@@ -22,6 +22,7 @@ def __main__():
                         "neighborhood": key3,
                         "street": item
                     }
+                    print(location)
                     insert_street_neighborhood_city(database, location)
 
 

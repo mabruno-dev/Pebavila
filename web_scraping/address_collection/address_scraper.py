@@ -197,10 +197,10 @@ def __main__():
                             for street_tr in street_tr_list:
                                 street_td_list = street_tr.find_elements(By.TAG_NAME, "td")
                                 address = {
-                                    "street": normalize_str(street_td_list[1].find_element(By.TAG_NAME, "a").text),
-                                    "neighborhood": normalize_str(street_td_list[3].text),
+                                    "state": normalize_str(street_td_list[4].text.split("/")[1]),
                                     "city": normalize_str(street_td_list[4].text.split("/")[0]),
-                                    "state": normalize_str(street_td_list[4].text.split("/")[1])
+                                    "neighborhood": normalize_str(street_td_list[3].text),
+                                    "street": normalize_str(street_td_list[1].find_element(By.TAG_NAME, "a").text)
                                 }
                                 print(address)
                                 if address["state"] not in all_addresses.keys():
