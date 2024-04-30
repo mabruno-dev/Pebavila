@@ -83,7 +83,7 @@ def progress_saver(all_addresses: dict):
             if list_len != len(all_addresses):
                 list_len = len(all_addresses)
                 write_json(all_addresses)
-                time.sleep(300)
+            time.sleep(300)
 
 def get_next_city(all_addresses: dict):
     cities_list = list(all_addresses[CURRENT_STATE].keys())
