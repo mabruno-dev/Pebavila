@@ -3,7 +3,6 @@ project_name = "the-beginning"; sys.path.append(os.path.abspath(__file__)[:os.pa
 # Resolve module imports
 
 from selenium import webdriver
-# from selenium_stealth import stealth
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait as Wait
@@ -11,8 +10,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from unidecode import unidecode
 
 from time import sleep
-import random
-from datetime import datetime
+from threading import Thread
 
 from utils.wrappers import timed
 from utils.functions import error
@@ -20,8 +18,14 @@ from database.connection import Database
 from database.functions.zapimoveis import *
 from database.functions.public import *
 from utils.constants import ConsoleColors as Console
+from utils.wrappers import announce_off
+
+announce_off()
 
 database = Database(ensure_connection=True)
+
+cities = []
+stored_addresses = []
 
 main_url = "https://www.zapimoveis.com.br/venda/?__ab=exp-aa-test:control,rec-cta:rcta,desc-phone:pcta&transacao=venda&pagina=1"
 default_urls = [
@@ -68,9 +72,10 @@ def get_address_url(driver: webdriver.Chrome, location: dict, update = False) ->
             while True:
                 try:
                     text_input = Wait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'input[placeholder="Digite o nome da rua, bairro ou cidade"]')))
+                    print(text_input.text)
                     text_input.click()
                     break
-                except:
+                except Exception as e:
                     continue
 
             def clear_inputs():
@@ -160,12 +165,23 @@ def get_address_url(driver: webdriver.Chrome, location: dict, update = False) ->
     except Exception as e:
         error(e)
 
-def fix_mistakes(driver: webdriver):
-    print("Looking for mistakes")
+def fix_mistakes():
+    global main_url
+
     result = database.query(
-        "SELECT address FROM zapimoveis.address_urls WHERE url NOT LIKE '%%https://www.zapimoveis.com.br/venda/imoveis/rj%%'"
+        "SELECT address FROM zapimoveis.address_urls WHERE url NOT LIKE '%%https://www.zapimoveis.com.br/venda/imoveis/%%'"
     )
     if result:
+        options = webdriver.ChromeOptions()
+        options.add_argument('--log-level=3')
+
+        driver = webdriver.Chrome(options=options)
+
+        driver.get(main_url)
+
+        database = Database(ensure_connection=True)
+
+        print("Fixing mistakes...")
         for index, item in enumerate(result):
             print(f"{index + 1}/{len(result)}", end=" ")
             address = item[0]
@@ -180,37 +196,31 @@ def fix_mistakes(driver: webdriver):
             address_url = get_address_url(driver, location, update=True)
             if address_url:
                 update_address_url(database, address_url)
+        print("Done!")
+        driver.quit()
 
-@timed
-def __main__():
-
-    global database
+def link_scraper(x: int, y: int):
+    global cities
+    global stored_addresses
     global main_url
+
+    database = Database(ensure_connection=True)
 
     options = webdriver.ChromeOptions()
     options.add_argument('--log-level=3')
 
     driver = webdriver.Chrome(options=options)
-
-    # stealth(driver,
-    #     languages=["en-US", "en"],
-    #     vendor="Google Inc.",
-    #     platform="Win32",
-    #     webgl_vendor="Intel Inc.",
-    #     renderer="Intel Iris OpenGL Engine",
-    #     fix_hairline=True,
-    # )
+    driver.set_window_size(900, 900)
+    driver.set_window_position(x + 30, y + 30)
 
     driver.get(main_url)
 
-    fix_mistakes(driver)
+    while len(cities) > 0:
+        city = cities[0]
+        cities.pop(0)
 
-    cities = get_all_cities(database)
-    stored_addresses = [item["address"] for item in get_address_urls(database)]
-
-    for city in cities:
-
-        locations = get_locations_from_city(database, city["city_name"], "RJ")
+        state = get_state_by_id(database, city["city_state"])
+        locations = get_locations_from_city(database, city["city_name"], state["state_acronym"])
 
         aux = locations[:]
         for item in aux:
@@ -222,8 +232,30 @@ def __main__():
             address_url = get_address_url(driver, location)
             if address_url:
                 insert_address_url(database, address_url)
-                
+
     driver.quit()
+
+@timed
+def __main__():
+
+    global main_url
+    global cities
+    global stored_addresses
+
+    fix_mistakes()
+
+    cities = get_all_cities(database)
+    stored_addresses = [item["address"] for item in get_address_urls(database)]
+                    
+    thread_list = []
+    for i in range(10):
+        thread = Thread(target=link_scraper, args=(100 * i, 0))
+        thread.start()
+        thread_list.append(thread)
+        sleep(10)
+    
+    for thread in thread_list:
+        thread.join()
 
 if __name__ == "__main__":
     __main__()
