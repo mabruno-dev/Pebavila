@@ -161,16 +161,16 @@ def insert_neighborhood_city(database: Database, location: dict):
     except Exception as e:
         db_error(database, e)
 
-@announce
-def set_streets_neighborhoods_cities(json_streets):
-    try:
-        with Database() as database:
-            addresses = json_streets["addresses"]
-            for index, street in enumerate(addresses):
-                print(f"Inserting {index}/{len(addresses)} ({100 * index / len(addresses)})", end="\r")
-                insert_street_neighborhood_city(database, street)
-    except Exception as e:
-        db_error(database, e)
+# @announce
+# def set_streets_neighborhoods_cities(json_streets):
+#     try:
+#         with Database() as database:
+#             addresses = json_streets["addresses"]
+#             for index, street in enumerate(addresses):
+#                 print(f"Inserting {index}/{len(addresses)} ({100 * index / len(addresses)})", end="\r")
+#                 insert_street_neighborhood_city(database, street)
+#     except Exception as e:
+#         db_error(database, e)
 
 @announce
 def get_street_id(database: Database, street_name: str, neighborhood_id):
