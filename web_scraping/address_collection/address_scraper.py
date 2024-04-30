@@ -77,13 +77,21 @@ def get_progress():
 def progress_saver(all_addresses: dict):
         global running
 
-        list_len = len(all_addresses)
+        list_len = get_all_addresses_len(all_addresses)
         while running:
             backup_json()
-            if list_len != len(all_addresses):
-                list_len = len(all_addresses)
+            if list_len != get_all_addresses_len(all_addresses):
+                list_len = get_all_addresses_len(all_addresses)
                 write_json(all_addresses)
             time.sleep(300)
+
+def get_all_addresses_len(all_addresses: dict):
+    length = 0
+    for key1 in all_addresses.keys():
+        for key2 in all_addresses[key1].keys():
+            for key3 in all_addresses[key1][key2].keys():
+                length += len(all_addresses[key1][key2][key3])
+    return length
 
 def get_next_city(all_addresses: dict):
     cities_list = list(all_addresses[CURRENT_STATE].keys())
