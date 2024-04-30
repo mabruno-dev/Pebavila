@@ -8,10 +8,10 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait as wait
 
-import json
-import shutil
 import os
+import json
 import time
+import shutil
 from threading import Thread
 from unidecode import unidecode
 
@@ -19,6 +19,8 @@ from utils.wrappers import timed
 from utils.functions import error
 
 running = True
+
+CURRENT_STATE = "SP"
 
 # Retorna as linhas de uma tabela passada por parâmetro
 def find_table_rows(table: WebElement):
@@ -31,7 +33,7 @@ def backup_json():
     backup_file_path = output_path + r"/addresses_backup.json"
     shutil.copy(file_path, backup_file_path)
 
-def write_json(all_addresses: list):
+def write_json(all_addresses: dict):
     output_path = r"output"
     file_path = output_path + r"/addresses.json"
     
@@ -58,7 +60,7 @@ def normalize_str(s: str):
     s = remove_deg(s)
     return s
 
-def get_progress(all_addresses: list):
+def get_progress():
     file_path = r"output/addresses.json"
     progress = list()
     if os.path.exists(file_path):
@@ -69,10 +71,10 @@ def get_progress(all_addresses: list):
             for key2 in all_addresses[key1].keys():
                 for key3 in all_addresses[key1][key2].keys():
                         progress.append(f"{key2}/{key3}")
+    # print(all_addresses)
+    return all_addresses, progress
 
-    return progress
-
-def progress_saver(all_addresses: list):
+def progress_saver(all_addresses: dict):
         global running
 
         list_len = len(all_addresses)
@@ -83,16 +85,18 @@ def progress_saver(all_addresses: list):
                 write_json(all_addresses)
                 time.sleep(300)
 
-def get_next_city(all_addresses: list):
-    return all_addresses[-1]["city"]
+def get_next_city(all_addresses: dict):
+    cities_list = list(all_addresses[CURRENT_STATE].keys())
+    cities_list.sort()
+    return cities_list[-1]
 
 @timed
 def __main__():
     global running
 
-    all_addresses = list() 
+    all_addresses, progress_list = get_progress()
 
-    progress_list = get_progress(all_addresses)
+    get_next_city(all_addresses) 
 
     thread = Thread(target=progress_saver, args=(all_addresses,))
     thread.start()
