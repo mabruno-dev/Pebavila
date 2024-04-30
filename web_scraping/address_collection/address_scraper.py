@@ -9,6 +9,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait as wait
 
 import os
+import copy
 import json
 import time
 import shutil
@@ -37,7 +38,7 @@ def write_json(all_addresses: dict):
     output_path = r"output"
     file_path = output_path + r"/addresses.json"
     
-    json_object = all_addresses.copy()
+    json_object = copy.deepcopy(all_addresses)
     os.makedirs(output_path, exist_ok=True)
     with open(file_path, "w") as json_file:
         json.dump(json_object, json_file, ensure_ascii=False, indent=4)
