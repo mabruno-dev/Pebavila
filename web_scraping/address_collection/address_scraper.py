@@ -21,7 +21,7 @@ from utils.functions import error
 
 running = True
 
-CURRENT_STATE = "SP"
+CURRENT_STATE = "ES"
 
 # Retorna as linhas de uma tabela passada por parâmetro
 def find_table_rows(table: WebElement):
@@ -32,7 +32,8 @@ def backup_json():
     output_path = r"output"
     file_path = output_path + r"/addresses.json"
     backup_file_path = output_path + r"/addresses_backup.json"
-    shutil.copy(file_path, backup_file_path)
+    if os.path.exists(file_path):
+        shutil.copy(file_path, backup_file_path)
 
 def write_json(all_addresses: dict):
     output_path = r"output"
@@ -64,6 +65,7 @@ def normalize_str(s: str):
 def get_progress():
     file_path = r"output/addresses.json"
     progress = list()
+    all_addresses = dict()
     if os.path.exists(file_path):
         with open(file_path, "r") as json_file:
             all_addresses = json.load(json_file)
@@ -95,9 +97,13 @@ def get_all_addresses_len(all_addresses: dict):
     return length
 
 def get_next_city(all_addresses: dict):
-    cities_list = list(all_addresses[CURRENT_STATE].keys())
-    cities_list.sort()
-    return cities_list[-1]
+    try:
+        cities_list = list(all_addresses[CURRENT_STATE].keys())
+        cities_list.sort()
+        return cities_list[-1]
+    except:
+        print("No progress yet...")
+        return None
 
 @timed
 def __main__():
@@ -115,7 +121,7 @@ def __main__():
 
     while True:
         try:
-            driver.get("https://codigo-postal.org/pt-br/brasil/sao-paulo/")
+            driver.get("https://codigo-postal.org/brasil/espirito-santo/")
             break
         except:
             print("Connection failed, trying again")
