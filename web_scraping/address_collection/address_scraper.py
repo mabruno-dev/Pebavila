@@ -38,7 +38,7 @@ def write_json(all_addresses: list):
     os.makedirs(output_path, exist_ok=True)
     json_object = {"addresses": all_addresses}
     with open(file_path, "w") as json_file:
-        json.dump(json_object, json_file, ensure_ascii=False, indent=4)
+        json.dump(json_object, json_file, ensure_ascii=False)
 
 def remove_deg(s: str):
     for i in range(1, 10):
@@ -90,7 +90,7 @@ def progress_saver(all_addresses: list):
             if list_len != len(all_addresses):
                 list_len = len(all_addresses)
                 write_json(all_addresses)
-                time.sleep(300)
+                time.sleep(900)
 
 def get_next_city(all_addresses: list):
     return all_addresses[-1]["city"]
