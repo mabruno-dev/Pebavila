@@ -38,7 +38,7 @@ def write_json(all_addresses: list):
     os.makedirs(output_path, exist_ok=True)
     json_object = {"addresses": all_addresses}
     with open(file_path, "w") as json_file:
-        json.dump(json_object, json_file, ensure_ascii=False)
+        json.dump(json_object, json_file, ensure_ascii=False, indent=2)
 
 def remove_deg(s: str):
     for i in range(1, 10):
