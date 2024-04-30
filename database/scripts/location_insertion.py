@@ -4,7 +4,10 @@ project_name = "the-beginning"; sys.path.append(os.path.abspath(__file__)[:os.pa
 
 from database.connection import Database
 from database.functions.public import insert_street_neighborhood_city
+from utils.wrappers import announce_off
 import json
+
+announce_off()
 
 database = Database(ensure_connection=True)
 
@@ -24,7 +27,6 @@ def __main__():
                     }
                     print(location)
                     insert_street_neighborhood_city(database, location)
-
 
 if __name__ == "__main__":
     __main__()

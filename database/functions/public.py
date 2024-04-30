@@ -24,7 +24,7 @@ def get_state_id(database: Database, state_acronym: str):
 def get_or_insert_city(database: Database, city_name, state_id):
     try:
         city_id = database.queryone(
-            'SELECT city_id FROM public.cities WHERE city_name = %s', (city_name,))
+            'SELECT city_id FROM public.cities WHERE city_name = %s AND city_state = %s', (city_name, state_id))
 
         if city_id:
             return city_id[0]
@@ -42,8 +42,8 @@ def get_or_insert_city(database: Database, city_name, state_id):
 def get_or_insert_neighborhood(database: Database, neighborhood_name, city_id):
     try:
         neighborhood_id = database.queryone(
-            "SELECT neighborhood_id FROM public.neighborhoods WHERE neighborhood_name = %s",
-            (neighborhood_name,)
+            "SELECT neighborhood_id FROM public.neighborhoods WHERE neighborhood_name = %s AND neighborhood_city = %s",
+            (neighborhood_name, city_id)
         )
 
         if neighborhood_id:
@@ -298,7 +298,7 @@ def get_all_cities(database: Database):
             "city_id": item[0],
             "city_name": item[1],
             "city_state": item[2]
-            } for item in result]
+        } for item in result]
         return cities
     except Exception as e:
         print(f"Error {e}")
@@ -578,5 +578,20 @@ def check_realty_exists_by_url(database: Database, url: str):
             "SELECT realty_id FROM public.realties WHERE realty_url = %s",
             (url,)
         )
+    except Exception as e:
+        db_error(database, e)
+
+def get_state_by_id(database: Database, id: int):
+    try:
+        result = database.queryone(
+            "SELECT * FROM public.states WHERE state_id = %s",
+            (id,)
+        )
+        if result:
+            return {
+                "state_id": result[0],
+                "state_name": result[1],
+                "state_acronym": result[2]
+            }
     except Exception as e:
         db_error(database, e)
