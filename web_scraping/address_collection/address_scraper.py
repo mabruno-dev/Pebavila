@@ -21,7 +21,7 @@ from utils.functions import error
 
 running = True
 
-CURRENT_STATE = "ES"
+CURRENT_STATE = "MG"
 
 # Retorna as linhas de uma tabela passada por parâmetro
 def find_table_rows(table: WebElement):
@@ -121,7 +121,7 @@ def __main__():
 
     while True:
         try:
-            driver.get("https://codigo-postal.org/pt-br/brasil/espirito-santo/")
+            driver.get("https://codigo-postal.org/pt-br/brasil/minas-gerais/")
             break
         except:
             print("Connection failed, trying again")
