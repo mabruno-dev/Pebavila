@@ -69,11 +69,13 @@ def get_progress():
     if os.path.exists(file_path):
         with open(file_path, "r") as json_file:
             all_addresses = json.load(json_file)
-
-        for key1 in all_addresses.keys():
-            for key2 in all_addresses[key1].keys():
-                for key3 in all_addresses[key1][key2].keys():
-                        progress.append(f"{key2}/{key3}")
+        try:
+            for key1 in all_addresses.keys():
+                for key2 in all_addresses[key1].keys():
+                    for key3 in all_addresses[key1][key2].keys():
+                            progress.append(f"{key2}/{key3}")
+        except:
+            print("No keys yet...")
     # print(all_addresses)
     return all_addresses, progress
 
@@ -90,10 +92,13 @@ def progress_saver(all_addresses: dict):
 
 def get_all_addresses_len(all_addresses: dict):
     length = 0
-    for key1 in all_addresses.keys():
-        for key2 in all_addresses[key1].keys():
-            for key3 in all_addresses[key1][key2].keys():
-                length += len(all_addresses[key1][key2][key3])
+    try:
+        for key1 in all_addresses.keys():
+            for key2 in all_addresses[key1].keys():
+                for key3 in all_addresses[key1][key2].keys():
+                    length += len(all_addresses[key1][key2][key3])
+    except:
+        print("No keys yet...")
     return length
 
 def get_next_city(all_addresses: dict):
