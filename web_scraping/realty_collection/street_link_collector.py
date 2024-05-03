@@ -141,7 +141,7 @@ def get_address_url(driver: webdriver.Chrome, database: Database, location: dict
             location_div.click()
             sleep(1)
 
-            while driver.current_url in default_urls and "https://www.zapimoveis.com.br/venda/imoveis/" in driver.current_url:
+            while driver.current_url in default_urls and not "https://www.zapimoveis.com.br/venda/imoveis/" in driver.current_url:
                 # print(driver.current_url, default_urls)
                 sleep(0.1)
 
