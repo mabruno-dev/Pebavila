@@ -251,7 +251,7 @@ def __main__():
     stored_addresses = [item["address"] for item in get_address_urls(database)]
                     
     thread_list = []
-    for i in range(10):
+    for i in range(3):
         thread = Thread(target=link_scraper, args=(100 * i, 0))
         thread.start()
         thread_list.append(thread)
