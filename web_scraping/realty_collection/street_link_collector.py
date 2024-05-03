@@ -11,6 +11,7 @@ from unidecode import unidecode
 
 from time import sleep
 from threading import Thread
+from random import shuffle
 
 from utils.wrappers import timed
 from utils.functions import error
@@ -187,7 +188,6 @@ def fix_mistakes(driver: webdriver.Chrome, database: Database):
             if address_url:
                 update_address_url(database, address_url)
         print("Done!")
-        driver.quit()
 
 def link_scraper(x: int, y: int):
     global cities
@@ -237,6 +237,7 @@ def __main__():
 
     database = Database()
     cities = get_all_cities(database)
+    shuffle(cities)
     stored_addresses = [item["address"] for item in get_address_urls(database)]
                     
     thread_list = []
