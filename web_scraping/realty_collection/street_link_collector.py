@@ -164,9 +164,8 @@ def get_address_url(driver: webdriver.Chrome, database: Database, location: dict
     except Exception as e:
         error(e)
 
-def fix_mistakes():
+def fix_mistakes(driver: webdriver.Chrome, database: Database):
     global main_url
-    global database
     
     database = Database()
 
@@ -174,13 +173,6 @@ def fix_mistakes():
         "SELECT address FROM zapimoveis.address_urls WHERE url NOT LIKE '%%https://www.zapimoveis.com.br/venda/imoveis/%%'"
     )
     if result:
-        options = webdriver.ChromeOptions()
-        options.add_argument('--log-level=3')
-
-        driver = webdriver.Chrome(options=options)
-
-        driver.get(main_url)
-
         print("Fixing mistakes...")
         for index, item in enumerate(result):
             print(f"{index + 1}/{len(result)}", end=" ")
@@ -233,6 +225,8 @@ def link_scraper(x: int, y: int):
             if address_url:
                 insert_address_url(database, address_url)
 
+        fix_mistakes(driver, database)
+
     driver.quit()
 
 @timed
@@ -242,8 +236,6 @@ def __main__():
     global cities
     global stored_addresses
 
-
-    fix_mistakes()
 
     database = Database()
     cities = get_all_cities(database)
