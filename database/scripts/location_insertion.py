@@ -7,8 +7,6 @@ from database.functions.public import insert_street_neighborhood_city
 from utils.wrappers import announce_off
 import json
 
-announce_off()
-
 database = Database(ensure_connection=True)
 
 def __main__():

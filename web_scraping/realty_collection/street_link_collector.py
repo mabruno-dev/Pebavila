@@ -22,7 +22,6 @@ from utils.wrappers import announce_off
 
 announce_off()
 
-database = Database(ensure_connection=True)
 
 cities = []
 stored_addresses = []
@@ -54,9 +53,8 @@ def location_to_address(location: dict):
     address = address.replace("'", "")
     return address
 
-def get_address_url(driver: webdriver.Chrome, location: dict, update = False) -> dict:
+def get_address_url(driver: webdriver.Chrome, database: Database, location: dict, update = False) -> dict:
 
-    global database
     global main_url
     global default_urls
     
@@ -120,13 +118,15 @@ def get_address_url(driver: webdriver.Chrome, location: dict, update = False) ->
                     break
                 except:
                     try:
-                        driver.find_element(By.CLASS_NAME, "locations-feedback") # Tries to find the "not found" element
+                        result = driver.find_element(By.CLASS_NAME, "locations-feedback") # Tries to find the "not found" element
                         print(Console.RED + "No results  " + Console.RESET)
                         clear_inputs()
-                        return {
-                            "address": address,
-                            "url": None
-                        }
+                        # print(result.text)
+                        if "Não há resultados para esta localização" in result.text:
+                            return {
+                                "address": address,
+                                "url": None
+                            }
                     except:
                         try:
                             driver.find_element(By.CSS_SELECTOR, 'a[class="multiselect__redirect"]') # Tries to find the first element of "Imobiliárias"
@@ -168,6 +168,8 @@ def get_address_url(driver: webdriver.Chrome, location: dict, update = False) ->
 def fix_mistakes():
     global main_url
     global database
+    
+    database = Database()
 
     result = database.query(
         "SELECT address FROM zapimoveis.address_urls WHERE url NOT LIKE '%%https://www.zapimoveis.com.br/venda/imoveis/%%'"
@@ -192,7 +194,7 @@ def fix_mistakes():
                 "neighborhood": None,
                 "street": street
             }
-            address_url = get_address_url(driver, location, update=True)
+            address_url = get_address_url(driver, database, location, update=True)
             if address_url:
                 update_address_url(database, address_url)
         print("Done!")
@@ -228,7 +230,7 @@ def link_scraper(x: int, y: int):
 
         for index, location in enumerate(locations):
             print(Console.BLACK + f"{index + 1}/{len(locations)}" + Console.RESET, end=" ")
-            address_url = get_address_url(driver, location)
+            address_url = get_address_url(driver, database, location)
             if address_url:
                 insert_address_url(database, address_url)
 
@@ -241,8 +243,10 @@ def __main__():
     global cities
     global stored_addresses
 
+
     fix_mistakes()
 
+    database = Database()
     cities = get_all_cities(database)
     stored_addresses = [item["address"] for item in get_address_urls(database)]
                     
@@ -251,7 +255,7 @@ def __main__():
         thread = Thread(target=link_scraper, args=(100 * i, 0))
         thread.start()
         thread_list.append(thread)
-        sleep(10)
+        sleep(5)
     
     for thread in thread_list:
         thread.join()
