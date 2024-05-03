@@ -70,7 +70,6 @@ def get_address_url(driver: webdriver.Chrome, database: Database, location: dict
             while True:
                 try:
                     text_input = Wait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'input[placeholder="Digite o nome da rua, bairro ou cidade"]')))
-                    print(text_input.text)
                     text_input.click()
                     break
                 except Exception as e:
@@ -104,7 +103,7 @@ def get_address_url(driver: webdriver.Chrome, database: Database, location: dict
                 try:
                     location_div = Wait(driver, 1).until(EC.presence_of_element_located((By.CSS_SELECTOR, '[data-cy="locations-item-input"]'))) # Tries to find the address selection element
                     if not check_address_similarity(address, unidecode(location_div.text.upper())):
-                        print(Console.RED + "No results  " + Console.RESET)
+                        print(Console.RED + "No results" + Console.RESET)
                         clear_inputs()
                         while True:
                             try:
@@ -119,7 +118,7 @@ def get_address_url(driver: webdriver.Chrome, database: Database, location: dict
                 except:
                     try:
                         result = driver.find_element(By.CLASS_NAME, "locations-feedback") # Tries to find the "not found" element
-                        print(Console.RED + "No results  " + Console.RESET)
+                        print(Console.RED + "No results" + Console.RESET)
                         clear_inputs()
                         # print(result.text)
                         if "Não há resultados para esta localização" in result.text:
@@ -130,7 +129,7 @@ def get_address_url(driver: webdriver.Chrome, database: Database, location: dict
                     except:
                         try:
                             driver.find_element(By.CSS_SELECTOR, 'a[class="multiselect__redirect"]') # Tries to find the first element of "Imobiliárias"
-                            print(Console.RED + "No results  " + Console.RESET)
+                            print(Console.RED + "No results" + Console.RESET)
                             clear_inputs()
                             return {
                                 "address": address,
@@ -142,7 +141,7 @@ def get_address_url(driver: webdriver.Chrome, database: Database, location: dict
             location_div.click()
             sleep(1)
 
-            while driver.current_url in default_urls:
+            while driver.current_url in default_urls and "https://www.zapimoveis.com.br/venda/imoveis/" in driver.current_url:
                 # print(driver.current_url, default_urls)
                 sleep(0.1)
 
