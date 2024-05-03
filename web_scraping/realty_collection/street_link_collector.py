@@ -167,8 +167,6 @@ def get_address_url(driver: webdriver.Chrome, database: Database, location: dict
 def fix_mistakes(driver: webdriver.Chrome, database: Database):
     global main_url
     
-    database = Database()
-
     result = database.query(
         "SELECT address FROM zapimoveis.address_urls WHERE url NOT LIKE '%%https://www.zapimoveis.com.br/venda/imoveis/%%'"
     )
