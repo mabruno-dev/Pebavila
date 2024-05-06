@@ -95,17 +95,15 @@ def scrape_realty(driver: webdriver.Chrome, url: str):
         print("Connection error")
         return scrape_realty(driver, url)
 
+    status = RC.DONE
     try:
         status_span = driver.find_element(By.CLASS_NAME, "main__labels")
-
         if "Em construção" in status_span.text:
             status = RC.UNDER_CONSTRUCTION
         elif "Na planta" in status_span.text:
             status = RC.FLOOR_PLAN
-        else:
-            status = RC.DONE
     except:
-        status = RC.DONE
+        pass
 
     name = driver.find_element(By.CLASS_NAME,  "info__business-type")
     type = unidecode(name.text.split("para")[0].strip().upper())
