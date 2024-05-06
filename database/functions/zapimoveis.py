@@ -57,7 +57,11 @@ def get_address_urls(database: Database):
             address_url = {
                 "id": item[0],
                 "address": item[1],
-                "url": item[2]
+                "url": item[2],
+                "current_page": item[3],
+                "current_price": item[4],
+                "total_realties": item[5],
+                "done_scraping": item[6]
             }
             address_url_list.append(address_url)
         return address_url_list
@@ -68,7 +72,7 @@ def get_address_urls(database: Database):
 def set_address_url_scraped(database: Database, address_url: dict):
     try:
         database.execute(
-            "UPDATE zapimoveis.address_urls SET done_scraping = 1, updated_at = %s WHERE address = %s",
+            "UPDATE zapimoveis.address_urls SET done_scraping = true, updated_at = %s WHERE address = %s",
             (datetime.now(), address_url["address"])
         )
         database.commit()
@@ -79,7 +83,7 @@ def set_address_url_scraped(database: Database, address_url: dict):
 def set_address_url_not_scraped(database: Database, address_url: dict):
     try:
         database.execute(
-            "UPDATE zapimoveis.address_urls SET done_scraping = 0 WHERE address = %s",
+            "UPDATE zapimoveis.address_urls SET done_scraping = false WHERE address = %s",
             (address_url["address"],)
         )
         database.commit()
