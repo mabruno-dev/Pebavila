@@ -168,7 +168,10 @@ def scrape_address(database: Database, driver: webdriver, address_url: dict):
         total_realties = 1
         while range_collected_realty_urls < total_realties and current_page <= 100:
             try:
-                page_url = url + f"{current_page}&precoMinimo={min_price}&precoMaximo={min_price + 100000}"
+                if address_url["total_realties"] > 10000:
+                    page_url = url + f"{current_page}&precoMinimo={min_price}&precoMaximo={min_price + 100000}"
+                else:
+                    page_url = url + f"{current_page}"
                 driver.get(page_url)
                 wait = WebDriverWait(driver, 10)
 
