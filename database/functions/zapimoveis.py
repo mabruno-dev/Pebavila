@@ -94,7 +94,7 @@ def set_address_url_not_scraped(database: Database, address_url: dict):
 def check_address_url_is_scraped(database: Database, address: str):
         try:
             result = database.queryone(
-                "SELECT scraped FROM zapimoveis.address_urls WHERE address = %s",
+                "SELECT done_scraping FROM zapimoveis.address_urls WHERE address = %s",
                 (address,)
             )
             return result[0]
