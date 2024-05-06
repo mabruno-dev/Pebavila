@@ -88,19 +88,23 @@ def scrape_realty(driver: webdriver.Chrome, url: str):
         return scrape_realty(driver, url)
 
     try:
-        # verify_human(driver, wait)
-        status_span = wait.until(
-            EC.presence_of_element_located((By.CLASS_NAME, "main__labels"))
+        wait.until(
+            EC.presence_of_element_located((By.CLASS_NAME, "price-info-wrapper"))
         )
     except:
         print("Connection error")
         return scrape_realty(driver, url)
 
-    if "Em construção" in status_span.text:
-        status = RC.UNDER_CONSTRUCTION
-    elif "Na planta" in status_span.text:
-        status = RC.FLOOR_PLAN
-    else:
+    try:
+        status_span = driver.find_element(By.CLASS_NAME, "main__labels")
+
+        if "Em construção" in status_span.text:
+            status = RC.UNDER_CONSTRUCTION
+        elif "Na planta" in status_span.text:
+            status = RC.FLOOR_PLAN
+        else:
+            status = RC.DONE
+    except:
         status = RC.DONE
 
     name = driver.find_element(By.CLASS_NAME,  "info__business-type")
