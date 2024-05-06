@@ -23,8 +23,8 @@ def insert_address_url(database: Database, address_url: dict):
     try:
         if not check_address_url_exists(database, address_url):
             database.execute(
-                "INSERT INTO zapimoveis.address_urls (address, url) VALUES (%s, %s)", 
-                (address_url["address"], address_url["url"])
+                "INSERT INTO zapimoveis.address_urls (address, url, total_realties) VALUES (%s, %s, %s)", 
+                (address_url["address"], address_url["url"], address_url["total_realties"])
             )
             database.commit()
             print("Record added to the database successfully")
@@ -38,8 +38,8 @@ def update_address_url(database: Database, address_url: dict):
     try:
         if check_address_url_exists(database, address_url):
             database.execute(
-                "UPDATE zapimoveis.address_urls SET url = %s, updated_at = %s WHERE address = %s",
-                (address_url["url"], datetime.now(), address_url["address"])
+                "UPDATE zapimoveis.address_urls SET url = %s, updated_at = %s, total_realties = %s WHERE address = %s",
+                (address_url["url"], datetime.now(), address_url["address"], address_url["total_realties"])
             )
             database.commit()
             print("Record updated successfully")
@@ -55,6 +55,7 @@ def get_address_urls(database: Database):
         address_url_list = list()
         for item in result:
             address_url = {
+                "id": item[0],
                 "address": item[1],
                 "url": item[2]
             }
@@ -67,7 +68,7 @@ def get_address_urls(database: Database):
 def set_address_url_scraped(database: Database, address_url: dict):
     try:
         database.execute(
-            "UPDATE zapimoveis.address_urls SET scraped = 1, updated_at = %s WHERE address = %s",
+            "UPDATE zapimoveis.address_urls SET done_scraping = 1, updated_at = %s WHERE address = %s",
             (datetime.now(), address_url["address"])
         )
         database.commit()
@@ -78,7 +79,7 @@ def set_address_url_scraped(database: Database, address_url: dict):
 def set_address_url_not_scraped(database: Database, address_url: dict):
     try:
         database.execute(
-            "UPDATE zapimoveis.address_urls SET scraped = 0 WHERE address = %s",
+            "UPDATE zapimoveis.address_urls SET done_scraping = 0 WHERE address = %s",
             (address_url["address"],)
         )
         database.commit()
@@ -95,4 +96,26 @@ def check_address_url_is_scraped(database: Database, address: str):
             return result[0]
         except Exception as e:
             db_error(database, e)
+
+@announce
+def update_address_url_current_page(database: Database, address: str, page: int):
+    try:
+        database.execute(
+            "UPDATE zapimoveis.address_urls SET current_page = %s WHERE address = %s",
+            (page, address)
+        )
+        database.commit()
+    except Exception as e:
+        db_error(database, e)
+
+@announce
+def update_address_url_current_price(database: Database, address: str, price: int):
+    try:
+        database.execute(
+            "UPDATE zapimoveis.address_urls SET current_price = %s WHERE address = %s",
+            (price, address)
+        )
+        database.commit()
+    except Exception as e:
+        db_error(database, e)
 

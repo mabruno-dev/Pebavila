@@ -53,7 +53,6 @@ def load_realties(driver: webdriver.Chrome, realty_list_div: WebElement):
     global pause_loading
     global stop_loading
     global total_realties
-    global scraped_realties
 
     loaded_realties = 0
     stop_loading = False
@@ -160,97 +159,104 @@ def scrape_address(database: Database, driver: webdriver, address_url: dict):
     global stop_loading
     global total_realties
 
-    total_realties = 1
-    collected_realty_urls = 0
-    current_page = 1
+    neighborhood_collected_realty_urls = 0
+    current_page = address_url["current_page"]
+    min_price = address_url["current_price"]
 
-    while collected_realty_urls < total_realties and current_page <= 100:
-        try:
-            page_url = url + f"{current_page}"
-            driver.get(page_url)
-            wait = WebDriverWait(driver, 10)
-
-            driver.get(page_url)
-
+    while neighborhood_collected_realty_urls < address_url["total_realties"]:
+        range_collected_realty_urls = 0
+        total_realties = 1
+        while range_collected_realty_urls < total_realties and current_page <= 100:
             try:
-                # verify_human(driver)
-                total_realties_h1 = wait.until(
-                    EC.presence_of_element_located((By.CSS_SELECTOR, "h1.l-text.l-u-color-neutral-12.l-text--variant-heading-small.l-text--weight-semibold.undefined"))
-                )
-            except:
-                print(Console.RED + "Connection error" + Console.RESET)
-                break
-            try:
-                total_realties = int(total_realties_h1.text.split(" ")[0].replace(".", ""))
-            except:
-                print("No realties in this url")
-                current_page = 101
-                continue
+                page_url = url + f"{current_page}&precoMinimo={min_price}&precoMaximo={min_price + 100000}"
+                driver.get(page_url)
+                wait = WebDriverWait(driver, 10)
 
-            realty_list_div = driver.find_element(By.CLASS_NAME, "listing-wrapper")
+                driver.get(page_url)
 
-            loader = threading.Thread(target=load_realties, args=(driver, realty_list_div))
-            loader.start()
-            loading_time = 0
-
-            start_time = time()
-
-            data_position = 1
-
-            while data_position <= REALTIES_PER_PAGE and collected_realty_urls < total_realties:
                 try:
-                    realty_div = driver.find_element(By.CSS_SELECTOR, f'div[data-position="{data_position}"]')
-                    realty_div_size = realty_div.size["height"]
+                    total_realties_h1 = wait.until(
+                        EC.presence_of_element_located((By.CSS_SELECTOR, "h1.l-text.l-u-color-neutral-12.l-text--variant-heading-small.l-text--weight-semibold.undefined"))
+                    )
+                except:
+                    print(Console.RED + "Connection error" + Console.RESET)
+                    break
+                try:
+                    total_realties = int(total_realties_h1.text.split(" ")[0].replace(".", ""))
+                except:
+                    print("No realties in this url")
+                    break
 
-                    image = realty_div.find_element(By.TAG_NAME, "img")
-                    image_url = image.get_attribute("src")
+                realty_list_div = driver.find_element(By.CLASS_NAME, "listing-wrapper")
 
+                loader = threading.Thread(target=load_realties, args=(driver, realty_list_div))
+                loader.start()
+                loading_time = 0
+
+                start_time = time()
+
+                data_position = 1
+
+                while data_position <= REALTIES_PER_PAGE and range_collected_realty_urls < total_realties:
                     try:
-                        # Extract the URL of the realty
-                        realty_a = realty_div.find_element(By.TAG_NAME, "a")
-                        realty_url = realty_a.get_attribute("href")
+                        realty_div = driver.find_element(By.CSS_SELECTOR, f'div[data-position="{data_position}"]')
+                        realty_div_size = realty_div.size["height"]
+
+                        image = realty_div.find_element(By.TAG_NAME, "img")
+                        image_url = image.get_attribute("src")
+
+                        try:
+                            # Extract the URL of the realty
+                            realty_a = realty_div.find_element(By.TAG_NAME, "a")
+                            realty_url = realty_a.get_attribute("href")
+                        except NoSuchElementException:
+                            # Handle special case when link is not directly available
+                            # pause_loading = True
+                            # show_all_button = realty_div.find_element(By.XPATH, ".//*[contains(text(), 'Exibir Anúncios')]")
+                            # show_all_button.click()
+                            # sleep(1.5)
+                            # duplicate_list_div = driver.find_element(By.CLASS_NAME, "deduplication-listings__listings")
+                            # duplicate_a_tags = duplicate_list_div.find_elements(By.TAG_NAME, "a")
+                            # realty_url = duplicate_a_tags[0].get_attribute("href")
+                            # close_span = driver.find_element(By.CSS_SELECTOR, f'span[aria-label="Fechar modal lateral"]')
+                            # close_span.click()
+                            # pause_loading = False
+                            realty_url = None # for now
+                        finally:
+                            realty_list.append({
+                                "index": data_position,
+                                "realty": realty_url,
+                                "image": image_url,
+                                "address": address_url["address"]
+                            })
+                            data_position += 1
+                            range_collected_realty_urls += 1
+                            neighborhood_collected_realty_urls += 1
                     except NoSuchElementException:
-                        # Handle special case when link is not directly available
-                        # pause_loading = True
-                        # show_all_button = realty_div.find_element(By.XPATH, ".//*[contains(text(), 'Exibir Anúncios')]")
-                        # show_all_button.click()
-                        # sleep(1.5)
-                        # duplicate_list_div = driver.find_element(By.CLASS_NAME, "deduplication-listings__listings")
-                        # duplicate_a_tags = duplicate_list_div.find_elements(By.TAG_NAME, "a")
-                        # realty_url = duplicate_a_tags[0].get_attribute("href")
-                        # close_span = driver.find_element(By.CSS_SELECTOR, f'span[aria-label="Fechar modal lateral"]')
-                        # close_span.click()
-                        # pause_loading = False
-                        realty_url = None # for now
-                    finally:
-                        realty_list.append({
-                            "index": data_position,
-                            "realty": realty_url,
-                            "image": image_url,
-                            "address": address_url["address"]
-                        })
-                        data_position += 1
-                        collected_realty_urls += 1
-                except NoSuchElementException:
-                    pause_loading = False
+                        pause_loading = False
 
-                    loading_time = time() - start_time
-                    if loading_time > (60 if total_realties > 100 else (total_realties % 15) * 5):
-                        print("Loading took too long, reloading page")
-                        current_page -= 1
-                        break
-                    
-                except Exception as e:
-                    # set_status(database, error=str(e))
-                    # error(e)
-                    pass
+                        loading_time = time() - start_time
+                        if loading_time > (60 if total_realties > 100 else (total_realties % 15) * 5):
+                            print("Loading took too long, reloading page")
+                            current_page -= 1
+                            break
+                        
+                    except Exception as e:
+                        # set_status(database, error=str(e))
+                        # error(e)
+                        pass
 
-            stop_loading = True
-            loader.join()
-            current_page += 1
-        except Exception as e:
-            set_status(database, error=str(e))
-            error(e)
+                stop_loading = True
+                loader.join()
+                current_page += 1
+                update_address_url_current_page(database, address_url["address"], current_page)
+            except Exception as e:
+                set_status(database, error=str(e))
+                error(e)
+
+        current_page = 1
+        min_price += 100000
+        update_address_url_current_price(database, address_url["address"], min_price)
 
     realty_list.append({"end": address_url})
 
@@ -294,14 +300,14 @@ def __main__():
     global realty_list
     
     producers = []
-    for i in range(2):
+    for i in range(1):
         thread = threading.Thread(target=scrape_addresses, args=(0,  300 * i))
         thread.start()
         producers.append(thread)
         sleep(3)
 
     consumers = []
-    for i in range(5):
+    for i in range(1):
         thread = threading.Thread(target=scrape_realties, args=(630 + 30 * i, 30 * i))
         thread.start()
         consumers.append(thread)

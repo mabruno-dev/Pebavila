@@ -23,7 +23,6 @@ from utils.wrappers import announce_off
 
 announce_off()
 
-
 cities = []
 stored_addresses = []
 
@@ -50,7 +49,7 @@ def check_address_similarity(local_address: str, web_address: str) -> bool:
         return False
 
 def location_to_address(location: dict):
-    address = f"{location['street']}, {location['city']} - {location['state']}"
+    address = f"{location['neighborhood']}, {location['city']} - {location['state']}"
     address = address.replace("'", "")
     return address
 
@@ -113,7 +112,8 @@ def get_address_url(driver: webdriver.Chrome, database: Database, location: dict
                                 break
                         return {
                             "address": address,
-                            "url": None
+                            "url": None,
+                            "total_realties": 0
                         }
                     break
                 except:
@@ -125,7 +125,8 @@ def get_address_url(driver: webdriver.Chrome, database: Database, location: dict
                         if "Não há resultados para esta localização" in result.text:
                             return {
                                 "address": address,
-                                "url": None
+                                "url": None,
+                                "total_realties": 0
                             }
                     except:
                         try:
@@ -134,7 +135,8 @@ def get_address_url(driver: webdriver.Chrome, database: Database, location: dict
                             clear_inputs()
                             return {
                                 "address": address,
-                                "url": None
+                                "url": None,
+                                "total_realties": 0
                             }
                         except:
                             print("Searching...", end="\r")
@@ -149,6 +151,9 @@ def get_address_url(driver: webdriver.Chrome, database: Database, location: dict
             street_url = driver.current_url
             # last_gathered_url = street_url
 
+            total_realties_h1 = driver.find_element(By.CSS_SELECTOR, "h1.l-text.l-u-color-neutral-12.l-text--variant-heading-small.l-text--weight-semibold.undefined")
+            total_realties = int(total_realties_h1.text.split(" ")[0].replace(".", ""))
+
             clear_button = Wait(driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, "search-multiselect__clean-button")))
             clear_button.click()
 
@@ -158,7 +163,8 @@ def get_address_url(driver: webdriver.Chrome, database: Database, location: dict
 
             return {
                 "address": address,
-                "url": street_url
+                "url": street_url,
+                "total_realties": total_realties
             }
         else:
             print(Console.BLUE + "Skipped " + Console.RESET + f"{address}")
@@ -176,13 +182,13 @@ def fix_mistakes(driver: webdriver.Chrome, database: Database):
         for index, item in enumerate(result):
             print(f"{index + 1}/{len(result)}", end=" ")
             address = item[0]
-            street_and_city, state = address.split(" - ")
-            street, city = street_and_city.split(", ")
+            neighborhood_and_city, state = address.split(" - ")
+            neighborhood, city = neighborhood_and_city.split(", ")
             location = {
                 "state": state,
                 "city": city,
-                "neighborhood": None,
-                "street": street
+                "neighborhood": neighborhood,
+                "street": None
             }
             address_url = get_address_url(driver, database, location, update=True)
             if address_url:
@@ -217,6 +223,13 @@ def link_scraper(x: int, y: int):
             if location_to_address(item) in stored_addresses:
                 locations.remove(item)
 
+        aux = []
+        for item in locations:
+            del item["street"]
+            if item not in aux:
+                aux.append(item)
+        locations = aux
+
         for index, location in enumerate(locations):
             print(Console.BLACK + f"{index + 1}/{len(locations)}" + Console.RESET, end=" ")
             address_url = get_address_url(driver, database, location)
@@ -234,14 +247,13 @@ def __main__():
     global cities
     global stored_addresses
 
-
     database = Database()
     cities = get_all_cities(database)
     shuffle(cities)
     stored_addresses = [item["address"] for item in get_address_urls(database)]
                     
     thread_list = []
-    for i in range(3):
+    for i in range(2):
         thread = Thread(target=link_scraper, args=(100 * i, 0))
         thread.start()
         thread_list.append(thread)

@@ -13,7 +13,7 @@ def get_state_id(database: Database, state_acronym: str):
     state_acronym = state_acronym.upper()
     try:
         state_id = database.queryone(
-            'SELECT state_id FROM public.states WHERE state_acronym = %s', (state_acronym,))
+            'SELECT state_id FROM test.states WHERE state_acronym = %s', (state_acronym,))
         if state_id:
             return state_id[0]
 
@@ -24,13 +24,13 @@ def get_state_id(database: Database, state_acronym: str):
 def get_or_insert_city(database: Database, city_name, state_id):
     try:
         city_id = database.queryone(
-            'SELECT city_id FROM public.cities WHERE city_name = %s AND city_state = %s', (city_name, state_id))
+            'SELECT city_id FROM test.cities WHERE city_name = %s AND city_state = %s', (city_name, state_id))
 
         if city_id:
             return city_id[0]
         else:
             database.execute(
-                'INSERT INTO public.cities (city_name, city_state) VALUES(%s, %s) RETURNING city_id', (city_name, state_id))
+                'INSERT INTO test.cities (city_name, city_state) VALUES(%s, %s) RETURNING city_id', (city_name, state_id))
             city_id = database.fetchone()[0]
             database.commit()
             print("Record added to the database succesfully")
@@ -42,7 +42,7 @@ def get_or_insert_city(database: Database, city_name, state_id):
 def get_or_insert_neighborhood(database: Database, neighborhood_name, city_id):
     try:
         neighborhood_id = database.queryone(
-            "SELECT neighborhood_id FROM public.neighborhoods WHERE neighborhood_name = %s AND neighborhood_city = %s",
+            "SELECT neighborhood_id FROM test.neighborhoods WHERE neighborhood_name = %s AND neighborhood_city = %s",
             (neighborhood_name, city_id)
         )
 
@@ -50,7 +50,7 @@ def get_or_insert_neighborhood(database: Database, neighborhood_name, city_id):
             return neighborhood_id[0]
         else:
             database.execute(
-                'INSERT INTO public.neighborhoods (neighborhood_name, neighborhood_city) VALUES (%s, %s) RETURNING neighborhood_id',
+                'INSERT INTO test.neighborhoods (neighborhood_name, neighborhood_city) VALUES (%s, %s) RETURNING neighborhood_id',
                 (neighborhood_name, city_id)
             )
 
@@ -65,7 +65,7 @@ def get_or_insert_neighborhood(database: Database, neighborhood_name, city_id):
 def check_street_exists(database: Database, street_name, neighborhood_id):
     try:
         street_id = database.queryone(
-            'SELECT street_id FROM public.streets WHERE street_name = %s AND street_neighborhood = %s',
+            'SELECT street_id FROM test.streets WHERE street_name = %s AND street_neighborhood = %s',
             (street_name, neighborhood_id)
         )
 
@@ -74,7 +74,7 @@ def check_street_exists(database: Database, street_name, neighborhood_id):
         db_error(database, e)
     try:
         database.execute(
-            'INSERT INTO public.streets (street_name, street_neighborhood) VALUES (%s, %s)',
+            'INSERT INTO test.streets (street_name, street_neighborhood) VALUES (%s, %s)',
             (street_name, neighborhood_id)
         )
         database.commit()
@@ -85,7 +85,7 @@ def check_street_exists(database: Database, street_name, neighborhood_id):
 def check_neighborhood_exists(database: Database, neighborhood_name, city_id):
     try:
         neighborhood_id = database.queryone(
-            'SELECT neighborhood_id FROM public.neighborhoods WHERE neighborhood_name = %s AND neighborhood_city = %s',
+            'SELECT neighborhood_id FROM test.neighborhoods WHERE neighborhood_name = %s AND neighborhood_city = %s',
             (neighborhood_name, city_id)
         )
 
@@ -94,7 +94,7 @@ def check_neighborhood_exists(database: Database, neighborhood_name, city_id):
         db_error(database, e)
     try:
         database.execute(
-            'INSERT INTO public.neighborhoods (neighborhood_name, neighborhood_city) VALUES (%s, %s)',
+            'INSERT INTO test.neighborhoods (neighborhood_name, neighborhood_city) VALUES (%s, %s)',
             (neighborhood_name, city_id)
         )
         database.commit()
@@ -106,7 +106,7 @@ def insert_street(database: Database, street_name: str, neighborhood_id: int):
     try:
         if not check_street_exists(database, street_name, neighborhood_id):
             database.execute(
-                "INSERT INTO public.streets (street_name, street_neighborhood) VALUES (%s, %s)",
+                "INSERT INTO test.streets (street_name, street_neighborhood) VALUES (%s, %s)",
                 (street_name, neighborhood_id)
             )
             database.commit()
@@ -132,7 +132,7 @@ def insert_street_neighborhood_city(database: Database, location: dict):
                 print('Record already exists')
             else:
                 database.execute(
-                    'INSERT INTO public.streets (street_name, street_neighborhood) VALUES(%s, %s)', 
+                    'INSERT INTO test.streets (street_name, street_neighborhood) VALUES(%s, %s)', 
                     (location['street'], neighborhood_id)
                 )
                 database.commit()
@@ -153,7 +153,7 @@ def insert_neighborhood_city(database: Database, location: dict):
                 print('Record already exists')
             else:
                 database.execute(
-                    'INSERT INTO public.neighborhoods (neighborhood_name, neighborhood_city) VALUES(%s, %s)', 
+                    'INSERT INTO test.neighborhoods (neighborhood_name, neighborhood_city) VALUES(%s, %s)', 
                     (location['neighborhood'], city_id)
                 )
                 database.commit()
@@ -177,7 +177,7 @@ def get_street_id(database: Database, street_name: str, neighborhood_id):
     try:
         street_name = street_name.upper()
         street_id = database.queryone(
-            "SELECT street_id FROM public.streets WHERE street_name = %s AND street_neighborhood = %s",
+            "SELECT street_id FROM test.streets WHERE street_name = %s AND street_neighborhood = %s",
             (street_name, neighborhood_id)
         )
         if street_id:
@@ -192,7 +192,7 @@ def get_neighborhood_id(database: Database, neighborhood_name: str, city_id):
     try:
         neighborhood_name = neighborhood_name.upper()
         neighborhood_id = database.queryone(
-            "SELECT neighborhood_id FROM public.neighborhoods WHERE neighborhood_name = %s AND neighborhood_city = %s",
+            "SELECT neighborhood_id FROM test.neighborhoods WHERE neighborhood_name = %s AND neighborhood_city = %s",
             (neighborhood_name, city_id)
         )
         if neighborhood_id:
@@ -205,7 +205,7 @@ def get_city_id(database: Database, city_name: str, state_id):
     try:
         city_name = city_name.upper()
         city_id = database.queryone(
-            "SELECT city_id FROM public.cities WHERE city_name = %s AND city_state = %s",
+            "SELECT city_id FROM test.cities WHERE city_name = %s AND city_state = %s",
             (city_name, state_id)
         )
         if city_id:
@@ -236,7 +236,7 @@ def get_realty_advertiser(database: Database, advertiser: str):
     try:
         advertiser = advertiser.upper()
         advertiser_id = database.queryone(
-            "SELECT advertiser_id FROM public.advertisers WHERE advertiser_name = %s", (advertiser,)
+            "SELECT advertiser_id FROM test.advertisers WHERE advertiser_name = %s", (advertiser,)
         )
         if advertiser_id:
             return advertiser_id[0]
@@ -247,10 +247,10 @@ def get_realty_advertiser(database: Database, advertiser: str):
 def insert_advertiser(database: Database, advertiser: str):
     try:
         if not database.queryone(
-            "SELECT advertiser_id FROM public.advertisers WHERE advertiser_name = %s", (advertiser,)
+            "SELECT advertiser_id FROM test.advertisers WHERE advertiser_name = %s", (advertiser,)
         ):
             database.execute(
-                "INSERT INTO public.advertisers (advertiser_name) values (%s)", (advertiser,)
+                "INSERT INTO test.advertisers (advertiser_name) values (%s)", (advertiser,)
             )
             database.commit()
             print("Record added to the database successfully")
@@ -265,7 +265,7 @@ def get_realty_type(database: Database, type: str):
     try:
         type = type.upper()
         type_id = database.queryone(
-            "SELECT type_id FROM public.types WHERE type_name = %s", (type,)
+            "SELECT type_id FROM test.types WHERE type_name = %s", (type,)
         )
         if type_id:
             return type_id[0]
@@ -276,10 +276,10 @@ def get_realty_type(database: Database, type: str):
 def insert_type(database: Database, type: str):
     try:
         if not database.queryone(
-            "SELECT type_id FROM public.types WHERE type_name = %s", (type,)
+            "SELECT type_id FROM test.types WHERE type_name = %s", (type,)
         ):
             database.execute(
-                "INSERT INTO public.types (type_name) values (%s)", (type,)
+                "INSERT INTO test.types (type_name) values (%s)", (type,)
             )
             database.commit()
             print("Record added to the database successfully")
@@ -292,7 +292,7 @@ def insert_type(database: Database, type: str):
 def get_all_cities(database: Database):
     try:
         result = database.query(
-            "SELECT * FROM public.cities"
+            "SELECT * FROM test.cities"
         )
         cities = [{
             "city_id": item[0],
@@ -307,7 +307,7 @@ def get_all_cities(database: Database):
 def get_all_neighborhoods(database: Database):
     try:
         result = database.query(
-            "SELECT * FROM public.neighborhoods"
+            "SELECT * FROM test.neighborhoods"
         )
         neighborhoods = [{
             "neighborhood_id": item[0],
@@ -322,7 +322,7 @@ def get_all_neighborhoods(database: Database):
 def get_all_streets(database: Database):
     try:
         result = database.query(
-            "SELECT * FROM public.streets"
+            "SELECT * FROM test.streets"
         )
         streets = [{
             "street_id": item[0],
@@ -443,7 +443,7 @@ def check_realty_exists(database: Database, realty: dict):
         return database.queryone(
             comparison_query('''
                 SELECT realty_id 
-                FROM public.realties 
+                FROM test.realties 
                 WHERE realty_neighborhood %s %s
                 AND realty_street %s %s
                 AND realty_number %s %s
@@ -468,7 +468,7 @@ def insert_realty(database: Database, realty: dict):
                 values = list(realty.values())
                 placeholders = ', '.join(['%s'] * len(columns))
                 database.execute(
-                    f"INSERT INTO public.realties ({', '.join(columns)}) VALUES ({placeholders})",
+                    f"INSERT INTO test.realties ({', '.join(columns)}) VALUES ({placeholders})",
                     values
                 )
                 database.commit()
@@ -483,7 +483,7 @@ def insert_realty(database: Database, realty: dict):
 #     try:
 #         realty = normalize_realty_dict(database, realty)
 #         result = database.queryone(
-#             "SELECT realty_id, up_to_date FROM public.realties WHERE realty_url = %s",
+#             "SELECT realty_id, up_to_date FROM test.realties WHERE realty_url = %s",
 #             (realty["realty_url"],)
 #         )
 #         print(result)
@@ -502,7 +502,7 @@ def insert_realty(database: Database, realty: dict):
 #                         assignments.append(f"{key} = {value}")
 #                 updates = ", ".join(assignments)
 #                 database.execute(
-#                     f"UPDATE public.realties SET {updates}, up_to_date = 1, updated_at = %s WHERE realty_id = %s",
+#                     f"UPDATE test.realties SET {updates}, up_to_date = 1, updated_at = %s WHERE realty_id = %s",
 #                     (datetime.now(), realty_id)
 #                 )
 #                 database.commit()
@@ -519,7 +519,7 @@ def insert_realty(database: Database, realty: dict):
 def get_neighborhood_name(database: Database, neighborhood_id):
     try:
         data = database.queryone(
-            "SELECT * FROM public.neighborhoods WHERE neighborhood_id = %s", 
+            "SELECT * FROM test.neighborhoods WHERE neighborhood_id = %s", 
             (neighborhood_id,)
         )
         return data[1]
@@ -540,10 +540,10 @@ def get_locations_from_city(database: Database, city: str, state: str):
                 city.city_name,
                 state.state_acronym
             FROM 
-                public.streets AS street
-            INNER JOIN public.neighborhoods neighborhood ON street.street_neighborhood = neighborhood.neighborhood_id
-            INNER JOIN public.cities city ON neighborhood.neighborhood_city = city.city_id
-            INNER JOIN public.states state ON city.city_state = state.state_id
+                test.streets AS street
+            INNER JOIN test.neighborhoods neighborhood ON street.street_neighborhood = neighborhood.neighborhood_id
+            INNER JOIN test.cities city ON neighborhood.neighborhood_city = city.city_id
+            INNER JOIN test.states state ON city.city_state = state.state_id
             WHERE city.city_id = %s;
             ''',
             (city_id,)
@@ -564,7 +564,7 @@ def get_locations_from_city(database: Database, city: str, state: str):
 def get_realty_urls(database: Database):
     try:
         url_list = list()
-        temp = database.query("SELECT realty_url FROM public.realties")
+        temp = database.query("SELECT realty_url FROM test.realties")
         for item in temp:
             url_list.append(item[0])
         return url_list
@@ -575,7 +575,7 @@ def get_realty_urls(database: Database):
 def check_realty_exists_by_url(database: Database, url: str):
     try:
         return database.query(
-            "SELECT realty_id FROM public.realties WHERE realty_url = %s",
+            "SELECT realty_id FROM test.realties WHERE realty_url = %s",
             (url,)
         )
     except Exception as e:
@@ -584,7 +584,7 @@ def check_realty_exists_by_url(database: Database, url: str):
 def get_state_by_id(database: Database, id: int):
     try:
         result = database.queryone(
-            "SELECT * FROM public.states WHERE state_id = %s",
+            "SELECT * FROM test.states WHERE state_id = %s",
             (id,)
         )
         if result:
