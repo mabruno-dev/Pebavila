@@ -2,27 +2,17 @@ import os, sys
 project_name = "the-beginning"; sys.path.append(os.path.abspath(__file__)[:os.path.abspath(__file__).find(project_name) + len(project_name)] if project_name in os.path.abspath(__file__) else os.path.abspath(__file__))
 # Resolve module imports
 
-import json
 from re import findall
 import inspect
-import requests
-import base64
-from time import sleep
 
 from unidecode import unidecode
 import undetected_chromedriver as uc
 from selenium import webdriver
-from selenium_stealth import stealth
 from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.remote.webelement import WebElement
-from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.support import expected_conditions as EC
-from webdriver_manager.chrome import ChromeDriverManager
 
 from utils.constants import RealtyConstants as RC
-from utils.functions import print_log
 from utils.wrappers import timed
 
 frame = inspect.stack()[-1]
@@ -35,21 +25,11 @@ class InvalidStatusKeyException(Exception):
         self.message = message
         super().__init__(self.message)
 
-def verify_human(driver: webdriver):
-    wait = WebDriverWait(driver, 10)
-
-    iframe = WebDriverWait(driver, 10).until(
-        EC.presence_of_element_located((By.CSS_SELECTOR, 'iframe[title="Widget containing a Cloudflare security challenge"]'))
-    )
-    driver.switch_to.frame(iframe)
-
-    checkbox = wait.until(
-        EC.presence_of_element_located((By.CSS_SELECTOR, "input[type='checkbox']"))
-    )
-    checkbox.click()
-
-    driver.switch_to.default_content()
-    sleep(15)
+def append_new_line(file_path, text):
+    # Open the file in append mode
+    with open(file_path, 'a') as file:
+        # Write the text followed by a newline character
+        file.write(text + '\n')
 
 def find_numbers(s: str):
     result = findall(r"\d+\.*\d*", s)
@@ -74,7 +54,7 @@ def set_driver_options():
     # Enable incognito mode
     options.add_argument('--incognito')
 
-    return options
+    return options    
 
 @timed
 def scrape_realty(driver: webdriver.Chrome, url: str):
@@ -89,26 +69,32 @@ def scrape_realty(driver: webdriver.Chrome, url: str):
 
     try:
         wait.until(
-            EC.presence_of_element_located((By.CLASS_NAME, "price-info-wrapper"))
+            EC.presence_of_element_located((By.CLASS_NAME, "price-info-value"))
         )
     except:
         print("Connection error")
         return scrape_realty(driver, url)
 
-    status = RC.DONE
     try:
-        status_span = driver.find_element(By.CLASS_NAME, "main__labels")
+        status_span = driver.find_element(By.CLASS_NAME, "details-content__info-tags")
         if "Em construção" in status_span.text:
             status = RC.UNDER_CONSTRUCTION
         elif "Na planta" in status_span.text:
             status = RC.FLOOR_PLAN
+        else:
+            status = RC.DONE
     except:
-        pass
+        status = RC.DONE
 
-    name = driver.find_element(By.CLASS_NAME,  "info__business-type")
-    type = unidecode(name.text.split("para")[0].strip().upper())
+    # type_info = driver.find_elements(By.CLASS_NAME, "l-breadcrumb l-breadcrumb--small l-breadcrumb--collapsed")
+    # if "Lançamentos" in type_info[0].text:
+    #     type = unidecode(type_info[0].text.split("de")[1].strip().replace("s/", "").upper())
+    # elif "à Venda" in type_info[0].text:
+    #     type = unidecode(type_info[0].text.split("à")[0].replace("s ", " ").strip().upper())
+    # else:
+    #     pass
 
-    location_button = driver.find_element(By.CLASS_NAME, "info__map-link")
+    location_button = driver.find_element(By.CLASS_NAME, "address-info-value")
     location = location_button.text.replace("pin", "").replace(",", "$").replace(" - ", "$").replace("\n", "")
     location_list = location.split("$")
     for index, item in enumerate(location_list):
@@ -135,8 +121,11 @@ def scrape_realty(driver: webdriver.Chrome, url: str):
         case _:
             print(f"Error scraping location\nurl: {url}")
             return
+        
+    type = driver.find_elements(By.CLASS_NAME, "description__title")[1]
+    append_new_line("output/types.txt", type.text)
 
-    price_div = driver.find_element(By.CLASS_NAME, "prices__container")
+    price_div = driver.find_element(By.CLASS_NAME, "price-info-value")
     try:
         price = find_numbers(price_div.text.replace(".", ""))[0]
 
@@ -166,38 +155,38 @@ def scrape_realty(driver: webdriver.Chrome, url: str):
     
 
     # Coleta os valores mais baixos
-    features_ul = driver.find_element(By.CLASS_NAME, "info__base-amenities")
+    features_ul = driver.find_element(By.CLASS_NAME, "amenities-list")
     try:
-        square_footage = find_numbers(features_ul.find_element(By.CSS_SELECTOR, 'span[itemprop="floorSize"]').text)[0]
+        square_footage = find_numbers(features_ul.find_element(By.CSS_SELECTOR, 'p[itemprop="floorSize"]').text)[0]
     except:
         print("Square footage not informed")
         square_footage = None
     try:
-        bedrooms = find_numbers(features_ul.find_element(By.CSS_SELECTOR, 'span[itemprop="numberOfRooms"]').text)[0]
+        bedrooms = find_numbers(features_ul.find_element(By.CSS_SELECTOR, 'p[itemprop="numberOfRooms"]').text)[0]
     except:
         print("Number of bedrooms not informed")
         bedrooms = None
     try:
-        parking_spaces = find_numbers(features_ul.find_element(By.CLASS_NAME, "js-parking-spaces").text)[0]
-    except:
+        parking_spaces = find_numbers(features_ul.find_element(By.CSS_SELECTOR, 'p[itemprop="numberOfParkingSpaces"]').text)[0]
+    except Exception as e:
         print("Number of parking spaces not informed")
         parking_spaces = None
     try:
-        bathrooms = find_numbers(features_ul.find_element(By.CSS_SELECTOR, 'span[itemprop="numberOfBathroomsTotal"]').text)[0]
+        bathrooms = find_numbers(features_ul.find_element(By.CSS_SELECTOR, 'p[itemprop="numberOfBathroomsTotal"]').text)[0]
     except:
         print("Number of bathrooms not informed")
         bathrooms = None
     try:
-        floor = find_numbers(features_ul.find_element(By.CSS_SELECTOR, 'span[itemprop="floorLevel"]').text)[0]
+        floor = find_numbers(features_ul.find_element(By.CSS_SELECTOR, 'p[itemprop="floorLevel"]').text)[0]
     except:
         print("Floor not informed")
         floor = None
 
-    advertiser_div = driver.find_element(By.CLASS_NAME, "advertser-info--wrapper")
-    advertiser_name = unidecode(advertiser_div.find_element(By.CLASS_NAME, "advertiser-info__name").text.strip().upper())
+    advertiser_div = driver.find_elements(By.CLASS_NAME, "advertiser-info__credentials")[1]
+    advertiser_name = unidecode(advertiser_div.text.strip().upper())
 
     # Descrição deve ser conservada para exibição ao usuário caso necessária
-    description = driver.find_element(By.CLASS_NAME, "amenities__description").text.strip()
+    description = driver.find_element(By.CLASS_NAME, "description__content--text").text.strip()
 
     if "mobiliado" in url:
         furnished = RC.FURNISHED
@@ -233,8 +222,8 @@ def scrape_realty(driver: webdriver.Chrome, url: str):
 
 # Main function for testing purposes
 def __main__():
-    driver = uc.Chrome(options=set_driver_options)
-    scrape_realty(driver, "https://www.zapimoveis.com.br/lancamento/venda-apartamento-2-quartos-sao-lourenco-niteroi-rj-279m2-id-2646116981/")
+    driver = uc.Chrome(options=set_driver_options())
+    print(scrape_realty(driver, "https://www.zapimoveis.com.br/imovel/venda-apartamento-3-quartos-com-cozinha-vila-andrade-zona-sul-sao-paulo-sp-69m2-id-2715755726/"))
 
 if __name__ == "__main__":
     __main__()

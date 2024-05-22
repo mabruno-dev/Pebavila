@@ -10,14 +10,11 @@ import inspect
 
 import undetected_chromedriver as uc
 from selenium import webdriver
-from selenium_stealth import stealth
 from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.support import expected_conditions as EC
-from webdriver_manager.chrome import ChromeDriverManager
 
 from utils.functions import error, create_dirs
 from utils.wrappers import timed, announce_off
@@ -160,7 +157,7 @@ def scrape_address(database: Database, driver: webdriver, address_url: dict):
     global total_realties
 
     neighborhood_collected_realty_urls = 0
-    current_page = address_url["current_page"]
+    current_page = 1 # address_url["current_page"]
     min_price = address_url["current_price"]
 
     while neighborhood_collected_realty_urls < address_url["total_realties"]:
