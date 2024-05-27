@@ -25,12 +25,6 @@ class InvalidStatusKeyException(Exception):
         self.message = message
         super().__init__(self.message)
 
-def append_new_line(file_path, text):
-    # Open the file in append mode
-    with open(file_path, 'a') as file:
-        # Write the text followed by a newline character
-        file.write(text + '\n')
-
 def find_numbers(s: str):
     result = findall(r"\d+\.*\d*", s)
     # O padrão de expressão regular r'\d+\.*\d*' corresponde a um ou mais dígitos \d+,
@@ -54,7 +48,16 @@ def set_driver_options():
     # Enable incognito mode
     options.add_argument('--incognito')
 
-    return options    
+    return options  
+
+def get_type(s: str):
+    first_nuber = find_numbers(s)[0]
+    print(first_nuber)
+    if f"{first_nuber} quartos" in s:
+        type = unidecode(s.split("com")[0].strip().upper())
+    else:
+        type = unidecode(s.split(str(first_nuber))[0].strip().upper())
+    return type
 
 @timed
 def scrape_realty(driver: webdriver.Chrome, url: str):
@@ -121,9 +124,13 @@ def scrape_realty(driver: webdriver.Chrome, url: str):
         case _:
             print(f"Error scraping location\nurl: {url}")
             return
-        
-    type = driver.find_elements(By.CLASS_NAME, "description__title")[1]
-    append_new_line("output/types.txt", type.text)
+    
+    description_h1_list = driver.find_elements(By.CLASS_NAME, "description__title")
+    for item in description_h1_list:
+        if item.text:
+            description_h1 = item
+            break
+    type = get_type(description_h1.text)
 
     price_div = driver.find_element(By.CLASS_NAME, "price-info-value")
     try:
@@ -132,27 +139,18 @@ def scrape_realty(driver: webdriver.Chrome, url: str):
     except:
         print("Price not informed, skipping realty") # Normalmente sob consulta
         return
-    try:
-        price_ul = price_div.find_element(By.CLASS_NAME, "subinfo")
-        price_li_list = price_ul.find_elements(By.TAG_NAME, "li")
-        condo_price = None
-        property_tax = None
-        for price_li in price_li_list:
-            if "condomínio" in price_li.text:
-                condo_price = find_numbers(price_li.text.replace(".", ""))[0]
-
-            if "IPTU" in price_li.text:
-                property_tax = find_numbers(price_li.text.replace(".", ""))[0]
-
-        if not condo_price:
-            print("Condo price not informed")
-        if not property_tax:
-            print("Property tax not informed")
-    except:
-        print("Condo price and taxes not informed")
-        condo_price = None
-        property_tax = None
     
+    additional_price_info = driver.find_element(By.CLASS_NAME, "additional-price-info")
+    additional_price_elements = additional_price_info.find_elements(By.TAG_NAME, "p")
+    for item in additional_price_elements:
+        if "Condomínio" in item.text:
+            condo_price = find_numbers(item.text.replace(".", ""))[0]
+        elif "IPTU" in item.text:
+            property_tax = find_numbers(item.text.replace(".", ""))[0]
+    if not condo_price:
+        print("Condo price not informed")
+    if not property_tax:
+        print("Property tax not informed")
 
     # Coleta os valores mais baixos
     features_ul = driver.find_element(By.CLASS_NAME, "amenities-list")
@@ -223,7 +221,7 @@ def scrape_realty(driver: webdriver.Chrome, url: str):
 # Main function for testing purposes
 def __main__():
     driver = uc.Chrome(options=set_driver_options())
-    print(scrape_realty(driver, "https://www.zapimoveis.com.br/imovel/venda-apartamento-3-quartos-com-cozinha-vila-andrade-zona-sul-sao-paulo-sp-69m2-id-2715755726/"))
+    print(scrape_realty(driver, "https://www.zapimoveis.com.br/imovel/venda-terreno-lote-condominio-portao-curitiba-pr-587m2-id-2713268416/"))
 
 if __name__ == "__main__":
     __main__()
